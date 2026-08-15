@@ -1,12 +1,15 @@
 import os
+import json
+import time
 os.environ["ROS_DOMAIN_ID"] = "0"
 os.environ.pop("ROS_AUTOMATIC_DISCOVERY_RANGE", None)
 os.environ["RMW_IMPLEMENTATION"] = "rmw_fastrtps_cpp"
 os.environ["ROS_SUPER_CLIENT"] = "True"
 os.environ["ROS_DISCOVERY_SERVER"] = "192.168.0.129:11811;"
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from backend.experiment_audit import emit_event
 
 from backend.api.settings_routes import router as settings_router
 from backend.api.health_routes import router as health_router
@@ -28,6 +31,44 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+@app.middleware("http")
+async def audit_mutating_dashboard_commands(request: Request, call_next):
+    """Registra comandos HTTP; leituras periódicas do dashboard não geram ruído."""
+    if request.method not in {"POST", "PUT", "PATCH", "DELETE"}:
+        return await call_next(request)
+    started = time.monotonic()
+    raw_body = await request.body()
+    body = None
+    if raw_body:
+        try:
+            body = json.loads(raw_body[:65536])
+        except Exception:
+            body = raw_body[:2048].decode("utf-8", errors="replace")
+    base = {
+        "method": request.method,
+        "path": request.url.path,
+        "query": str(request.url.query),
+        "body": body,
+        "client": request.client.host if request.client else None,
+    }
+    try:
+        response = await call_next(request)
+        emit_event("dashboard_command", {
+            **base,
+            "status_code": response.status_code,
+            "duration_ms": round((time.monotonic() - started) * 1000.0, 3),
+        })
+        return response
+    except Exception as exc:
+        emit_event("dashboard_command", {
+            **base,
+            "status_code": 500,
+            "duration_ms": round((time.monotonic() - started) * 1000.0, 3),
+            "exception": repr(exc),
+        })
+        raise
 
 # Registra os roteadores de API
 app.include_router(settings_router)

@@ -8,6 +8,7 @@ import math
 import yaml
 import threading
 import subprocess
+import queue
 from pathlib import Path
 from datetime import datetime
 from typing import Dict, List, Optional
@@ -17,7 +18,7 @@ try:
     import rclpy
     from rclpy.node import Node
     from rclpy.action import ActionClient
-    from rclpy.qos import QoSProfile, ReliabilityPolicy, HistoryPolicy
+    from rclpy.qos import QoSProfile, ReliabilityPolicy, HistoryPolicy, DurabilityPolicy
     from rclpy.executors import MultiThreadedExecutor
     from sensor_msgs.msg import JointState
     from std_msgs.msg import Bool, String
@@ -95,6 +96,8 @@ class CobotNode(BaseNode):
         self.cmd_pub = None
         self.product_class_pub = None
         self.item_released_pub = None
+        self.experiment_event_pub = None
+        self.experiment_event_queue = queue.SimpleQueue()
 
         self.load_poses()
 
@@ -132,6 +135,16 @@ class CobotNode(BaseNode):
                 self.cmd_pub = self.create_publisher(JointState, "/joint_states_commands", 10)
                 self.product_class_pub = self.create_publisher(String, "/product_class", 10)
                 self.item_released_pub = self.create_publisher(Bool, "/item_released_on_tb4", 10)
+                event_qos = QoSProfile(
+                    history=HistoryPolicy.KEEP_LAST,
+                    depth=50,
+                    reliability=ReliabilityPolicy.RELIABLE,
+                    durability=DurabilityPolicy.TRANSIENT_LOCAL,
+                )
+                self.experiment_event_pub = self.create_publisher(
+                    String, "/future_lab/events", event_qos
+                )
+                self.create_timer(0.05, self._flush_experiment_events)
                 
                 self.create_subscription(JointState, "/joint_states", self._js_cb, 10)
                 self.create_subscription(JointState, "/joint_states_raw", self._js_cb, 10)
@@ -146,6 +159,31 @@ class CobotNode(BaseNode):
             except Exception as e:
                 print(f"[WARN] Erro ao inicializar nó ROS 2: {e}")
                 self.is_ros_active = False
+
+    def publish_experiment_event(self, serialized_event: str) -> bool:
+        """Enfileira o JSON; o executor ROS publica no próprio contexto."""
+        if self.experiment_event_pub is None or not HAS_RCLPY:
+            return False
+        try:
+            self.experiment_event_queue.put(str(serialized_event))
+            return True
+        except Exception as exc:
+            print(f"[WARN] Falha ao enfileirar /future_lab/events: {exc}")
+            return False
+
+    def _flush_experiment_events(self) -> None:
+        if self.experiment_event_pub is None:
+            return
+        try:
+            while True:
+                serialized_event = self.experiment_event_queue.get_nowait()
+                msg = String()
+                msg.data = serialized_event
+                self.experiment_event_pub.publish(msg)
+        except queue.Empty:
+            return
+        except Exception as exc:
+            print(f"[WARN] Falha ao publicar /future_lab/events: {exc}")
 
     def _tb4_battery_emergency_cb(self, msg):
         if msg and msg.data:

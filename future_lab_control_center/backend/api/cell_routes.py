@@ -8,6 +8,7 @@ from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 from typing import Optional
 from backend.ros2_nodes.cobot_node import get_cobot_node
+from backend.experiment_audit import emit_event
 
 router = APIRouter(prefix="/api/v1/cell", tags=["Cell Control"])
 
@@ -180,6 +181,7 @@ def _set_handshake(phase: str, **updates) -> None:
         cell_state["handshake"] = handshake
         if handshake.get("active"):
             cell_state["status"] = f"handshake_{phase}"
+    emit_event("handshake_transition", {"phase": phase, **handshake})
 
 
 def _merge_handshake_evidence(**evidence) -> None:
@@ -198,6 +200,7 @@ def _set_integrated_real(phase: str, **updates) -> None:
         cell_state["integrated_real"] = state
         if state.get("active"):
             cell_state["status"] = f"integrated_{phase}"
+    emit_event("integrated_real_transition", {"phase": phase, **state})
 
 
 def _handshake_infrastructure_preflight() -> dict:
