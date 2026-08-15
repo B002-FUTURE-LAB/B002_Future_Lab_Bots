@@ -95,6 +95,54 @@ class MissionSignalAgentTest(unittest.TestCase):
         self.assertIn("não permitida", result["detail"])
         popen.assert_not_called()
 
+    def test_completion_requires_target_dock_and_manager_after_start(self):
+        timestamps = iter((None, 101.0, 102.0, 103.0))
+        with patch.object(
+            signal_agent,
+            "_latest_marker_timestamp",
+            side_effect=lambda _marker: next(timestamps),
+        ):
+            result, code = signal_agent.wait_for_delivery_complete(
+                "delivery_blue", after_timestamp=100.0, timeout=1.0
+            )
+
+        self.assertEqual(200, code)
+        self.assertTrue(result["completed"])
+        self.assertEqual(
+            {"target": 101.0, "docking": 102.0, "manager": 103.0},
+            result["evidence"],
+        )
+
+    def test_completion_stops_on_explicit_manager_failure(self):
+        with patch.object(
+            signal_agent,
+            "_latest_marker_timestamp",
+            return_value=101.0,
+        ):
+            result, code = signal_agent.wait_for_delivery_complete(
+                "delivery_red", after_timestamp=100.0, timeout=1.0
+            )
+
+        self.assertEqual(409, code)
+        self.assertFalse(result["completed"])
+        self.assertTrue(result["failed"])
+
+    def test_pickup_timeout_is_not_reported_as_arrival(self):
+        completed = subprocess.CompletedProcess(
+            args=[],
+            returncode=4,
+            stdout=(
+                '{"received": false, "topic": "/turtlebot_at_pickup", '
+                '"publisher_count": 1}\n'
+            ),
+            stderr="",
+        )
+        with patch.object(signal_agent.subprocess, "run", return_value=completed):
+            result, code = signal_agent.wait_for_pickup(1.0)
+
+        self.assertEqual(504, code)
+        self.assertFalse(result["received"])
+
 
 if __name__ == "__main__":
     unittest.main()

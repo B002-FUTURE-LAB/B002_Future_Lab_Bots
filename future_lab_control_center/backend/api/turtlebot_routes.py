@@ -907,7 +907,10 @@ _undock_lock = threading.Lock()
 def _run_create3_dock_action() -> tuple:
     print("[INFO TB4] Disparando ação infravermelha /dock no TurtleBot 4...")
     cmd_action = f'{JAZZY_ENV_CMD} && ros2 action send_goal /dock irobot_create_msgs/action/Dock "{{}}"'
-    res = subprocess.run(cmd_action, shell=True, executable="/bin/bash", stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, timeout=30)
+    # A manobra física medida levou pouco mais de 30 s. Um timeout exatamente
+    # em 30 s matava somente o cliente ros2 enquanto a Create 3 terminava o
+    # acoplamento, fazendo a API responder 504 mesmo com /dock_status=True.
+    res = subprocess.run(cmd_action, shell=True, executable="/bin/bash", stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, timeout=60)
     full_output = res.stdout.strip()
     print(f"[INFO TB4] Resultado do Docking infravermelho: {full_output}")
     is_success = ("SUCCEEDED" in full_output) and not any(k in full_output for k in ["ABORTED", "CANCELED", "FAILED"])
@@ -974,7 +977,19 @@ def trigger_dock():
                     detail=f"Ação /dock infravermelha não reportou sucesso: {full_output}"
                 )
     except subprocess.TimeoutExpired:
-        raise HTTPException(status_code=504, detail="Tempo limite esgotado aguardando a manobra de Docking no robô.")
+        node = get_turtlebot_node()
+        deadline = time.monotonic() + 10.0
+        while time.monotonic() < deadline:
+            if node.telemetry_fresh() and node.is_docked:
+                return {
+                    "status": "success",
+                    "message": "Docking físico confirmado por /dock_status após timeout do cliente.",
+                }
+            time.sleep(0.25)
+        raise HTTPException(
+            status_code=504,
+            detail="Tempo limite esgotado e /dock_status não confirmou acoplamento.",
+        )
     except HTTPException:
         raise
     except Exception as e:
@@ -1077,7 +1092,7 @@ def _publish_mission_signal_on_host(signal: str, value: str = "") -> dict:
         method="POST",
     )
     try:
-        with urllib.request.urlopen(request, timeout=25.0) as response:
+        with urllib.request.urlopen(request, timeout=35.0) as response:
             result = json.loads(response.read().decode("utf-8"))
     except urllib.error.HTTPError as exc:
         try:
@@ -1133,6 +1148,89 @@ def _start_test_delivery_on_host(product_class: str) -> dict:
         raise HTTPException(
             status_code=504,
             detail="O destino da delivery não foi confirmado pela rotina.",
+        )
+    return result
+
+
+def _wait_for_pickup_on_host(timeout: float = 8.0) -> dict:
+    """Aguarda uma amostra True real de /turtlebot_at_pickup no host.
+
+    HTTP 504 representa somente uma janela sem mensagem e é devolvido como
+    received=False para permitir espera cancelável em janelas curtas.
+    """
+    import json
+    import urllib.error
+    import urllib.request
+
+    body = json.dumps({"timeout": float(timeout)}).encode("utf-8")
+    request = urllib.request.Request(
+        f"{MISSION_SIGNAL_AGENT_URL}/wait_pickup",
+        data=body,
+        headers={
+            "X-Agent-Token": AGENT_TOKEN,
+            "Content-Type": "application/json",
+        },
+        method="POST",
+    )
+    try:
+        with urllib.request.urlopen(request, timeout=float(timeout) + 10.0) as response:
+            return json.loads(response.read().decode("utf-8"))
+    except urllib.error.HTTPError as exc:
+        try:
+            result = json.loads(exc.read().decode("utf-8", "replace"))
+        except Exception:
+            result = {"detail": str(exc)}
+        if exc.code == 504:
+            return {**result, "received": False}
+        raise HTTPException(status_code=exc.code, detail=result.get("detail") or str(exc))
+    except Exception as exc:
+        raise HTTPException(
+            status_code=503,
+            detail=f"Falha ao aguardar /turtlebot_at_pickup no host: {exc}",
+        )
+
+
+def _wait_for_delivery_complete_on_host(
+    target: str, after_timestamp: float, timeout: float = 180.0
+) -> dict:
+    """Exige evidências de destino, docking e Manager liberado no host."""
+    import json
+    import urllib.error
+    import urllib.request
+
+    body = json.dumps({
+        "target": target,
+        "after_timestamp": float(after_timestamp),
+        "timeout": float(timeout),
+    }).encode("utf-8")
+    request = urllib.request.Request(
+        f"{MISSION_SIGNAL_AGENT_URL}/wait_delivery_complete",
+        data=body,
+        headers={
+            "X-Agent-Token": AGENT_TOKEN,
+            "Content-Type": "application/json",
+        },
+        method="POST",
+    )
+    try:
+        with urllib.request.urlopen(request, timeout=float(timeout) + 10.0) as response:
+            result = json.loads(response.read().decode("utf-8"))
+    except urllib.error.HTTPError as exc:
+        try:
+            error = json.loads(exc.read().decode("utf-8", "replace"))
+            detail = error.get("detail")
+        except Exception:
+            detail = str(exc)
+        raise HTTPException(status_code=exc.code, detail=detail or str(exc))
+    except Exception as exc:
+        raise HTTPException(
+            status_code=503,
+            detail=f"Falha ao confirmar conclusão da delivery no host: {exc}",
+        )
+    if result.get("completed") is not True:
+        raise HTTPException(
+            status_code=504,
+            detail="Conclusão completa da delivery não foi confirmada.",
         )
     return result
 

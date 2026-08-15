@@ -3,6 +3,7 @@
 # ============================================================
 import time
 import threading
+import uuid
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 from typing import Optional
@@ -29,8 +30,23 @@ cell_state = {
     "manual_step": "idle",  # "idle", "at_scan", "pick_authorized", "at_place_approach", "place_authorized"
     "status": "idle",
     "panic_locked": False,
-    "yolo_detected_item": None
+    "yolo_detected_item": None,
+    "handshake": {
+        "active": False,
+        "run_id": None,
+        "phase": "idle",
+        "item_class": None,
+        "canonical_class": None,
+        "target": None,
+        "success": None,
+        "error": None,
+        "started_at": None,
+        "completed_at": None,
+        "evidence": {},
+    },
 }
+
+_state_lock = threading.Lock()
 
 # Controle de threads e eventos do motor de ciclo
 _cycle_thread: Optional[threading.Thread] = None
@@ -116,6 +132,207 @@ def is_valid_tin_class(cls_name: Optional[str]) -> bool:
     if any(k in l for k in valid_keywords):
         return True
     return False
+
+
+_HANDSHAKE_CLASSES = {
+    "blue": ("tin_valid_blue", "delivery_blue"),
+    "tin_valid_blue": ("tin_valid_blue", "delivery_blue"),
+    "tin_valid_blue_square": ("tin_valid_blue", "delivery_blue"),
+    "red": ("tin_valid_red", "delivery_red"),
+    "tin_valid_red": ("tin_valid_red", "delivery_red"),
+    "tin_valid_red_square": ("tin_valid_red", "delivery_red"),
+}
+
+
+def _normalize_handshake_class(item_class: str) -> tuple[str, str]:
+    normalized = str(item_class or "").strip().lower()
+    result = _HANDSHAKE_CLASSES.get(normalized)
+    if result is None:
+        raise HTTPException(
+            status_code=422,
+            detail="Classe inválida. Use somente a lata azul ou vermelha.",
+        )
+    return result
+
+
+def _set_handshake(phase: str, **updates) -> None:
+    with _state_lock:
+        handshake = dict(cell_state.get("handshake") or {})
+        handshake.update({"phase": phase, **updates})
+        cell_state["handshake"] = handshake
+        if handshake.get("active"):
+            cell_state["status"] = f"handshake_{phase}"
+
+
+def _merge_handshake_evidence(**evidence) -> None:
+    with _state_lock:
+        handshake = dict(cell_state.get("handshake") or {})
+        merged = dict(handshake.get("evidence") or {})
+        merged.update(evidence)
+        handshake["evidence"] = merged
+        cell_state["handshake"] = handshake
+
+
+def _handshake_preflight(item_class: str) -> dict:
+    """Portão sem movimento: só permite o teste com cada elo medido."""
+    canonical_class, target = _normalize_handshake_class(item_class)
+    node = get_cobot_node()
+    node.load_poses()
+    required_poses = [
+        "home", "scan", "pick_approach", "pick", "place_approach", "place"
+    ]
+    missing_poses = [pose for pose in required_poses if pose not in node.poses]
+    if missing_poses:
+        raise HTTPException(
+            status_code=409,
+            detail=f"Poses obrigatórias ausentes: {', '.join(missing_poses)}.",
+        )
+
+    hardware = node.get_hardware_status()
+    measured_joints = node.get_measured_joints()
+    if not hardware or measured_joints is None:
+        raise HTTPException(
+            status_code=503,
+            detail="Nano não forneceu /status e /get_angles mensuráveis.",
+        )
+    if hardware.get("mock") is not False:
+        raise HTTPException(status_code=409, detail="Nano está em modo mock; teste físico recusado.")
+    if hardware.get("gpio_ready") is not True:
+        raise HTTPException(status_code=409, detail="GPIO do Nano não está pronto.")
+    if hardware.get("pump_active") is not False:
+        raise HTTPException(
+            status_code=409,
+            detail="Bomba já está ligada antes do teste; desligue-a e verifique a peça.",
+        )
+
+    from backend.api.turtlebot_routes import (
+        get_nav_readiness, get_processes, MISSION_SIGNAL_AGENT_URL,
+    )
+    readiness = get_nav_readiness()
+    if readiness.get("mission_ready") is not True:
+        raise HTTPException(
+            status_code=409,
+            detail=(
+                "TurtleBot não está pronto para missão: "
+                + ", ".join(readiness.get("mission_missing") or ["estado desconhecido"])
+            ),
+        )
+    manager = (get_processes() or {}).get("mission_manager") or {}
+    if not (
+        manager.get("running") is True
+        and int(manager.get("instances", 0)) == 1
+        and manager.get("visible_on_ros_graph") is True
+    ):
+        raise HTTPException(
+            status_code=409,
+            detail="Mission Manager precisa ter exatamente uma instância e estar visível no grafo ROS.",
+        )
+
+    try:
+        import json
+        import urllib.request
+        with urllib.request.urlopen(
+            f"{MISSION_SIGNAL_AGENT_URL}/health", timeout=2.0
+        ) as response:
+            bridge = json.loads(response.read().decode("utf-8"))
+    except Exception as exc:
+        raise HTTPException(
+            status_code=503,
+            detail=f"Mission Signal Agent não está saudável: {exc}",
+        )
+    if bridge.get("ok") is not True:
+        raise HTTPException(status_code=503, detail="Mission Signal Agent não confirmou saúde.")
+
+    return {
+        "canonical_class": canonical_class,
+        "target": target,
+        "nano": {
+            "mock": hardware.get("mock"),
+            "gpio_ready": hardware.get("gpio_ready"),
+            "pump_active": hardware.get("pump_active"),
+            "measured_joints": measured_joints,
+        },
+        "turtlebot": {
+            "mission_ready": True,
+            "start_mode": readiness.get("mission_start_mode"),
+            "manager_instances": manager.get("instances"),
+            "manager_visible": manager.get("visible_on_ros_graph"),
+        },
+        "signal_bridge": bridge,
+    }
+
+
+def _goto_pose_verified_with_resume(node, pose_name: str, speed: float) -> bool:
+    if not _check_pause_and_cancel():
+        return False
+    ok = node.goto_pose_verified(pose_name, speed)
+    return bool(ok and _check_pause_and_cancel())
+
+
+def _rollback_handshake_cobot(node, release_confirmed: bool) -> dict:
+    """Best effort seguro; nunca relata sucesso sem medir bomba OFF e HOME."""
+    evidence = {"attempted": True, "release_confirmed": release_confirmed}
+    status = node.get_hardware_status() or {}
+    pump_on = bool(status.get("pump_active", node.pump_active))
+    if pump_on and not release_confirmed:
+        returned_to_pick = all([
+            node.goto_pose_verified("place_approach", 0.15),
+            node.goto_pose_verified("pick_approach", 0.15),
+            node.goto_pose_verified("pick", 0.10),
+        ])
+        evidence["returned_to_pick"] = returned_to_pick
+        evidence["pump_off"] = node.set_pump_verified(False)
+        node.goto_pose_verified("pick_approach", 0.15)
+    elif pump_on:
+        evidence["pump_off"] = node.set_pump_verified(False)
+    else:
+        evidence["pump_off"] = True
+    evidence["home"] = node.goto_pose_verified("home", 0.15)
+    return evidence
+
+
+def _recover_turtlebot_after_handshake_failure(
+    turtle_node,
+    stop_mission_fn,
+    trigger_dock_fn,
+    dock_confirm_sec: float = 10.0,
+) -> dict:
+    """Cancela a rotina e só confirma recuperação com dock físico medido."""
+    evidence = {}
+    try:
+        evidence["turtlebot_stop"] = stop_mission_fn()
+    except Exception as stop_error:
+        evidence["turtlebot_stop_error"] = str(stop_error)
+
+    if turtle_node.telemetry_fresh() and turtle_node.is_docked:
+        evidence["turtlebot_recovery"] = {
+            "status": "already_docked",
+            "dock_status_measured": True,
+        }
+        return evidence
+
+    try:
+        dock_result = trigger_dock_fn()
+        deadline = time.monotonic() + max(0.0, float(dock_confirm_sec))
+        while time.monotonic() < deadline:
+            if turtle_node.telemetry_fresh() and turtle_node.is_docked:
+                break
+            time.sleep(0.25)
+        dock_measured = bool(
+            turtle_node.telemetry_fresh() and turtle_node.is_docked
+        )
+        evidence["turtlebot_recovery"] = {
+            "status": "docked" if dock_measured else "unconfirmed",
+            "dock_status_measured": dock_measured,
+            "command_result": dock_result,
+        }
+    except Exception as dock_error:
+        evidence["turtlebot_recovery"] = {
+            "status": "failed",
+            "dock_status_measured": False,
+            "error": str(dock_error),
+        }
+    return evidence
 
 def _run_cycle_internal(is_manual: bool = False):
     """Executa a sequência de inspeção, visão YOLO e coleta/soltura com suporte a aprovação passo-a-passo no modo manual."""
@@ -306,6 +523,7 @@ def _run_cycle_internal(is_manual: bool = False):
 
         # 2. Aguarda a chegada do TurtleBot 4 no Ponto de Coleta (pickup_point) ou aviso de bateria <= 5%
         print("[CYCLE] ⏳ Braço Nano em PLACE segurando a lata. Aguardando sinal de chegada do TurtleBot 4 no pickup_point...")
+        node.clear_turtlebot_pickup()
         
         # Limpa o evento de emergência antes da checagem
         if hasattr(node, 'tb4_battery_emergency_event'):
@@ -344,7 +562,15 @@ def _run_cycle_internal(is_manual: bool = False):
         if arrived:
             print("[CYCLE] ✅ Confirmação recebida! TurtleBot 4 chegou no Ponto de Coleta (pickup_point).")
         else:
-            print("[CYCLE] ⚠️ Timeout aguardando TurtleBot 4 no pickup_point — liberando lata por segurança...")
+            print("[CYCLE] ❌ Timeout sem confirmação do TurtleBot — a lata NÃO será liberada no PLACE.")
+            cell_state["status"] = "pickup_timeout_rollback"
+            _goto_pose_with_resume(node, "place_approach", speed)
+            _goto_pose_with_resume(node, "pick_approach", speed)
+            _goto_pose_with_resume(node, "pick", slow_speed)
+            node.set_pump(False)
+            _goto_pose_with_resume(node, "pick_approach", speed)
+            _goto_pose_with_resume(node, "home", 0.20)
+            return
 
         # 3. Desliga a bomba (solta a lata na bandeja do TurtleBot 4) e notifica o robô móvel
         print("[CYCLE] 📦 Desligando bomba de sucção (liberando lata na bandeja do TurtleBot 4)...")
@@ -375,92 +601,188 @@ def _run_cycle_internal(is_manual: bool = False):
         cell_state["yolo_detected_item"] = None
         cell_state["manual_authorized"] = False
 
-def _run_handshake_test_standalone(item_class: str):
-    """Executa um teste totalmente isolado de comunicação inter-robôs (Handshake) sem alterar o ciclo automático oficial."""
+def _run_handshake_test_standalone(item_class: str, preflight: dict):
+    """Executa o handshake físico com provas independentes dos dois robôs."""
     global _cycle_cancel, _abort_requested
     _cycle_cancel = False
     _abort_requested = False
 
     node = get_cobot_node()
     node.load_poses()
-
     speed = max(0.10, min(1.0, float(cell_state.get("arm_speed", 0.50))))
     slow_speed = max(0.05, speed * 0.7)
+    canonical_class = preflight["canonical_class"]
+    expected_target = preflight["target"]
+    turtle_started = False
+    item_physically_released = False
+    release_confirmed = False
 
     try:
-        print(f"[HANDSHAKE TEST] 🧪 1. Movendo Nano para SCAN e injetando lata '{item_class}'...")
-        cell_state["status"] = "moving_scan"
-        if not _goto_pose_with_resume(node, "scan", speed):
-            return
-
-        cell_state["status"] = "at_scan_inspecting"
-        cell_state["yolo_detected_item"] = {"class": item_class, "confidence": 0.99}
-        time.sleep(0.5)
-
-        # Disparo proativo antecipado do TurtleBot 4
-        from backend.api.turtlebot_routes import trigger_delivery, trigger_failure
+        from backend.api.turtlebot_routes import (
+            _publish_mission_signal_on_host,
+            _start_test_delivery_on_host,
+            _wait_for_delivery_complete_on_host,
+            _wait_for_pickup_on_host,
+            get_turtlebot_node,
+            stop_mission,
+            trigger_dock,
+        )
         from backend.ros2_nodes.cell_event_bridge import record_detected_class
-        record_detected_class(item_class)
 
-        # O registro acima serve somente ao estado interno da ponte. A rotina
-        # do TurtleBot mede a classe pelo tópico ROS e não deve assumir que o
-        # valor registrado localmente chegou ao outro robô.
-        if not node.publish_product_class(item_class):
-            print("[HANDSHAKE TEST] ❌ /product_class não foi publicado; abortando antes de mover o TurtleBot.")
-            cell_state["status"] = "handshake_publish_failed"
-            return
+        print(f"[HANDSHAKE] 1/8 SCAN para simular YOLO: '{canonical_class}'.")
+        _set_handshake("moving_scan")
+        if not _goto_pose_verified_with_resume(node, "scan", speed):
+            raise RuntimeError("Nano não confirmou a pose SCAN.")
+        _merge_handshake_evidence(scan_pose_measured=True)
 
-        print(f"[HANDSHAKE TEST] 🚚 2. Disparando TurtleBot 4 para a lata '{item_class}'...")
-        if is_valid_tin_class(item_class):
-            trigger_delivery()
-        else:
-            trigger_failure()
+        _set_handshake("yolo_detected")
+        cell_state["yolo_detected_item"] = {"class": item_class, "confidence": 0.99}
+        record_detected_class(canonical_class)
 
-        # Coleta e Transporte
-        print("[HANDSHAKE TEST] ✊ 3. Movendo para PICK APPROACH e PICK...")
-        cell_state["status"] = "moving_pick"
-        if not _goto_pose_with_resume(node, "pick_approach", speed):
-            return
-        if not _goto_pose_with_resume(node, "pick", slow_speed):
-            return
+        print("[HANDSHAKE] 2/8 Enviando classe fresca e start pelo participante ROS do host.")
+        _set_handshake("starting_turtlebot")
+        start_evidence = _start_test_delivery_on_host(canonical_class)
+        turtle_started = True
+        if start_evidence.get("target") != expected_target:
+            raise RuntimeError(
+                f"Destino confirmado '{start_evidence.get('target')}' difere de '{expected_target}'."
+            )
+        _merge_handshake_evidence(turtlebot_start=start_evidence)
 
-        print("[HANDSHAKE TEST] 🧲 Ligar Bomba de Sucção...")
-        node.set_pump(True)
-        time.sleep(0.5)
+        print("[HANDSHAKE] 3/8 TurtleBot navega em paralelo; Nano executa PICK.")
+        _set_handshake("cobot_picking")
+        if not _goto_pose_verified_with_resume(node, "pick_approach", speed):
+            raise RuntimeError("Nano não confirmou PICK APPROACH.")
+        if not _goto_pose_verified_with_resume(node, "pick", slow_speed):
+            raise RuntimeError("Nano não confirmou PICK.")
+        if not node.set_pump_verified(True):
+            raise RuntimeError("Bomba ON não foi confirmada pelo Nano.")
+        _merge_handshake_evidence(pick_pose_measured=True, pump_on_measured=True)
 
-        print("[HANDSHAKE TEST] 📦 Movendo para PLACE APPROACH e PLACE segurando a lata...")
-        cell_state["status"] = "placing"
-        _goto_pose_with_resume(node, "pick_approach", speed)
-        _goto_pose_with_resume(node, "place_approach", speed)
-        _goto_pose_with_resume(node, "place", slow_speed)
-        time.sleep(0.5)
+        print("[HANDSHAKE] 4/8 Transportando a lata simulada até PLACE.")
+        _set_handshake("cobot_placing")
+        for pose_name, pose_speed in [
+            ("pick_approach", speed),
+            ("place_approach", speed),
+            ("place", slow_speed),
+        ]:
+            if not _goto_pose_verified_with_resume(node, pose_name, pose_speed):
+                raise RuntimeError(f"Nano não confirmou a pose {pose_name.upper()}.")
+        _merge_handshake_evidence(place_pose_measured=True)
 
-        print("[HANDSHAKE TEST] ⏳ 4. Braço em PLACE segurando lata. Aguardando chegada do TurtleBot 4 em pickup_point...")
-        arrived = False
-        t_start = time.time()
-        while (time.time() - t_start) < 90.0:
-            if node.wait_for_turtlebot_at_pickup(timeout_sec=1.0):
-                arrived = True
+        print("[HANDSHAKE] 5/8 Aguardando True real em /turtlebot_at_pickup.")
+        _set_handshake("waiting_turtlebot_pickup")
+        pickup_deadline = time.monotonic() + 100.0
+        pickup_evidence = None
+        while time.monotonic() < pickup_deadline:
+            if not _check_pause_and_cancel():
+                raise RuntimeError("Teste cancelado pelo operador.")
+            window = min(8.0, max(1.0, pickup_deadline - time.monotonic()))
+            result = _wait_for_pickup_on_host(window)
+            if result.get("received") is True:
+                pickup_evidence = result
                 break
+        if pickup_evidence is None:
+            raise RuntimeError(
+                "Timeout sem True em /turtlebot_at_pickup; a lata não será solta."
+            )
+        _merge_handshake_evidence(turtlebot_at_pickup=pickup_evidence)
 
-        if arrived:
-            print("[HANDSHAKE TEST] ✅ TurtleBot 4 chegou ao pickup_point! Soltando a lata na bandeja...")
-        else:
-            print("[HANDSHAKE TEST] ⚠️ Timeout aguardando TurtleBot 4 — liberando lata por segurança...")
+        print("[HANDSHAKE] 6/8 Turtle confirmado: bomba OFF e release confirmado na missão.")
+        _set_handshake("releasing_item")
+        if not node.set_pump_verified(False):
+            raise RuntimeError("Bomba OFF não foi confirmada pelo Nano.")
+        item_physically_released = True
+        release_evidence = None
+        release_errors = []
+        for attempt in range(1, 3):
+            try:
+                release_evidence = _publish_mission_signal_on_host(
+                    "item_released", ""
+                )
+                break
+            except HTTPException as release_error:
+                release_errors.append({
+                    "attempt": attempt,
+                    "status_code": release_error.status_code,
+                    "detail": str(release_error.detail),
+                })
+                if attempt < 2:
+                    time.sleep(1.0)
+        if release_evidence is None:
+            _merge_handshake_evidence(release_attempts=release_errors)
+            raise RuntimeError(
+                "Bomba OFF foi medida, mas a missão não confirmou "
+                "/item_released_on_tb4 após duas janelas."
+            )
+        release_confirmed = True
+        _merge_handshake_evidence(
+            pump_off_measured=True,
+            item_released=release_evidence,
+        )
 
-        node.set_pump(False)
-        node.publish_item_released()
-        time.sleep(1.0)
+        print("[HANDSHAKE] 7/8 Nano retorna HOME enquanto TurtleBot entrega.")
+        _set_handshake("cobot_returning_home")
+        if not _goto_pose_verified_with_resume(node, "place_approach", speed):
+            raise RuntimeError("Nano não confirmou retorno a PLACE APPROACH.")
+        if not _goto_pose_verified_with_resume(node, "home", 0.20):
+            raise RuntimeError("Nano não confirmou retorno a HOME.")
+        _merge_handshake_evidence(home_pose_measured=True)
 
-        print("[HANDSHAKE TEST] 🏠 5. Retornando Nano para HOME...")
-        _goto_pose_with_resume(node, "place_approach", speed)
-        _goto_pose_with_resume(node, "home", 0.20)
-        cell_state["status"] = "idle"
-        print("[HANDSHAKE TEST] 🎉 Teste de Handshake Concluído com Sucesso!")
+        print("[HANDSHAKE] 8/8 Aguardando destino, docking e Manager livre.")
+        _set_handshake("waiting_delivery_and_dock")
+        completion = _wait_for_delivery_complete_on_host(
+            expected_target,
+            start_evidence["target_log_timestamp"],
+            timeout=200.0,
+        )
+        turtle_node = get_turtlebot_node()
+        dock_deadline = time.monotonic() + 10.0
+        while time.monotonic() < dock_deadline:
+            if turtle_node.telemetry_fresh() and turtle_node.is_docked:
+                break
+            time.sleep(0.25)
+        if not (turtle_node.telemetry_fresh() and turtle_node.is_docked):
+            raise RuntimeError("Log reportou docking, mas /dock_status fresco não confirmou dock físico.")
+        _merge_handshake_evidence(delivery_complete=completion, dock_status_measured=True)
+
+        _set_handshake(
+            "completed",
+            active=False,
+            success=True,
+            error=None,
+            completed_at=time.time(),
+        )
+        print("[HANDSHAKE] SUCESSO medido: cobot HOME, entrega correta e TurtleBot dockado.")
 
     except Exception as e:
-        print(f"[HANDSHAKE TEST] ❌ Erro durante o teste de Handshake: {e}")
+        detail = e.detail if isinstance(e, HTTPException) else str(e)
+        print(f"[HANDSHAKE] FALHA: {detail}")
+        _set_handshake("rollback", error=detail)
+        rollback = _rollback_handshake_cobot(node, item_physically_released)
+        if turtle_started and not item_physically_released:
+            turtle_node = get_turtlebot_node()
+            rollback.update(
+                _recover_turtlebot_after_handshake_failure(
+                    turtle_node,
+                    stop_mission,
+                    trigger_dock,
+                )
+            )
+        _merge_handshake_evidence(rollback=rollback)
+        _set_handshake(
+            "failed",
+            active=False,
+            success=False,
+            error=detail,
+            completed_at=time.time(),
+        )
+    finally:
+        cell_state["auto_running"] = False
         cell_state["status"] = "idle"
+        cell_state["manual_step"] = "idle"
+        cell_state["yolo_detected_item"] = None
+        cell_state["manual_authorized"] = False
 
 def _run_auto_loop():
     """Worker do modo automático contínuo com verificação de interrupção e cooldown."""
@@ -493,10 +815,16 @@ def get_cell_status():
     """Retorna o status global da célula automatizada."""
     node = get_cobot_node()
     from backend.api.cobot_routes import is_yolo_process_alive
+    hardware = node.get_hardware_status()
+    measured_joints = node.get_measured_joints()
     return {
         "cell": cell_state,
-        "current_joints": node.current_joints,
-        "pump_active": node.pump_active,
+        "current_joints": measured_joints,
+        "joints_source": "nano_get_angles" if measured_joints is not None else None,
+        "pump_active": (
+            hardware.get("pump_active") if hardware else node.pump_active
+        ),
+        "hardware": hardware,
         "yolo_test_active": is_yolo_process_alive(),
         "last_yolo": node.get_last_yolo_msg()
     }
@@ -528,6 +856,22 @@ def set_cell_mode(payload: CellModeSchema):
 class TestHandshakeSchema(BaseModel):
     item_class: str = "tin_valid_blue_square"  # "tin_valid_blue_square" ou "tin_valid_red_square"
 
+
+@router.post("/test_handshake/preflight")
+def preflight_test_handshake(payload: TestHandshakeSchema):
+    """Valida todos os elos do teste integrado sem comandar movimento."""
+    if cell_state.get("panic_locked"):
+        raise HTTPException(status_code=423, detail="Célula bloqueada em Pânico.")
+    if _cycle_thread is not None and _cycle_thread.is_alive():
+        raise HTTPException(status_code=409, detail="Há um ciclo em execução.")
+    evidence = _handshake_preflight(payload.item_class)
+    return {
+        "status": "ready",
+        "movement_commanded": False,
+        "preflight": evidence,
+    }
+
+
 @router.post("/test_handshake")
 def trigger_test_handshake(payload: TestHandshakeSchema):
     """Executa um ciclo automático completo do Cobot simular a detecção YOLO para testar a comunicação handshake com o TurtleBot 4."""
@@ -535,18 +879,49 @@ def trigger_test_handshake(payload: TestHandshakeSchema):
     if cell_state.get("panic_locked"):
         raise HTTPException(status_code=423, detail="Célula bloqueada em Pânico.")
 
+    if _cycle_thread is not None and _cycle_thread.is_alive():
+        raise HTTPException(status_code=409, detail="Um ciclo já está em execução. Aguarde a conclusão antes de iniciar outro teste.")
+
+    preflight = _handshake_preflight(payload.item_class)
+    run_id = uuid.uuid4().hex[:12]
     cell_state["mode"] = "auto"
     cell_state["auto_running"] = True
     _cycle_cancel = False
     _abort_requested = False
     _pause_event.set()
+    with _state_lock:
+        cell_state["handshake"] = {
+            "active": True,
+            "run_id": run_id,
+            "phase": "preflight_passed",
+            "item_class": payload.item_class,
+            "canonical_class": preflight["canonical_class"],
+            "target": preflight["target"],
+            "success": None,
+            "error": None,
+            "started_at": time.time(),
+            "completed_at": None,
+            "evidence": {"preflight": preflight},
+        }
+        cell_state["status"] = "handshake_preflight_passed"
 
-    if _cycle_thread is not None and _cycle_thread.is_alive():
-        raise HTTPException(status_code=409, detail="Um ciclo já está em execução. Aguarde a conclusão antes de iniciar outro teste.")
-
-    _cycle_thread = threading.Thread(target=_run_handshake_test_standalone, kwargs={"item_class": payload.item_class}, daemon=True)
+    _cycle_thread = threading.Thread(
+        target=_run_handshake_test_standalone,
+        kwargs={"item_class": payload.item_class, "preflight": preflight},
+        daemon=True,
+    )
     _cycle_thread.start()
-    return {"status": "success", "message": f"Teste de Handshake iniciado com a lata '{payload.item_class}'!"}
+    return {
+        "status": "started",
+        "run_id": run_id,
+        "canonical_class": preflight["canonical_class"],
+        "target": preflight["target"],
+        "preflight": preflight,
+        "message": (
+            f"Handshake {run_id} iniciado com '{preflight['canonical_class']}' "
+            f"para '{preflight['target']}'."
+        ),
+    }
 
 @router.post("/auto/start")
 def start_auto_mode():

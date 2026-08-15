@@ -711,6 +711,9 @@ export default function Dashboard() {
       <div className={activeTab === 'cobot' ? 'space-y-6 block' : 'hidden'}>
         <CellControlPanel
           cellState={cellStatus?.cell}
+          tbNavReadiness={tbNavReadiness}
+          tbProcesses={tbProcesses}
+          tbStatus={tbStatus}
           onUpdateMode={handleUpdateMode}
           onAutoStart={handleAutoStart}
           onAutoStop={handleAutoStop}

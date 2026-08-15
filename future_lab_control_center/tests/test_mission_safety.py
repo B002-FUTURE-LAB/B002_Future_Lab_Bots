@@ -259,6 +259,15 @@ class NavigationFreshnessTest(unittest.TestCase):
         self.assertNotIn("subprocess.Popen", source)
         self.assertIn("ClearEntireCostmap", source)
 
+    def test_mission_cleanup_does_not_destroy_executor_entities_in_callbacks(self):
+        source = (SCRIPTS_DIR / "mission_base.py").read_text(encoding="utf-8")
+        self.assertNotIn("destroy_timer(", source)
+        stop_observers = source.split(
+            "def _stop_navigation_observers", 1
+        )[1].split("def _wp_from_param", 1)[0]
+        self.assertNotIn("destroy_subscription", stop_observers)
+        self.assertNotIn("unregister", stop_observers)
+
 
 if __name__ == "__main__":
     unittest.main()

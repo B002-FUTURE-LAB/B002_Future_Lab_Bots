@@ -4,6 +4,7 @@ from unittest.mock import patch
 
 from backend.mission_readiness import mission_readiness
 from backend.mission_signal_evidence import is_new_evidence, latest_matching_timestamp
+from backend.api import cell_routes
 from backend.ros2_nodes import cobot_node
 
 
@@ -92,6 +93,68 @@ class SimulatedSignalPublisherTest(unittest.TestCase):
         with patch.object(cobot_node, "Bool", type("Bool", (), {})):
             self.assertTrue(cobot_node.CobotNode.publish_item_released(node))
         self.assertEqual([True] * 5, published)
+
+
+class CobotMeasurementTest(unittest.TestCase):
+    def test_joint_error_wraps_at_pi(self):
+        error = cobot_node.CobotNode._joint_error(3.13, -3.13)
+        self.assertLess(error, 0.03)
+
+    def test_wait_does_not_clear_an_already_received_pickup(self):
+        event = __import__("threading").Event()
+        event.set()
+        node = types.SimpleNamespace(tb4_at_pickup_event=event)
+        self.assertTrue(
+            cobot_node.CobotNode.wait_for_turtlebot_at_pickup(
+                node, timeout_sec=0.01
+            )
+        )
+
+    def test_verified_pose_retries_once_without_automatic_pump_side_effect(self):
+        commands = []
+        node = types.SimpleNamespace()
+        node.goto_pose = lambda pose, speed, manage_pose_side_effects: commands.append(
+            (pose, speed, manage_pose_side_effects)
+        ) or True
+        node.pose_is_reached = lambda *_args, **_kwargs: (True, 0.02, [0.0] * 6)
+        moments = iter([0.0, 2.0, 3.0, 3.1, 3.2])
+        with patch.object(cobot_node.time, "monotonic", side_effect=lambda: next(moments)), \
+             patch.object(cobot_node.time, "sleep", return_value=None):
+            reached = cobot_node.CobotNode.goto_pose_verified(
+                node,
+                "pick",
+                velocity_scaling=0.15,
+                timeout_sec=0.01,
+                max_attempts=2,
+            )
+
+        self.assertTrue(reached)
+        self.assertEqual(
+            [("pick", 0.15, False), ("pick", 0.15, False)],
+            commands,
+        )
+
+
+class HandshakeRollbackTest(unittest.TestCase):
+    def test_failed_handshake_recovers_turtle_only_after_measured_dock(self):
+        turtle = types.SimpleNamespace(is_docked=False)
+        turtle.telemetry_fresh = lambda: True
+        stops = []
+
+        def dock():
+            turtle.is_docked = True
+            return {"status": "success"}
+
+        evidence = cell_routes._recover_turtlebot_after_handshake_failure(
+            turtle,
+            lambda: stops.append(True) or {"status": "success"},
+            dock,
+            dock_confirm_sec=0.0,
+        )
+
+        self.assertEqual([True], stops)
+        self.assertTrue(evidence["turtlebot_recovery"]["dock_status_measured"])
+        self.assertEqual("docked", evidence["turtlebot_recovery"]["status"])
 
 
 if __name__ == "__main__":

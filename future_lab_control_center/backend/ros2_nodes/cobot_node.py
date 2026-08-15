@@ -4,6 +4,7 @@
 import os
 import sys
 import time
+import math
 import yaml
 import threading
 import subprocess
@@ -204,8 +205,11 @@ class CobotNode(BaseNode):
 
     def wait_for_turtlebot_at_pickup(self, timeout_sec: float = 30.0) -> bool:
         """Aguarda a chegada do TurtleBot 4 no pickup_point com timeout configurável."""
-        self.tb4_at_pickup_event.clear()
         return self.tb4_at_pickup_event.wait(timeout=timeout_sec)
+
+    def clear_turtlebot_pickup(self) -> None:
+        """Limpa a confirmação uma única vez, antes de iniciar uma nova missão."""
+        self.tb4_at_pickup_event.clear()
 
     def publish_item_released(self, count: int = 5, interval_sec: float = 0.05):
         """Notifica o TurtleBot 4 de que a lata foi solta na bandeja e a bomba foi desligada."""
@@ -489,6 +493,140 @@ class CobotNode(BaseNode):
             self.pump_active = on
         return ok
 
+    def _nano_json(self, path: str, timeout_sec: float = 2.5) -> Optional[dict]:
+        """Consulta somente endpoints JSON mensuráveis do microbridge do Nano."""
+        try:
+            import json
+            import urllib.request
+            from backend.config.settings import get_settings
+
+            nano_ip = get_settings().JETSON_NANO_IP
+            request = urllib.request.Request(f"http://{nano_ip}:8088{path}")
+            with urllib.request.urlopen(request, timeout=timeout_sec) as response:
+                if response.status != 200:
+                    return None
+                payload = json.loads(response.read().decode("utf-8"))
+                return payload if isinstance(payload, dict) else None
+        except Exception as exc:
+            print(f"[WARN] Leitura do Nano '{path}' falhou: {exc}")
+            return None
+
+    def get_hardware_status(self) -> Optional[dict]:
+        """Lê bomba, GPIO, modo mock e juntas reportados pelo hardware."""
+        status = self._nano_json("/status")
+        if status and status.get("success") is True:
+            self.pump_active = bool(status.get("pump_active"))
+            return status
+        return None
+
+    def get_measured_joints(self) -> Optional[List[float]]:
+        """Obtém juntas reais em radianos; não usa o último alvo comandado."""
+        payload = self._nano_json("/get_angles")
+        joints = payload.get("joints") if payload else None
+        if (
+            payload
+            and payload.get("success") is True
+            and isinstance(joints, list)
+            and len(joints) >= 6
+        ):
+            measured = [float(value) for value in joints[:6]]
+            with self.lock:
+                self.current_joints = measured
+            return measured
+        return None
+
+    @staticmethod
+    def _joint_error(measured: float, target: float) -> float:
+        return abs(math.atan2(math.sin(measured - target), math.cos(measured - target)))
+
+    def pose_is_reached(
+        self, pose_name: str, tolerance_rad: float = 0.10
+    ) -> tuple[bool, Optional[float], Optional[List[float]]]:
+        """Compara a pose cadastrada com juntas realmente lidas do Nano."""
+        if pose_name not in self.poses:
+            self.load_poses()
+        target = self.poses.get(pose_name)
+        measured = self.get_measured_joints()
+        if not target or measured is None:
+            return False, None, measured
+        max_error = max(
+            self._joint_error(actual, expected)
+            for actual, expected in zip(measured[:6], target[:6])
+        )
+        return max_error <= float(tolerance_rad), max_error, measured
+
+    def goto_pose_verified(
+        self,
+        pose_name: str,
+        velocity_scaling: float = 0.50,
+        tolerance_rad: float = 0.10,
+        timeout_sec: float = 25.0,
+        max_attempts: int = 2,
+    ) -> bool:
+        """Comanda uma pose e só retorna sucesso após medir a chegada no Nano.
+
+        O Micro-Bridge confirma que aceitou o comando, não que o braço chegou ao
+        alvo. Uma repetição é permitida porque o hardware já demonstrou que um
+        segundo comando idêntico resolve aceitações sem movimento completo. A
+        bomba nunca é alterada por este caminho: o chamador precisa comandá-la e
+        medi-la explicitamente depois da pose confirmada.
+        """
+        attempts = max(1, int(max_attempts))
+        last_error = None
+        for attempt in range(1, attempts + 1):
+            if not self.goto_pose(
+                pose_name,
+                velocity_scaling,
+                manage_pose_side_effects=False,
+            ):
+                print(
+                    f"[WARN] Comando da pose '{pose_name}' não foi aceito "
+                    f"(tentativa {attempt}/{attempts})."
+                )
+                continue
+
+            deadline = time.monotonic() + max(1.0, float(timeout_sec))
+            stable_samples = 0
+            while time.monotonic() < deadline:
+                reached, last_error, _measured = self.pose_is_reached(
+                    pose_name, tolerance_rad=tolerance_rad
+                )
+                stable_samples = stable_samples + 1 if reached else 0
+                if stable_samples >= 2:
+                    print(
+                        f"[INFO] Pose '{pose_name}' confirmada pelo Nano "
+                        f"(erro máximo {last_error:.4f} rad, "
+                        f"tentativa {attempt}/{attempts})."
+                    )
+                    return True
+                time.sleep(0.25)
+
+            if attempt < attempts:
+                print(
+                    f"[WARN] Pose '{pose_name}' ainda fora da tolerância "
+                    f"(erro máximo={last_error!r} rad); reenviando o mesmo "
+                    f"alvo uma única vez."
+                )
+        print(
+            f"[WARN] Pose '{pose_name}' não foi confirmada pelo Nano "
+            f"após {attempts} tentativa(s) "
+            f"(último erro máximo={last_error!r} rad)."
+        )
+        return False
+
+    def set_pump_verified(self, on: bool, timeout_sec: float = 4.0) -> bool:
+        """Comanda a bomba e exige o mesmo estado medido em /status."""
+        if not self.set_pump(on):
+            return False
+        deadline = time.monotonic() + max(0.5, float(timeout_sec))
+        while time.monotonic() < deadline:
+            status = self.get_hardware_status()
+            if status and bool(status.get("pump_active")) is bool(on):
+                return True
+            time.sleep(0.1)
+        print(f"[WARN] Estado físico da bomba não confirmou pump_active={on}.")
+        return False
+
     def goto_pose_direct_bridge(self, target_joints: List[float], duration_sec: float = 3.0) -> bool:
         """Envia posições angulares via ROS 2 DDS Topic (/joint_states_commands) de forma instantânea e não-bloqueante."""
         if not self.is_ros_active or not hasattr(self, 'cmd_pub'):
@@ -529,7 +667,12 @@ class CobotNode(BaseNode):
             print(f"[WARN] HTTP Micro-Bridge move_joints falhou: {e}")
         return False
 
-    def goto_pose(self, pose_name: str, velocity_scaling: float = 0.50) -> bool:
+    def goto_pose(
+        self,
+        pose_name: str,
+        velocity_scaling: float = 0.50,
+        manage_pose_side_effects: bool = True,
+    ) -> bool:
         if pose_name not in self.poses:
             print(f"[INFO] Pose '{pose_name}' não encontrada em memória. Tentando recarregar poses do disco...")
             self.load_poses()
@@ -601,7 +744,7 @@ class CobotNode(BaseNode):
                 return self.goto_pose_direct_bridge(target_joints, duration_sec=duration)
 
             success = _execute_move()
-        if success:
+        if success and manage_pose_side_effects:
             # Regra Mestre de Hardware:
             # 1. Ligar a bomba APÓS alcançar a pose 'pick'
             # 2. Desligar a bomba APÓS alcançar a pose 'place'

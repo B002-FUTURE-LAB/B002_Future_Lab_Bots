@@ -22,9 +22,13 @@ HELPER = Path(__file__).resolve().parent / "publish_mission_signal_once.py"
 DELIVERY_HELPER = (
     Path(__file__).resolve().parent / "start_delivery_with_class_once.py"
 )
+PICKUP_HELPER = (
+    Path(__file__).resolve().parent / "wait_mission_pickup_once.py"
+)
 MISSION_LOG = Path(main_agent.LOG_FILES["mission_manager"])
 PUBLISH_LOCK = threading.Lock()
 DELIVERY_START_LOCK = threading.Lock()
+PICKUP_WAIT_LOCK = threading.Lock()
 
 
 def _latest_marker_timestamp(marker: str) -> float | None:
@@ -51,7 +55,7 @@ def publish_and_confirm(signal: str, value: str = "") -> tuple[dict, int]:
     previous = _latest_marker_timestamp(marker)
     command = (
         f"{main_agent.JAZZY_ENV_CMD} && exec python3 '{HELPER}' "
-        '--signal "$1" --value "$2" --discovery-timeout 5.0'
+        '--signal "$1" --value "$2" --discovery-timeout 15.0'
     )
     try:
         with PUBLISH_LOCK:
@@ -60,7 +64,7 @@ def publish_and_confirm(signal: str, value: str = "") -> tuple[dict, int]:
                 cwd=str(main_agent.REPO_DIR),
                 capture_output=True,
                 text=True,
-                timeout=15.0,
+                timeout=25.0,
                 check=False,
             )
     except subprocess.TimeoutExpired:
@@ -208,6 +212,109 @@ def start_delivery_and_confirm(value: str) -> tuple[dict, int]:
             _stop_exact_process(process)
 
 
+def wait_for_pickup(timeout: float) -> tuple[dict, int]:
+    """Confirma o sentido TurtleBot -> cobot pelo tópico ROS real do host."""
+    timeout = max(1.0, min(15.0, float(timeout)))
+    command = (
+        f"{main_agent.JAZZY_ENV_CMD} && exec python3 '{PICKUP_HELPER}' "
+        '--timeout "$1"'
+    )
+    try:
+        with PICKUP_WAIT_LOCK:
+            completed = subprocess.run(
+                ["/bin/bash", "-lc", command, "pickup-wait", str(timeout)],
+                cwd=str(main_agent.REPO_DIR),
+                capture_output=True,
+                text=True,
+                timeout=timeout + 5.0,
+                check=False,
+            )
+    except subprocess.TimeoutExpired:
+        return {"received": False, "detail": "Timeout no waiter ROS do host."}, 504
+    except OSError as exc:
+        return {"received": False, "detail": f"Falha no waiter ROS: {exc}"}, 500
+
+    result = None
+    for line in reversed(completed.stdout.splitlines()):
+        try:
+            candidate = json.loads(line)
+        except json.JSONDecodeError:
+            continue
+        if isinstance(candidate, dict):
+            result = candidate
+            break
+    if result is None:
+        return {
+            "received": False,
+            "detail": "Waiter ROS terminou sem resposta JSON mensurável.",
+            "diagnostic": (completed.stderr or completed.stdout).strip()[-1000:],
+        }, 500
+    if completed.returncode == 0 and result.get("received") is True:
+        return result, 200
+    if completed.returncode == 4:
+        return result, 504
+    return result, 503
+
+
+def wait_for_delivery_complete(
+    target: str, after_timestamp: float, timeout: float
+) -> tuple[dict, int]:
+    """Exige destino, docking e liberação do Manager posteriores ao start."""
+    if target not in {"delivery_blue", "delivery_red"}:
+        return {"detail": "Destino de delivery não permitido."}, 422
+    try:
+        after_timestamp = float(after_timestamp)
+        timeout = max(1.0, min(240.0, float(timeout)))
+    except (TypeError, ValueError):
+        return {"detail": "Timestamp ou timeout inválido."}, 422
+
+    markers = {
+        "target": f"Chegou ao waypoint '{target}' com SUCESSO!",
+        "docking": "Docking concluído com SUCESSO!",
+        "manager": (
+            "Missão 'delivery' reportou conclusão (Success: True). "
+            "Liberando Manager."
+        ),
+    }
+    failure_marker = (
+        "Missão 'delivery' reportou conclusão (Success: False). Liberando Manager."
+    )
+    deadline = time.monotonic() + timeout
+    while time.monotonic() < deadline:
+        failure_at = _latest_marker_timestamp(failure_marker)
+        if failure_at is not None and failure_at > after_timestamp:
+            return {
+                "completed": False,
+                "failed": True,
+                "failure_log_timestamp": failure_at,
+                "detail": "A missão reportou conclusão com Success: False.",
+            }, 409
+
+        evidence = {
+            name: _latest_marker_timestamp(marker)
+            for name, marker in markers.items()
+        }
+        if all(
+            measured is not None and measured > after_timestamp
+            for measured in evidence.values()
+        ):
+            return {
+                "completed": True,
+                "target": target,
+                "after_timestamp": after_timestamp,
+                "evidence": evidence,
+                "confirmations": markers,
+            }, 200
+        time.sleep(0.1)
+
+    return {
+        "completed": False,
+        "target": target,
+        "after_timestamp": after_timestamp,
+        "detail": "Timeout sem evidência completa de destino, docking e Manager livre.",
+    }, 504
+
+
 class ThreadedHTTPServer(ThreadingMixIn, HTTPServer):
     daemon_threads = True
 
@@ -234,7 +341,10 @@ class Handler(BaseHTTPRequestHandler):
         if self.headers.get("X-Agent-Token", "").strip() != main_agent.AGENT_TOKEN:
             self._send({"detail": "Token inválido ou ausente."}, 401)
             return
-        if self.path not in {"/publish", "/start_delivery"}:
+        if self.path not in {
+            "/publish", "/start_delivery", "/wait_pickup",
+            "/wait_delivery_complete",
+        }:
             self._send({"detail": "Rota não encontrada."}, 404)
             return
         try:
@@ -249,6 +359,14 @@ class Handler(BaseHTTPRequestHandler):
             return
         if self.path == "/start_delivery":
             result, code = start_delivery_and_confirm(value)
+        elif self.path == "/wait_pickup":
+            result, code = wait_for_pickup(body.get("timeout", 8.0))
+        elif self.path == "/wait_delivery_complete":
+            result, code = wait_for_delivery_complete(
+                str(body.get("target", "")),
+                body.get("after_timestamp"),
+                body.get("timeout", 180.0),
+            )
         else:
             result, code = publish_and_confirm(signal, value)
         self._send(result, code)

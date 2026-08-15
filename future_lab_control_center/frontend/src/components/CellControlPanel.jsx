@@ -14,7 +14,10 @@ export default function CellControlPanel({
   onEmergencyStop,
   onPanicStop,
   onRestartNanoHardware,
-  onTestHandshake
+  onTestHandshake,
+  tbNavReadiness,
+  tbProcesses,
+  tbStatus
 }) {
   const { t } = useLanguage();
   const [mode, setMode] = useState(cellState?.mode || 'auto');
@@ -60,10 +63,32 @@ export default function CellControlPanel({
 
   const status = cellState?.status || 'idle';
   const detectedItem = cellState?.yolo_detected_item;
+  const handshake = cellState?.handshake || {};
+  const handshakePhaseLabels = {
+    idle: 'Aguardando teste',
+    preflight_passed: 'Pré-validação concluída',
+    moving_scan: 'Cobot indo para SCAN',
+    yolo_detected: 'YOLO sintético detectou a lata',
+    starting_turtlebot: 'Enviando classe e missão ao TurtleBot',
+    cobot_picking: 'TurtleBot em rota; cobot executando PICK',
+    cobot_placing: 'Cobot transportando até PLACE',
+    waiting_turtlebot_pickup: 'Aguardando TurtleBot confirmar pickup',
+    releasing_item: 'Liberando lata e confirmando sinal',
+    cobot_returning_home: 'Cobot voltando HOME; TurtleBot entregando',
+    waiting_delivery_and_dock: 'Aguardando entrega e docking',
+    rollback: 'Executando retorno seguro',
+    completed: 'Fluxo completo confirmado',
+    failed: 'Teste falhou'
+  };
+  const managerReady = tbProcesses?.mission_manager?.running === true
+    && tbProcesses?.mission_manager?.instances === 1
+    && tbProcesses?.mission_manager?.visible_on_ros_graph === true;
+  const turtleReady = tbNavReadiness?.mission_ready === true;
 
   // Lógica dinâmica: Se o modo manual estiver ATIVO (ou se um ciclo estiver rodando), o botão vira "INTERROMPER"
   const isManualActive = mode === 'manual';
-  const isCycleRunning = status !== 'idle' && status !== 'stopped' && status !== 'panic_locked';
+  const isCycleRunning = handshake.active === true
+    || (status !== 'idle' && status !== 'stopped' && status !== 'panic_locked');
   const isAutoRunning = mode === 'auto' && isCycleRunning;
 
   return (
@@ -224,10 +249,10 @@ export default function CellControlPanel({
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <button
-            onClick={() => onTestHandshake && onTestHandshake('tin_valid_blue_square')}
-            disabled={isCycleRunning}
+            onClick={() => onTestHandshake && onTestHandshake('blue')}
+            disabled={isCycleRunning || !turtleReady || !managerReady}
             className={`py-3 px-4 rounded-xl font-extrabold text-xs flex items-center justify-center gap-2 transition-all border ${
-              !isCycleRunning
+              !isCycleRunning && turtleReady && managerReady
                 ? 'bg-blue-600 hover:bg-blue-500 text-white border-blue-400 shadow-lg shadow-blue-900/40 btn-hover'
                 : 'bg-slate-800 text-slate-500 border-slate-700 cursor-not-allowed'
             }`}
@@ -237,10 +262,10 @@ export default function CellControlPanel({
           </button>
 
           <button
-            onClick={() => onTestHandshake && onTestHandshake('tin_valid_red_square')}
-            disabled={isCycleRunning}
+            onClick={() => onTestHandshake && onTestHandshake('red')}
+            disabled={isCycleRunning || !turtleReady || !managerReady}
             className={`py-3 px-4 rounded-xl font-extrabold text-xs flex items-center justify-center gap-2 transition-all border ${
-              !isCycleRunning
+              !isCycleRunning && turtleReady && managerReady
                 ? 'bg-red-600 hover:bg-red-500 text-white border-red-400 shadow-lg shadow-red-900/40 btn-hover'
                 : 'bg-slate-800 text-slate-500 border-slate-700 cursor-not-allowed'
             }`}
@@ -248,6 +273,34 @@ export default function CellControlPanel({
             <span className="w-2.5 h-2.5 rounded-full bg-red-400 animate-pulse"></span>
             <span>{t('testRedTin')}</span>
           </button>
+        </div>
+
+        <div className={`rounded-lg border p-3 text-xs space-y-1 ${
+          handshake.success === true
+            ? 'border-emerald-500/40 bg-emerald-950/30'
+            : handshake.success === false
+              ? 'border-red-500/40 bg-red-950/30'
+              : 'border-slate-700 bg-slate-900/60'
+        }`}>
+          <div className="flex items-center justify-between gap-2">
+            <span className="font-bold text-slate-200">
+              {handshakePhaseLabels[handshake.phase] || handshake.phase || 'Aguardando teste'}
+            </span>
+            {handshake.active && <Loader2 className="w-4 h-4 animate-spin text-purple-400" />}
+          </div>
+          <p className="text-slate-400">
+            Turtle pronto: <strong className={turtleReady ? 'text-emerald-400' : 'text-amber-400'}>{turtleReady ? 'SIM' : 'NÃO'}</strong>
+            {' · '}Manager único: <strong className={managerReady ? 'text-emerald-400' : 'text-amber-400'}>{managerReady ? 'SIM' : 'NÃO'}</strong>
+            {' · '}Dock: <strong className="text-slate-200">{tbStatus?.is_docked ? 'SIM' : 'NÃO'}</strong>
+          </p>
+          {handshake.run_id && (
+            <p className="text-slate-400">
+              Execução <span className="font-mono text-slate-300">{handshake.run_id}</span>
+              {handshake.canonical_class ? ` · ${handshake.canonical_class}` : ''}
+              {handshake.target ? ` → ${handshake.target}` : ''}
+            </p>
+          )}
+          {handshake.error && <p className="text-red-300 font-semibold">{handshake.error}</p>}
         </div>
       </div>
 
