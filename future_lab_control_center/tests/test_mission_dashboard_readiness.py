@@ -4,7 +4,8 @@ from unittest.mock import patch
 
 from backend.mission_readiness import mission_readiness
 from backend.mission_signal_evidence import is_new_evidence, latest_matching_timestamp
-from backend.api import cell_routes
+from backend.api import cell_routes, cobot_routes, health_routes
+from backend.config import settings
 from backend.ros2_nodes import cobot_node
 
 
@@ -155,6 +156,168 @@ class HandshakeRollbackTest(unittest.TestCase):
         self.assertEqual([True], stops)
         self.assertTrue(evidence["turtlebot_recovery"]["dock_status_measured"])
         self.assertEqual("docked", evidence["turtlebot_recovery"]["status"])
+
+
+class RealIntegratedYoloTest(unittest.TestCase):
+    def test_real_model_suffix_is_normalized_by_color(self):
+        samples = [
+            {"class": "tin_valid_red_triangle", "timestamp": 10.0 + index * 0.25}
+            for index in range(5)
+        ]
+        self.assertEqual(
+            ("tin_valid_red", "delivery_red"),
+            cell_routes._stable_real_yolo_class(samples),
+        )
+
+    def test_duplicate_frame_timestamp_is_not_stable_evidence(self):
+        samples = [
+            {"class": "tin_valid_blue_square", "timestamp": 10.0},
+            {"class": "tin_valid_blue_square", "timestamp": 10.0},
+            {"class": "tin_valid_blue_square", "timestamp": 10.2},
+            {"class": "tin_valid_blue_square", "timestamp": 10.4},
+            {"class": "tin_valid_blue_square", "timestamp": 10.6},
+        ]
+        self.assertEqual((None, None), cell_routes._stable_real_yolo_class(samples))
+
+    def test_mixed_colors_are_not_stable_evidence(self):
+        samples = [
+            {"class": "tin_valid_blue_square", "timestamp": 10.0},
+            {"class": "tin_valid_red_triangle", "timestamp": 10.2},
+            {"class": "tin_valid_blue_square", "timestamp": 10.4},
+            {"class": "tin_valid_blue_square", "timestamp": 10.6},
+            {"class": "tin_valid_blue_square", "timestamp": 10.8},
+        ]
+        self.assertEqual((None, None), cell_routes._stable_real_yolo_class(samples))
+
+    def test_burst_too_short_is_not_temporal_evidence(self):
+        samples = [
+            {"class": "tin_valid_blue_square", "timestamp": 10.0 + index * 0.05}
+            for index in range(5)
+        ]
+        self.assertEqual((None, None), cell_routes._stable_real_yolo_class(samples))
+
+    def test_high_frame_rate_can_accumulate_the_required_time_span(self):
+        samples = [
+            {"class": "tin_valid_blue_square", "timestamp": 10.0 + index * 0.05}
+            for index in range(19)
+        ]
+        self.assertEqual(
+            ("tin_valid_blue", "delivery_blue"),
+            cell_routes._stable_real_yolo_class(samples),
+        )
+
+    def test_invalid_class_is_rejected(self):
+        with self.assertRaises(Exception):
+            cell_routes._normalize_handshake_class("tin_invalid_red")
+
+    def test_gui_yolo_keeps_requested_confidence_and_opens_window(self):
+        fake_process = types.SimpleNamespace(pid=4242)
+        fake_settings = types.SimpleNamespace(CAMERA_STREAM_URL="http://camera.test/stream")
+        with patch.object(cobot_routes, "stop_yolo_test_process"), \
+             patch.object(cobot_routes.Path, "exists", return_value=True), \
+             patch.object(cobot_routes.subprocess, "run") as run_mock, \
+             patch.object(cobot_routes.subprocess, "Popen", return_value=fake_process) as popen_mock, \
+             patch.object(settings, "get_settings", return_value=fake_settings):
+            self.assertTrue(cobot_routes.start_yolo_test_process(0.60, headless=False))
+
+        shell_command = popen_mock.call_args.args[0][2]
+        self.assertNotIn("--headless", shell_command)
+        self.assertIn("--conf 0.6", shell_command)
+        self.assertIn("export DISPLAY=", shell_command)
+        run_mock.assert_called_once()
+        if cobot_routes._yolo_log_file is not None:
+            cobot_routes._yolo_log_file.close()
+            cobot_routes._yolo_log_file = None
+        cobot_routes.yolo_process = None
+        cobot_routes.yolo_test_active = False
+
+    def test_headless_yolo_keeps_requested_confidence_without_xhost(self):
+        fake_process = types.SimpleNamespace(pid=4343)
+        fake_settings = types.SimpleNamespace(CAMERA_STREAM_URL="http://camera.test/stream")
+        with patch.object(cobot_routes, "stop_yolo_test_process"), \
+             patch.object(cobot_routes.Path, "exists", return_value=True), \
+             patch.object(cobot_routes.subprocess, "run") as run_mock, \
+             patch.object(cobot_routes.subprocess, "Popen", return_value=fake_process) as popen_mock, \
+             patch.object(settings, "get_settings", return_value=fake_settings):
+            self.assertTrue(cobot_routes.start_yolo_test_process(0.72, headless=True))
+
+        shell_command = popen_mock.call_args.args[0][2]
+        self.assertIn("--headless", shell_command)
+        self.assertIn("--conf 0.72", shell_command)
+        run_mock.assert_not_called()
+        if cobot_routes._yolo_log_file is not None:
+            cobot_routes._yolo_log_file.close()
+            cobot_routes._yolo_log_file = None
+        cobot_routes.yolo_process = None
+        cobot_routes.yolo_test_active = False
+
+    def test_operator_confirmation_only_sets_worker_gate(self):
+        previous = dict(cell_routes.cell_state["integrated_real"])
+        cell_routes._real_detection_confirm_event.clear()
+        try:
+            cell_routes.cell_state["integrated_real"] = {
+                "active": True,
+                "phase": "waiting_detection_confirmation",
+                "candidate": {
+                    "class": "tin_valid_blue",
+                    "target": "delivery_blue",
+                    "confidence": 0.8,
+                },
+            }
+            response = cell_routes.confirm_integrated_real_detection()
+            self.assertEqual("confirmation_requested", response["status"])
+            self.assertFalse(response["movement_commanded"])
+            self.assertTrue(cell_routes._real_detection_confirm_event.is_set())
+        finally:
+            cell_routes._real_detection_confirm_event.clear()
+            cell_routes.cell_state["integrated_real"] = previous
+
+    def test_confirmation_is_rejected_without_a_waiting_candidate(self):
+        previous = dict(cell_routes.cell_state["integrated_real"])
+        try:
+            cell_routes.cell_state["integrated_real"] = {
+                "active": True,
+                "phase": "waiting_real_yolo",
+                "candidate": None,
+            }
+            with self.assertRaises(Exception):
+                cell_routes.confirm_integrated_real_detection()
+            self.assertFalse(cell_routes._real_detection_confirm_event.is_set())
+        finally:
+            cell_routes.cell_state["integrated_real"] = previous
+
+
+class PlanningPcGenerationTest(unittest.TestCase):
+    def test_launch_is_not_ready_until_the_measured_generation_completes(self):
+        class ImmediateThread:
+            def __init__(self, target, daemon):
+                self.target = target
+
+            def start(self):
+                self.target()
+
+        completed = types.SimpleNamespace(returncode=0, stdout="planning ok", stderr="")
+        with health_routes._rviz_launch_lock:
+            health_routes._rviz_launch_state["active"] = False
+        with patch.object(health_routes.Path, "exists", return_value=True), \
+             patch.object(health_routes.subprocess, "run", return_value=completed), \
+             patch.object(health_routes.threading, "Thread", ImmediateThread):
+            response = health_routes.launch_rviz()
+
+        self.assertEqual("starting", response["status"])
+        self.assertFalse(response["ready"])
+        measured = health_routes.get_rviz_launch_status(response["run_id"])
+        self.assertTrue(measured["completed"])
+        self.assertTrue(measured["success"])
+
+    def test_old_generation_is_never_reported_as_current_success(self):
+        with health_routes._rviz_launch_lock:
+            health_routes._rviz_launch_state.update(
+                {"run_id": "new", "active": False, "completed": True, "success": True}
+            )
+        measured = health_routes.get_rviz_launch_status("old")
+        self.assertFalse(measured["success"])
+        self.assertIn("substituída", measured["error"])
 
 
 if __name__ == "__main__":

@@ -6,6 +6,7 @@ import time
 import math
 import subprocess
 import threading
+from pathlib import Path
 from typing import Optional
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
@@ -1573,49 +1574,92 @@ def stop_mission():
 
 @router.post("/launch_integrated_3d")
 def launch_integrated_3d():
-    """Abre a cena gráfica 3D integrada (MyCobot 280 + TurtleBot 4 + Mapa B002) no monitor do PC Host."""
+    """Solicita a cena 3D e confirma que o script lançador terminou sem erro."""
     try:
         integration_ws = get_integration_workspace()
         subprocess.run("xhost +local:root 2>/dev/null || xhost + 2>/dev/null || true", shell=True, timeout=3)
         cmd_3d = f'cd {integration_ws} && export DISPLAY=:0 && {JAZZY_ENV_CMD} && bash ./scripts/run_3d_view.sh'
-        subprocess.Popen(cmd_3d, shell=True, executable="/bin/bash")
-        return {"status": "success", "message": "Janela 3D Integrada (Cobot + TurtleBot 4) disparada no monitor do PC Host!"}
+        result = subprocess.run(
+            cmd_3d,
+            shell=True,
+            executable="/bin/bash",
+            capture_output=True,
+            text=True,
+            timeout=35,
+        )
+        if result.returncode != 0:
+            detail = (result.stderr or result.stdout or "erro sem saída").strip()[-1200:]
+            raise HTTPException(
+                status_code=503,
+                detail=f"Lançador da Visão 3D falhou: {detail}",
+            )
+        return {
+            "status": "starting",
+            "ready": False,
+            "message": (
+                "Lançador 3D concluído; a operação integrada ainda confirmará "
+                "o processo RViz por PID."
+            ),
+            "launcher_output": result.stdout.strip()[-1200:],
+        }
+    except HTTPException:
+        raise
+    except subprocess.TimeoutExpired:
+        raise HTTPException(
+            status_code=504,
+            detail="Lançador da Visão 3D excedeu 35s e não confirmou conclusão.",
+        )
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Falha ao abrir Visão 3D Integrada: {e}")
 
 @router.post("/start_oakd_camera")
 def start_oakd_camera():
-    """Desperta a câmera OAK-D-PRO no TurtleBot 4 chamando o serviço ROS 2 /oakd/start_camera."""
+    """Desperta a OAK-D pelo Host Agent e só confirma após receber frames."""
     try:
         node = get_turtlebot_node()
-        cmd = f'ssh -o BatchMode=yes -o ConnectTimeout=3 -o StrictHostKeyChecking=no ubuntu@192.168.0.129 "source /etc/turtlebot4/setup.bash && ros2 service call /oakd/start_camera std_srvs/srv/Trigger {{}}"'
-        res = subprocess.run(cmd, shell=True, capture_output=True, text=True, timeout=15)
-        if res.returncode != 0 and "success=True" not in res.stdout:
-            # Tenta via container se o SSH falhou
-            cmd_container = f'{JAZZY_ENV_CMD} && ros2 service call /oakd/start_camera std_srvs/srv/Trigger {{}}'
-            res = subprocess.run(cmd_container, shell=True, executable="/bin/bash", capture_output=True, text=True, timeout=10)
+        if (time.time() - node.last_frame_time) < 3.0:
+            return {
+                "status": "success",
+                "message": "Câmera OAK-D-PRO já estava transmitindo frames.",
+                "oakd_streaming": True,
+                "stream_url": "/api/v1/turtlebot/oakd_stream",
+                "activation": {"status": "already_streaming"},
+            }
+        agent_result = _call_host_agent(
+            "/robot/start_oakd",
+            method="POST",
+            timeout=35.0,
+        )
 
-        out_text = (res.stdout or "") + (res.stderr or "")
-        if res.returncode != 0 and "success=True" not in out_text:
-            raise HTTPException(status_code=503, detail=f"Serviço /oakd/start_camera falhou ou indisponível: {out_text.strip()[:200]}")
-
-        # Aguarda até 5s para confirmar recepção de frames
+        # O retorno SSH comprova apenas que o serviço foi chamado. A confirmação
+        # operacional independente é um frame novo recebido pelo backend.
         t0 = time.time()
-        while time.time() - t0 < 5.0:
+        while time.time() - t0 < 10.0:
             if (time.time() - node.last_frame_time) < 3.0:
                 break
             time.sleep(0.3)
 
+        if (time.time() - node.last_frame_time) >= 3.0:
+            raise HTTPException(
+                status_code=504,
+                detail=(
+                    "Host Agent chamou /oakd/start_camera, mas nenhum frame "
+                    "OAK-D novo foi medido em 10s."
+                ),
+            )
+
         return {
             "status": "success",
             "message": "Câmera OAK-D-PRO despertada com sucesso!",
-            "oakd_streaming": (time.time() - node.last_frame_time) < 3.0,
-            "stream_url": "/api/v1/turtlebot/oakd_stream"
+            "oakd_streaming": True,
+            "stream_url": "/api/v1/turtlebot/oakd_stream",
+            "activation": agent_result,
         }
     except HTTPException:
         raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Falha ao acionar câmera OAK-D: {e}")
+
 
 @router.post("/restart_daemon")
 def restart_daemon():

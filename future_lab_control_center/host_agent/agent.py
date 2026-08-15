@@ -787,19 +787,41 @@ class AgentRequestHandler(BaseHTTPRequestHandler):
             return
 
         if path == "/robot/start_oakd":
-            res = subprocess.run(
-                [
-                    "ssh", "-o", "ConnectTimeout=5", "ubuntu@192.168.0.129",
-                    "source /etc/turtlebot4/setup.bash && ros2 service call /oakd/start_camera std_srvs/srv/Trigger {}",
-                ],
-                capture_output=True,
-                text=True,
-                timeout=30,
-            )
-            if res.returncode == 0:
-                self._send_json({"status": "success", "message": "Camera OAK-D ativada via ROS 2."})
+            try:
+                res = subprocess.run(
+                    [
+                        "ssh", "-o", "ConnectTimeout=5", "ubuntu@192.168.0.129",
+                        (
+                            "source /etc/turtlebot4/setup.bash && "
+                            "timeout 20 ros2 service call /oakd/start_camera "
+                            "std_srvs/srv/Trigger {}"
+                        ),
+                    ],
+                    capture_output=True,
+                    text=True,
+                    timeout=28,
+                )
+            except subprocess.TimeoutExpired:
+                self._send_json(
+                    {"detail": "Timeout mensurável ao chamar /oakd/start_camera no TurtleBot."},
+                    504,
+                )
+                return
+            output = ((res.stdout or "") + "\n" + (res.stderr or "")).strip()
+            normalized = output.lower()
+            service_success = "success=true" in normalized or "success: true" in normalized
+            if res.returncode == 0 and service_success:
+                self._send_json(
+                    {
+                        "status": "success",
+                        "message": "Camera OAK-D ativada via ROS 2 e serviço confirmou success=true.",
+                    }
+                )
             else:
-                self._send_json({"detail": res.stderr.strip() or res.stdout.strip()}, 500)
+                self._send_json(
+                    {"detail": output or "Serviço OAK-D terminou sem confirmar success=true."},
+                    503,
+                )
             return
 
         self._send_json({"detail": "Rota POST nao encontrada."}, 404)

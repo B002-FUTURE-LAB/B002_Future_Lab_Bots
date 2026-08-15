@@ -12,21 +12,25 @@ export default function CameraVisionPanel({
   onTogglePump,
   onToggleYoloTest,
   onRestartCamera,
-  onStopCamera,
-  onLaunchYoloWindow
+  onStopCamera
 }) {
   const { t } = useLanguage();
   const [streamError, setStreamError] = useState(false);
-  const [streamKey, setStreamKey] = useState(Date.now());
+  const [streamKey, setStreamKey] = useState(0);
+  const [streamHost, setStreamHost] = useState('localhost');
   const [restarting, setRestarting] = useState(false);
   const [stopping, setStopping] = useState(false);
   const retryTimers = useRef([]);
 
-  const defaultHost = typeof window !== 'undefined' ? window.location.hostname : 'localhost';
-  const rawUrl = streamUrl || `http://${defaultHost}:8080/stream.mjpg`;
+  const rawUrl = streamUrl || `http://${streamHost}:8080/stream.mjpg`;
   const liveUrl = `${rawUrl}${rawUrl.includes('?') ? '&' : '?'}t=${streamKey}`;
 
   const isFresh = Boolean(lastYolo && lastYolo.class && lastYolo.class !== 'none');
+
+  useEffect(() => {
+    setStreamHost(window.location.hostname || 'localhost');
+    setStreamKey(Date.now());
+  }, []);
 
   useEffect(() => {
     if (streamError && !restarting && !stopping && cameraOnline) {
@@ -206,15 +210,6 @@ export default function CameraVisionPanel({
             <Power className="w-3.5 h-3.5" />
             {pumpActive ? t('turnOffPump') : t('turnOnPump')}
           </button>
-
-          {onLaunchYoloWindow && (
-            <button
-              onClick={onLaunchYoloWindow}
-              className="px-3 py-1.5 bg-purple-600/30 hover:bg-purple-600 text-purple-200 border border-purple-500/40 text-xs font-bold rounded-lg flex items-center gap-1.5 btn-hover"
-            >
-              👁️ {t('opencvWindow')}
-            </button>
-          )}
 
           <a
             href={rawUrl}

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Play, Pause, AlertOctagon, RefreshCw, Sliders, CheckCircle, Flame, Cpu, Loader2, PauseCircle, Check, X } from 'lucide-react';
+import { Play, Pause, AlertOctagon, RefreshCw, Sliders, CheckCircle, Flame, Cpu, Loader2, PauseCircle, Check, X, Workflow, Camera } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 
 export default function CellControlPanel({
@@ -7,6 +7,9 @@ export default function CellControlPanel({
   onUpdateMode,
   onAutoStart,
   onAutoStop,
+  onStartIntegratedReal,
+  onStopIntegratedReal,
+  onConfirmIntegratedDetection,
   onManualStartScan,
   onManualAuthorizePick,
   onManualAuthorizePlace,
@@ -64,6 +67,7 @@ export default function CellControlPanel({
   const status = cellState?.status || 'idle';
   const detectedItem = cellState?.yolo_detected_item;
   const handshake = cellState?.handshake || {};
+  const integratedReal = cellState?.integrated_real || {};
   const handshakePhaseLabels = {
     idle: 'Aguardando teste',
     preflight_passed: 'Pré-validação concluída',
@@ -84,6 +88,23 @@ export default function CellControlPanel({
     && tbProcesses?.mission_manager?.instances === 1
     && tbProcesses?.mission_manager?.visible_on_ros_graph === true;
   const turtleReady = tbNavReadiness?.mission_ready === true;
+  const integratedActive = integratedReal.active === true;
+  const integratedPhaseLabels = {
+    idle: t('integratedRealIdle'),
+    preflight_passed: t('integratedRealPreflight'),
+    starting_moveit: t('integratedRealMoveit'),
+    starting_3d: t('integratedReal3d'),
+    starting_yolo: t('integratedRealYoloStarting'),
+    moving_scan: t('integratedRealScan'),
+    waiting_clear_view: t('integratedRealWaitingClear'),
+    waiting_real_yolo: t('integratedRealWaitingYolo'),
+    waiting_detection_confirmation: t('integratedRealWaitingConfirmation'),
+    real_yolo_confirmed: t('integratedRealYoloConfirmed'),
+    stopping: t('integratedRealStopping'),
+    stopped: t('integratedRealStopped'),
+    completed: t('integratedRealCompleted'),
+    failed: t('integratedRealFailed')
+  };
 
   // Lógica dinâmica: Se o modo manual estiver ATIVO (ou se um ciclo estiver rodando), o botão vira "INTERROMPER"
   const isManualActive = mode === 'manual';
@@ -113,6 +134,102 @@ export default function CellControlPanel({
             {t('modeBadge')} {mode.toUpperCase()}
           </span>
         </div>
+      </div>
+
+      {/* Operação Integrada Real — visualização + YOLO + handshake + delivery */}
+      <div className="p-5 bg-gradient-to-br from-cyan-950/70 via-slate-950/80 to-violet-950/60 border border-cyan-500/50 rounded-2xl space-y-4 shadow-xl shadow-cyan-950/30">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 border-b border-cyan-500/25 pb-3">
+          <div className="flex items-start gap-3">
+            <div className="p-2.5 rounded-xl bg-cyan-500/15 border border-cyan-400/30">
+              <Workflow className="w-6 h-6 text-cyan-300" />
+            </div>
+            <div>
+              <h3 className="text-base font-black text-cyan-100">{t('integratedRealTitle')}</h3>
+              <p className="text-xs text-slate-300 mt-1 max-w-3xl leading-relaxed">
+                {t('integratedRealDescription')}
+              </p>
+            </div>
+          </div>
+          <span className={`px-3 py-1.5 rounded-full text-xs font-black border ${
+            integratedActive
+              ? 'bg-cyan-500/20 text-cyan-200 border-cyan-400/50 animate-pulse'
+              : integratedReal.phase === 'completed'
+                ? 'bg-emerald-500/20 text-emerald-300 border-emerald-400/40'
+                : integratedReal.phase === 'failed'
+                  ? 'bg-red-500/20 text-red-300 border-red-400/40'
+                  : 'bg-slate-800 text-slate-300 border-slate-700'
+          }`}>
+            {integratedPhaseLabels[integratedReal.phase] || integratedReal.phase || t('integratedRealIdle')}
+          </span>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-2 text-[11px]">
+          {[
+            ['planning_pc', 'MoveIt + RViz'],
+            ['integrated_3d', t('integratedReal3dShort')],
+            ['cobot_yolo', t('integratedRealYoloHeadless')]
+          ].map(([key, label]) => {
+            const evidence = integratedReal.visuals?.[key];
+            const ready = evidence?.ready === true || evidence?.first_frame_confirmed === true;
+            return (
+              <div key={key} className={`p-2.5 rounded-lg border flex items-center justify-between gap-2 ${
+                ready ? 'bg-emerald-950/40 border-emerald-500/40 text-emerald-300' : 'bg-slate-900/70 border-slate-700 text-slate-400'
+              }`}>
+                <span className="font-bold truncate">{label}</span>
+                <span className={`w-2.5 h-2.5 rounded-full shrink-0 ${ready ? 'bg-emerald-400' : 'bg-slate-600'}`}></span>
+              </div>
+            );
+          })}
+        </div>
+
+        {integratedReal.phase === 'waiting_detection_confirmation' && integratedReal.candidate && (
+          <div className="p-4 rounded-xl border-2 border-amber-400/70 bg-amber-950/50 space-y-3">
+            <p className="text-sm font-black text-amber-200">
+              {t('integratedRealCandidateTitle')}: {integratedReal.candidate.class} · {(Number(integratedReal.candidate.confidence || 0) * 100).toFixed(1)}%
+            </p>
+            <p className="text-xs text-amber-100/90 leading-relaxed">
+              {t('integratedRealConfirmWarning')}
+            </p>
+            <button
+              onClick={onConfirmIntegratedDetection}
+              className="w-full py-3.5 px-4 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 border border-amber-200 font-black text-sm transition-colors shadow-lg shadow-amber-950/50"
+            >
+              {t('integratedRealConfirmButton')}
+            </button>
+          </div>
+        )}
+
+        <div className="flex flex-col md:flex-row gap-3">
+          <button
+            onClick={integratedActive ? onStopIntegratedReal : onStartIntegratedReal}
+            disabled={!integratedActive && (isCycleRunning || !turtleReady || !managerReady)}
+            className={`flex-1 py-4 px-5 rounded-xl font-black text-sm flex items-center justify-center gap-2.5 transition-all border ${
+              integratedActive
+                ? 'bg-red-600 hover:bg-red-500 text-white border-red-400 shadow-lg shadow-red-950/50'
+                : !isCycleRunning && turtleReady && managerReady
+                  ? 'bg-gradient-to-r from-cyan-600 to-violet-600 hover:from-cyan-500 hover:to-violet-500 text-white border-cyan-400/50 shadow-lg shadow-cyan-950/50'
+                  : 'bg-slate-800 text-slate-500 border-slate-700 cursor-not-allowed'
+            }`}
+          >
+            {integratedActive ? <X className="w-5 h-5" /> : <Camera className="w-5 h-5" />}
+            {integratedActive ? t('integratedRealStopButton') : t('integratedRealStartButton')}
+          </button>
+        </div>
+
+        <p className="text-xs text-slate-400">
+          {t('integratedRealSafety')}
+        </p>
+        {integratedReal.detection && (
+          <p className="text-xs text-emerald-300 font-semibold">
+            YOLO: {integratedReal.detection.class} · {(Number(integratedReal.detection.confidence || 0) * 100).toFixed(1)}% → {integratedReal.detection.target}
+          </p>
+        )}
+        {integratedReal.candidate && !integratedReal.detection && integratedReal.phase !== 'waiting_detection_confirmation' && (
+          <p className="text-xs text-amber-300 font-semibold">
+            {t('integratedRealBlockedCandidate')}: {integratedReal.candidate.class} · {(Number(integratedReal.candidate.confidence || 0) * 100).toFixed(1)}%
+          </p>
+        )}
+        {integratedReal.error && <p className="text-xs text-red-300 font-bold">{integratedReal.error}</p>}
       </div>
 
       {/* Botões Mestre de Operação (3 Botões) */}

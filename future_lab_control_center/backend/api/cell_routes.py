@@ -44,6 +44,17 @@ cell_state = {
         "completed_at": None,
         "evidence": {},
     },
+    "integrated_real": {
+        "active": False,
+        "run_id": None,
+        "phase": "idle",
+        "error": None,
+        "started_at": None,
+        "completed_at": None,
+        "visuals": {},
+        "detection": None,
+        "candidate": None,
+    },
 }
 
 _state_lock = threading.Lock()
@@ -56,6 +67,7 @@ _abort_requested = False
 _cycle_cancel = False
 _step_pick_event = threading.Event()
 _step_place_event = threading.Event()
+_real_detection_confirm_event = threading.Event()
 
 def _check_pause_and_cancel() -> bool:
     """Verifica se há requisição de pausa (interrupção) ou cancelamento/abort."""
@@ -146,6 +158,12 @@ _HANDSHAKE_CLASSES = {
 
 def _normalize_handshake_class(item_class: str) -> tuple[str, str]:
     normalized = str(item_class or "").strip().lower()
+    # O modelo real inclui o formato da lata no sufixo (por exemplo,
+    # tin_valid_red_triangle). O destino depende da cor, não do formato.
+    if normalized.startswith("tin_valid_blue"):
+        return "tin_valid_blue", "delivery_blue"
+    if normalized.startswith("tin_valid_red"):
+        return "tin_valid_red", "delivery_red"
     result = _HANDSHAKE_CLASSES.get(normalized)
     if result is None:
         raise HTTPException(
@@ -173,9 +191,17 @@ def _merge_handshake_evidence(**evidence) -> None:
         cell_state["handshake"] = handshake
 
 
-def _handshake_preflight(item_class: str) -> dict:
-    """Portão sem movimento: só permite o teste com cada elo medido."""
-    canonical_class, target = _normalize_handshake_class(item_class)
+def _set_integrated_real(phase: str, **updates) -> None:
+    with _state_lock:
+        state = dict(cell_state.get("integrated_real") or {})
+        state.update({"phase": phase, **updates})
+        cell_state["integrated_real"] = state
+        if state.get("active"):
+            cell_state["status"] = f"integrated_{phase}"
+
+
+def _handshake_infrastructure_preflight() -> dict:
+    """Mede hardware e comunicação sem inventar uma classe de produto."""
     node = get_cobot_node()
     node.load_poses()
     required_poses = [
@@ -244,8 +270,6 @@ def _handshake_preflight(item_class: str) -> dict:
         raise HTTPException(status_code=503, detail="Mission Signal Agent não confirmou saúde.")
 
     return {
-        "canonical_class": canonical_class,
-        "target": target,
         "nano": {
             "mock": hardware.get("mock"),
             "gpio_ready": hardware.get("gpio_ready"),
@@ -260,6 +284,52 @@ def _handshake_preflight(item_class: str) -> dict:
         },
         "signal_bridge": bridge,
     }
+
+
+def _handshake_preflight(item_class: str) -> dict:
+    """Portão sem movimento: só permite o teste com cada elo medido."""
+    canonical_class, target = _normalize_handshake_class(item_class)
+    return {
+        "canonical_class": canonical_class,
+        "target": target,
+        **_handshake_infrastructure_preflight(),
+    }
+
+
+def _stable_real_yolo_class(
+    samples: list[dict],
+    required: int = 5,
+    min_span_sec: float = 0.8,
+    window_sec: float = 3.0,
+) -> tuple[Optional[str], Optional[str]]:
+    """Aceita somente amostras distintas, recentes e da mesma classe real."""
+    if len(samples) < required:
+        return None, None
+    newest_timestamp = max(float(sample.get("timestamp", 0.0)) for sample in samples)
+    recent = [
+        sample
+        for sample in samples
+        if newest_timestamp - float(sample.get("timestamp", 0.0)) <= window_sec
+    ]
+    if len(recent) < required:
+        return None, None
+    timestamps = [float(sample.get("timestamp", 0.0)) for sample in recent]
+    span = max(timestamps) - min(timestamps)
+    if (
+        len(set(timestamps)) < required
+        or span < min_span_sec
+        or span > window_sec
+    ):
+        return None, None
+    normalized = []
+    for sample in recent:
+        try:
+            normalized.append(_normalize_handshake_class(sample.get("class", "")))
+        except HTTPException:
+            return None, None
+    if len({item[0] for item in normalized}) != 1:
+        return None, None
+    return normalized[-1]
 
 
 def _goto_pose_verified_with_resume(node, pose_name: str, speed: float) -> bool:
@@ -601,7 +671,12 @@ def _run_cycle_internal(is_manual: bool = False):
         cell_state["yolo_detected_item"] = None
         cell_state["manual_authorized"] = False
 
-def _run_handshake_test_standalone(item_class: str, preflight: dict):
+def _run_handshake_test_standalone(
+    item_class: str,
+    preflight: dict,
+    real_detection: Optional[dict] = None,
+    scan_already_confirmed: bool = False,
+):
     """Executa o handshake físico com provas independentes dos dois robôs."""
     global _cycle_cancel, _abort_requested
     _cycle_cancel = False
@@ -629,14 +704,36 @@ def _run_handshake_test_standalone(item_class: str, preflight: dict):
         )
         from backend.ros2_nodes.cell_event_bridge import record_detected_class
 
-        print(f"[HANDSHAKE] 1/8 SCAN para simular YOLO: '{canonical_class}'.")
-        _set_handshake("moving_scan")
-        if not _goto_pose_verified_with_resume(node, "scan", speed):
-            raise RuntimeError("Nano não confirmou a pose SCAN.")
+        if scan_already_confirmed:
+            print("[HANDSHAKE] 1/8 Pose SCAN já confirmada pelo modo YOLO real.")
+        else:
+            print(f"[HANDSHAKE] 1/8 SCAN para simular YOLO: '{canonical_class}'.")
+            _set_handshake("moving_scan")
+            if not _goto_pose_verified_with_resume(node, "scan", speed):
+                raise RuntimeError("Nano não confirmou a pose SCAN.")
         _merge_handshake_evidence(scan_pose_measured=True)
 
         _set_handshake("yolo_detected")
-        cell_state["yolo_detected_item"] = {"class": item_class, "confidence": 0.99}
+        if real_detection is not None:
+            detected_class, detected_target = _normalize_handshake_class(
+                real_detection.get("class", "")
+            )
+            if detected_class != canonical_class or detected_target != expected_target:
+                raise RuntimeError(
+                    "Classe real medida divergiu do destino aprovado no preflight."
+                )
+            cell_state["yolo_detected_item"] = dict(real_detection)
+            _merge_handshake_evidence(yolo_real_detection=dict(real_detection))
+            print(
+                "[HANDSHAKE] YOLO REAL confirmado: "
+                f"'{detected_class}' conf={real_detection.get('confidence')}."
+            )
+        else:
+            cell_state["yolo_detected_item"] = {
+                "class": item_class,
+                "confidence": 0.99,
+                "source": "synthetic_handshake_test",
+            }
         record_detected_class(canonical_class)
 
         print("[HANDSHAKE] 2/8 Enviando classe fresca e start pelo participante ROS do host.")
@@ -784,6 +881,408 @@ def _run_handshake_test_standalone(item_class: str, preflight: dict):
         cell_state["yolo_detected_item"] = None
         cell_state["manual_authorized"] = False
 
+
+def _update_integrated_visual(name: str, evidence: dict) -> None:
+    with _state_lock:
+        integrated = dict(cell_state.get("integrated_real") or {})
+        visuals = dict(integrated.get("visuals") or {})
+        visuals[name] = evidence
+        integrated["visuals"] = visuals
+        cell_state["integrated_real"] = integrated
+
+
+def _container_process_evidence(pattern: str) -> dict:
+    """Mede processos dentro do container; saída vazia nunca vira sucesso."""
+    import subprocess
+
+    result = subprocess.run(
+        ["docker", "exec", "mycobot_ros2", "pgrep", "-f", pattern],
+        capture_output=True,
+        text=True,
+        timeout=4,
+    )
+    pids = [
+        int(line)
+        for line in result.stdout.splitlines()
+        if line.strip().isdigit()
+    ]
+    return {"running": result.returncode == 0 and bool(pids), "pids": pids}
+
+
+def _wait_for_planning_pc(timeout_sec: float = 70.0) -> dict:
+    deadline = time.monotonic() + timeout_sec
+    last = {}
+    while time.monotonic() < deadline:
+        try:
+            move_group = _container_process_evidence("move_group")
+            rviz = _container_process_evidence("rviz2")
+            last = {"move_group": move_group, "rviz": rviz}
+            if move_group["running"] and rviz["running"]:
+                return {"ready": True, **last}
+        except Exception as exc:
+            last = {"error": str(exc)}
+        time.sleep(1.0)
+    return {"ready": False, **last}
+
+
+def _wait_for_host_process(pattern: str, timeout_sec: float = 30.0) -> dict:
+    import subprocess
+
+    deadline = time.monotonic() + timeout_sec
+    while time.monotonic() < deadline:
+        result = subprocess.run(
+            ["pgrep", "-f", pattern],
+            capture_output=True,
+            text=True,
+            timeout=3,
+        )
+        pids = [
+            int(line)
+            for line in result.stdout.splitlines()
+            if line.strip().isdigit()
+        ]
+        if result.returncode == 0 and pids:
+            return {"ready": True, "pids": pids}
+        time.sleep(0.5)
+    return {"ready": False, "pids": []}
+
+
+def _require_integrated_running() -> None:
+    if not _check_pause_and_cancel():
+        raise RuntimeError("Operação integrada interrompida pelo operador.")
+
+
+def _wait_for_handshake_infrastructure(timeout_sec: float = 35.0) -> dict:
+    """Aguarda a ponte Nano voltar após o script do Planning PC reiniciá-la."""
+    deadline = time.monotonic() + timeout_sec
+    last_error = "ponte ainda indisponível"
+    while time.monotonic() < deadline:
+        _require_integrated_running()
+        try:
+            return _handshake_infrastructure_preflight()
+        except HTTPException as exc:
+            last_error = str(exc.detail)
+        except Exception as exc:
+            last_error = str(exc)
+        time.sleep(1.0)
+    raise RuntimeError(
+        f"Ponte Nano não voltou mensurável após o Planning PC: {last_error}"
+    )
+
+
+def _stop_integrated_camera_processes() -> dict:
+    """Fecha apenas o detector YOLO headless criado por este modo."""
+    evidence = {}
+    try:
+        from backend.api.cobot_routes import stop_yolo_test_process
+
+        stop_yolo_test_process()
+        evidence["yolo_process_stopped"] = True
+    except Exception as exc:
+        evidence["yolo_stop_error"] = str(exc)
+    return evidence
+
+
+def _prepare_integrated_visuals(conf: float) -> dict:
+    """Inicializa e mede MoveIt, RViz integrado e YOLO real headless."""
+    from backend.api.cobot_routes import (
+        is_yolo_process_alive,
+        start_yolo_test_process,
+    )
+    from backend.api.health_routes import (
+        check_http_stream,
+        get_rviz_launch_status,
+        launch_rviz,
+        restart_camera_stream,
+    )
+    from backend.api.turtlebot_routes import launch_integrated_3d
+    from backend.config.settings import get_settings
+
+    evidence = {}
+    _require_integrated_running()
+    _set_integrated_real("starting_moveit")
+    evidence["planning_request"] = launch_rviz()
+    planning_run_id = evidence["planning_request"].get("run_id")
+    launch_deadline = time.monotonic() + 100.0
+    planning_launch = {}
+    while time.monotonic() < launch_deadline:
+        _require_integrated_running()
+        planning_launch = get_rviz_launch_status(planning_run_id)
+        if planning_launch.get("completed"):
+            break
+        time.sleep(0.5)
+    evidence["planning_launch"] = planning_launch
+    _update_integrated_visual("planning_launch", planning_launch)
+    if planning_launch.get("success") is not True:
+        raise RuntimeError(
+            planning_launch.get("error")
+            or "Lançador do Planning PC não concluiu com sucesso no prazo."
+        )
+    planning = _wait_for_planning_pc()
+    evidence["planning_pc"] = planning
+    _update_integrated_visual("planning_pc", planning)
+    if planning.get("ready") is not True:
+        raise RuntimeError("MoveIt e RViz do braço não ficaram ativos no prazo.")
+    _require_integrated_running()
+
+    # RUN_PLANNING_PC reinicia a ponte física; por isso o hardware é medido de
+    # novo antes que qualquer movimento seja permitido.
+    hardware_after_planning = _wait_for_handshake_infrastructure()
+    evidence["hardware_after_planning"] = hardware_after_planning
+    _update_integrated_visual("hardware_after_planning", hardware_after_planning)
+
+    _set_integrated_real("starting_3d")
+    evidence["integrated_3d_request"] = launch_integrated_3d()
+    integrated_3d = _wait_for_host_process("rviz2_cobot_tb4_3d")
+    evidence["integrated_3d"] = integrated_3d
+    _update_integrated_visual("integrated_3d", integrated_3d)
+    if integrated_3d.get("ready") is not True:
+        raise RuntimeError("RViz 3D integrado não ficou ativo no prazo.")
+    _require_integrated_running()
+
+    _set_integrated_real("starting_yolo")
+    camera_url = get_settings().CAMERA_STREAM_URL
+    if not check_http_stream(camera_url, timeout_sec=1.0):
+        restart_camera_stream()
+        camera_deadline = time.monotonic() + 25.0
+        while time.monotonic() < camera_deadline:
+            if check_http_stream(camera_url, timeout_sec=1.0):
+                break
+            time.sleep(1.0)
+    cobot_stream = check_http_stream(camera_url, timeout_sec=1.0)
+    evidence["cobot_camera"] = {"ready": cobot_stream, "url": camera_url}
+    _update_integrated_visual("cobot_camera", evidence["cobot_camera"])
+    if not cobot_stream:
+        raise RuntimeError("Stream da câmera do cobot não ficou disponível.")
+    _require_integrated_running()
+
+    if not start_yolo_test_process(conf=conf, headless=True):
+        raise RuntimeError("Processo YOLO real headless não iniciou.")
+    yolo_deadline = time.monotonic() + 35.0
+    yolo_ready = False
+    yolo_error = None
+    while time.monotonic() < yolo_deadline:
+        log_text = ""
+        try:
+            with open("/tmp/yolo_test.log", "r", encoding="utf-8", errors="replace") as log_file:
+                log_text = log_file.read()
+        except OSError:
+            pass
+        if is_yolo_process_alive() and "Câmera aberta." in log_text:
+            yolo_ready = True
+            break
+        if not is_yolo_process_alive():
+            yolo_error = "Processo YOLO terminou antes de abrir a câmera."
+            break
+        time.sleep(0.5)
+    evidence["cobot_yolo"] = {
+        "ready": yolo_ready,
+        "process_alive": is_yolo_process_alive(),
+        "headless": True,
+        "error": yolo_error,
+    }
+    _update_integrated_visual("cobot_yolo", evidence["cobot_yolo"])
+    if not yolo_ready:
+        raise RuntimeError(yolo_error or "YOLO headless não confirmou a câmera do cobot.")
+    _require_integrated_running()
+
+    return evidence
+
+
+def _run_integrated_real_mode(run_id: str) -> None:
+    """Arma visão real e executa uma missão somente após classificação medida."""
+    global _cycle_cancel, _abort_requested
+    node = get_cobot_node()
+    scan_confirmed = False
+    handshake_started = False
+    try:
+        conf = max(0.10, min(0.99, float(cell_state.get("yolo_conf", 0.60))))
+        visuals = _prepare_integrated_visuals(conf)
+        _set_integrated_real("moving_scan", visuals=visuals)
+        if not _goto_pose_verified_with_resume(
+            node,
+            "scan",
+            max(0.10, min(1.0, float(cell_state.get("arm_speed", 0.50)))),
+        ):
+            raise RuntimeError("Nano não confirmou SCAN no modo integrado real.")
+        scan_confirmed = True
+
+        node.clear_yolo_state()
+        _set_integrated_real("waiting_clear_view", candidate=None)
+        clear_since = None
+        last_candidate = None
+        while _check_pause_and_cancel():
+            yolo = node.get_last_yolo_msg()
+            confidence = float((yolo or {}).get("confidence", 0.0))
+            if yolo and confidence >= conf:
+                clear_since = None
+                candidate = {
+                    "class": yolo.get("class"),
+                    "confidence": confidence,
+                    "blocked_reason": "campo visual ainda não ficou limpo",
+                }
+                candidate_marker = (candidate["class"], round(confidence, 2))
+                if candidate_marker != last_candidate:
+                    _set_integrated_real("waiting_clear_view", candidate=candidate)
+                    last_candidate = candidate_marker
+            else:
+                if clear_since is None:
+                    clear_since = time.monotonic()
+                if time.monotonic() - clear_since >= 2.5:
+                    break
+            time.sleep(0.1)
+        _require_integrated_running()
+        _update_integrated_visual(
+            "yolo_gate",
+            {"ready": True, "clear_view_confirmed_sec": 2.5},
+        )
+        _set_integrated_real("waiting_real_yolo", candidate=None)
+        samples = []
+        last_timestamp = None
+        while _check_pause_and_cancel():
+            yolo = node.get_last_yolo_msg()
+            if yolo:
+                timestamp = float(yolo.get("timestamp", 0.0))
+                confidence = float(yolo.get("confidence", 0.0))
+                if timestamp != last_timestamp and confidence >= conf:
+                    last_timestamp = timestamp
+                    sample = dict(yolo)
+                    sample["source"] = "real_yolo_camera"
+                    samples.append(sample)
+                    samples = samples[-120:]
+                    canonical_class, target = _stable_real_yolo_class(samples)
+                    if canonical_class and target:
+                        candidate = {
+                            **sample,
+                            "class": canonical_class,
+                            "raw_class": sample.get("class"),
+                            "target": target,
+                            "threshold": conf,
+                            "distinct_samples": 5,
+                            "sample_span_min_sec": 0.8,
+                        }
+                        _real_detection_confirm_event.clear()
+                        _set_integrated_real(
+                            "waiting_detection_confirmation",
+                            candidate=candidate,
+                            detection=None,
+                        )
+
+                        while _check_pause_and_cancel():
+                            if not _real_detection_confirm_event.wait(timeout=0.1):
+                                continue
+                            _real_detection_confirm_event.clear()
+                            confirmed = node.get_last_yolo_msg()
+                            confirmed_confidence = float(
+                                (confirmed or {}).get("confidence", 0.0)
+                            )
+                            confirmed_age = time.time() - float(
+                                (confirmed or {}).get("timestamp", 0.0)
+                            )
+                            try:
+                                confirmed_class, confirmed_target = (
+                                    _normalize_handshake_class(
+                                        (confirmed or {}).get("class", "")
+                                    )
+                                )
+                            except HTTPException:
+                                confirmed_class, confirmed_target = None, None
+                            if not (
+                                confirmed
+                                and confirmed_age <= 1.0
+                                and confirmed_confidence >= conf
+                                and confirmed_class == canonical_class
+                                and confirmed_target == target
+                            ):
+                                candidate["blocked_reason"] = (
+                                    "detecção mudou ou ficou obsoleta antes da confirmação"
+                                )
+                                _set_integrated_real(
+                                    "waiting_detection_confirmation",
+                                    candidate=candidate,
+                                )
+                                continue
+
+                            detection = {
+                                **candidate,
+                                "confirmation": "operator_dashboard",
+                                "confirmed_at": time.time(),
+                                "confirmation_frame_age_sec": confirmed_age,
+                                "confidence": confirmed_confidence,
+                            }
+                            break
+                        _require_integrated_running()
+                        _set_integrated_real(
+                            "real_yolo_confirmed",
+                            candidate=None,
+                            detection=detection,
+                        )
+                        preflight = _handshake_preflight(canonical_class)
+                        with _state_lock:
+                            cell_state["handshake"] = {
+                                "active": True,
+                                "run_id": run_id,
+                                "phase": "yolo_detected",
+                                "item_class": canonical_class,
+                                "canonical_class": canonical_class,
+                                "target": target,
+                                "success": None,
+                                "error": None,
+                                "started_at": time.time(),
+                                "completed_at": None,
+                                "evidence": {
+                                    "preflight": preflight,
+                                    "yolo_real_detection": detection,
+                                },
+                            }
+                        handshake_started = True
+                        _run_handshake_test_standalone(
+                            canonical_class,
+                            preflight,
+                            real_detection=detection,
+                            scan_already_confirmed=True,
+                        )
+                        handshake = cell_state.get("handshake") or {}
+                        if handshake.get("success") is True:
+                            _set_integrated_real(
+                                "completed",
+                                active=False,
+                                error=None,
+                                completed_at=time.time(),
+                            )
+                        else:
+                            _set_integrated_real(
+                                "failed",
+                                active=False,
+                                error=handshake.get("error") or "Handshake real falhou.",
+                                completed_at=time.time(),
+                            )
+                        return
+            time.sleep(0.1)
+        raise RuntimeError("Operação integrada interrompida pelo operador.")
+    except Exception as exc:
+        detail = str(exc)
+        if scan_confirmed and not handshake_started:
+            pump_off = node.set_pump_verified(False)
+            home = node.goto_pose_verified("home", 0.15)
+            _update_integrated_visual(
+                "safe_stop",
+                {"pump_off_measured": pump_off, "home_measured": home},
+            )
+        _set_integrated_real(
+            "stopped" if _cycle_cancel else "failed",
+            active=False,
+            error=detail,
+            completed_at=time.time(),
+        )
+    finally:
+        yolo_stop = _stop_integrated_camera_processes()
+        _update_integrated_visual("yolo_stop", yolo_stop)
+        _real_detection_confirm_event.clear()
+        cell_state["auto_running"] = False
+        if not (cell_state.get("handshake") or {}).get("active"):
+            cell_state["status"] = "idle"
+
 def _run_auto_loop():
     """Worker do modo automático contínuo com verificação de interrupção e cooldown."""
     global _cycle_cancel, _abort_requested
@@ -855,6 +1354,126 @@ def set_cell_mode(payload: CellModeSchema):
 
 class TestHandshakeSchema(BaseModel):
     item_class: str = "tin_valid_blue_square"  # "tin_valid_blue_square" ou "tin_valid_red_square"
+
+
+@router.post("/integrated_real/preflight")
+def preflight_integrated_real():
+    """Valida robôs e comunicação sem mover ou pressupor uma classe."""
+    if cell_state.get("panic_locked"):
+        raise HTTPException(status_code=423, detail="Célula bloqueada em Pânico.")
+    if _cycle_thread is not None and _cycle_thread.is_alive():
+        raise HTTPException(status_code=409, detail="Há um ciclo em execução.")
+    return {
+        "status": "ready",
+        "movement_commanded": False,
+        "class_assumed": False,
+        "preflight": _handshake_infrastructure_preflight(),
+    }
+
+
+@router.post("/integrated_real/start")
+def start_integrated_real():
+    """Inicia visualizações e arma um ciclo para classificação YOLO real."""
+    global _cycle_thread, _cycle_cancel, _abort_requested, _pause_event
+    if cell_state.get("panic_locked"):
+        raise HTTPException(status_code=423, detail="Célula bloqueada em Pânico.")
+    if _cycle_thread is not None and _cycle_thread.is_alive():
+        raise HTTPException(
+            status_code=409,
+            detail="Já existe um ciclo ou operação integrada em execução.",
+        )
+
+    preflight = _handshake_infrastructure_preflight()
+    run_id = uuid.uuid4().hex[:12]
+    _cycle_cancel = False
+    _abort_requested = False
+    _real_detection_confirm_event.clear()
+    _pause_event.set()
+    cell_state["mode"] = "auto"
+    cell_state["auto_running"] = True
+    with _state_lock:
+        cell_state["integrated_real"] = {
+            "active": True,
+            "run_id": run_id,
+            "phase": "preflight_passed",
+            "error": None,
+            "started_at": time.time(),
+            "completed_at": None,
+            "visuals": {"preflight": preflight},
+            "detection": None,
+            "candidate": None,
+        }
+        cell_state["status"] = "integrated_preflight_passed"
+
+    _cycle_thread = threading.Thread(
+        target=_run_integrated_real_mode,
+        kwargs={"run_id": run_id},
+        daemon=True,
+    )
+    _cycle_thread.start()
+    return {
+        "status": "started",
+        "run_id": run_id,
+        "movement_commanded": False,
+        "message": (
+            "Operação integrada iniciada. As visualizações serão confirmadas "
+            "antes de o cobot ir para SCAN; o Turtle só se moverá após YOLO real "
+            "estável e confirmação explícita do operador."
+        ),
+        "preflight": preflight,
+    }
+
+
+@router.post("/integrated_real/confirm_detection")
+def confirm_integrated_real_detection():
+    """Autoriza pick/delivery somente para o candidato medido e ainda visível."""
+    with _state_lock:
+        integrated = dict(cell_state.get("integrated_real") or {})
+        if integrated.get("active") is not True:
+            raise HTTPException(status_code=409, detail="Operação integrada não está ativa.")
+        if integrated.get("phase") != "waiting_detection_confirmation":
+            raise HTTPException(
+                status_code=409,
+                detail="Ainda não existe uma detecção estável aguardando confirmação.",
+            )
+        candidate = dict(integrated.get("candidate") or {})
+        if not candidate.get("class") or not candidate.get("target"):
+            raise HTTPException(status_code=409, detail="Candidato YOLO não mensurável.")
+    _real_detection_confirm_event.set()
+    return {
+        "status": "confirmation_requested",
+        "movement_commanded": False,
+        "candidate": candidate,
+        "message": (
+            "Confirmação recebida. O worker ainda verificará uma imagem fresca "
+            "da mesma classe antes de liberar pick e delivery."
+        ),
+    }
+
+
+@router.post("/integrated_real/stop")
+def stop_integrated_real():
+    """Solicita parada; o worker mede bomba OFF/HOME ou executa rollback."""
+    global _cycle_cancel
+    _cycle_cancel = True
+    cell_state["auto_running"] = False
+    integrated = cell_state.get("integrated_real") or {}
+    if integrated.get("active"):
+        _set_integrated_real("stopping")
+
+    stop_evidence = _stop_integrated_camera_processes()
+    if (cell_state.get("handshake") or {}).get("active"):
+        try:
+            from backend.api.turtlebot_routes import stop_mission
+            stop_evidence["mission_stop"] = stop_mission()
+        except Exception as exc:
+            stop_evidence["mission_stop_error"] = str(exc)
+    _update_integrated_visual("stop_request", stop_evidence)
+    return {
+        "status": "stopping",
+        "message": "Parada solicitada; aguarde HOME/dock serem medidos no estado.",
+        "evidence": stop_evidence,
+    }
 
 
 @router.post("/test_handshake/preflight")

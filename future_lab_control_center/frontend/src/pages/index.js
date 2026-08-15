@@ -145,6 +145,57 @@ export default function Dashboard() {
     refreshStatus();
   };
 
+  const handleStartIntegratedReal = async () => {
+    const apiBase = getApiBase();
+    const { ok, data } = await safeApiCall(
+      `${apiBase}/cell/integrated_real/start`,
+      { method: 'POST' },
+      t('integratedRealTitle')
+    );
+    if (ok) {
+      setNotification({
+        type: 'success',
+        title: t('integratedRealStartedTitle'),
+        message: data.message
+      });
+    }
+    refreshStatus();
+  };
+
+  const handleStopIntegratedReal = async () => {
+    const apiBase = getApiBase();
+    const { ok, data } = await safeApiCall(
+      `${apiBase}/cell/integrated_real/stop`,
+      { method: 'POST' },
+      t('integratedRealStopTitle')
+    );
+    if (ok) {
+      setNotification({
+        type: 'warning',
+        title: t('integratedRealStopTitle'),
+        message: data.message
+      });
+    }
+    refreshStatus();
+  };
+
+  const handleConfirmIntegratedDetection = async () => {
+    const apiBase = getApiBase();
+    const { ok, data } = await safeApiCall(
+      `${apiBase}/cell/integrated_real/confirm_detection`,
+      { method: 'POST' },
+      t('integratedRealConfirmationTitle')
+    );
+    if (ok) {
+      setNotification({
+        type: 'warning',
+        title: t('integratedRealConfirmationTitle'),
+        message: data.message
+      });
+    }
+    refreshStatus();
+  };
+
   const handleManualStartScan = async () => {
     const apiBase = getApiBase();
     await safeApiCall(`${apiBase}/cell/manual/start_scan`, { method: 'POST' }, t('manualMoveScanTitle'));
@@ -337,18 +388,6 @@ export default function Dashboard() {
         type: 'info',
         title: t('rviz3DStartedTitle'),
         message: data.message || t('rviz3DStartedMsg')
-      });
-    }
-  };
-
-  const handleLaunchYoloWindow = async () => {
-    const apiBase = getApiBase();
-    const { ok, data } = await safeApiCall(`${apiBase}/cobot/launch_yolo_window`, { method: 'POST' }, t('opencvYoloTitle'));
-    if (ok) {
-      setNotification({
-        type: 'info',
-        title: t('opencvYoloStartedTitle'),
-        message: data.message || t('opencvYoloStartedMsg')
       });
     }
   };
@@ -717,6 +756,9 @@ export default function Dashboard() {
           onUpdateMode={handleUpdateMode}
           onAutoStart={handleAutoStart}
           onAutoStop={handleAutoStop}
+          onStartIntegratedReal={handleStartIntegratedReal}
+          onStopIntegratedReal={handleStopIntegratedReal}
+          onConfirmIntegratedDetection={handleConfirmIntegratedDetection}
           onManualStartScan={handleManualStartScan}
           onManualAuthorizePick={handleManualAuthorizePick}
           onManualAuthorizePlace={handleManualAuthorizePlace}
@@ -755,7 +797,6 @@ export default function Dashboard() {
             onToggleYoloTest={handleToggleYoloTest}
             onRestartCamera={handleRestartCamera}
             onStopCamera={handleStopCamera}
-            onLaunchYoloWindow={handleLaunchYoloWindow}
           />
 
           <TeachModePanel

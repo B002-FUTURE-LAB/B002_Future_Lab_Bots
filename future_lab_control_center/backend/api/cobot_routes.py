@@ -68,14 +68,36 @@ def start_yolo_test_process(conf: float = 0.60, headless: bool = True) -> bool:
                     _yolo_log_file.close()
                 except Exception:
                     pass
-            _yolo_log_file = open("/tmp/yolo_test.log", "a")
+            _yolo_log_file = open("/tmp/yolo_test.log", "w")
             from backend.config.settings import get_settings
             stream_url = get_settings().CAMERA_STREAM_URL
-            inf_conf = min(float(conf), 0.35)
-            shell_cmd = f"source /opt/ros/jazzy/setup.bash && export ROS_DOMAIN_ID=0 && export RMW_IMPLEMENTATION=rmw_fastrtps_cpp && python3 -u {target_script} --headless --conf {inf_conf} --url {stream_url}"
-            yolo_process = subprocess.Popen(["bash", "-c", shell_cmd], stdout=_yolo_log_file, stderr=_yolo_log_file)
+            inf_conf = max(0.10, min(0.99, float(conf)))
+            gui_arg = "" if not headless else "--headless"
+            if not headless:
+                subprocess.run(
+                    "xhost +local:root 2>/dev/null || xhost + 2>/dev/null || true",
+                    shell=True,
+                    timeout=3,
+                )
+            shell_cmd = (
+                "source /opt/ros/jazzy/setup.bash && "
+                "export ROS_DOMAIN_ID=0 && "
+                "export RMW_IMPLEMENTATION=rmw_fastrtps_cpp && "
+                "export DISPLAY=${DISPLAY:-:0} && "
+                f"python3 -u {target_script} {gui_arg} "
+                f"--conf {inf_conf} --url {stream_url}"
+            )
+            yolo_process = subprocess.Popen(
+                ["bash", "-c", shell_cmd],
+                stdout=_yolo_log_file,
+                stderr=_yolo_log_file,
+            )
             yolo_test_active = True
-            print(f"[INFO] Processo cam_yolo_test.py iniciado com SUCESSO com rclpy DDS ativo (PID {yolo_process.pid}) na URL {stream_url}")
+            mode = "GUI OpenCV" if not headless else "headless"
+            print(
+                f"[INFO] Processo cam_yolo_test.py iniciado em modo {mode} "
+                f"com rclpy DDS ativo (PID {yolo_process.pid}) na URL {stream_url}"
+            )
             return True
         except Exception as e:
             print(f"[WARN] Erro ao disparar cam_yolo_test.py: {e}")
@@ -404,42 +426,3 @@ def playback_trajectory():
         "playback_status": "running",
         "message": "Playback da trajetória iniciado com sucesso!"
     }
-
-@router.post("/launch_yolo_window")
-def launch_yolo_window():
-    """Abre uma janela gráfica nativa OpenCV no monitor do PC Host com visões YOLO, bounding boxes e FPS ao vivo."""
-    from backend.api.cell_routes import cell_state
-    from backend.config.settings import get_settings
-    import os
-    from pathlib import Path
-    conf = float(cell_state.get("yolo_conf", 0.60))
-    nano_ip = get_settings().JETSON_NANO_IP
-    try:
-        candidate_paths = [
-            Path("/cobot/mycobot_docker/RUN_CAMERA_TEST.sh"),
-            Path("/app/cobot/mycobot_docker/RUN_CAMERA_TEST.sh"),
-            Path("/home/future-lab/B002_Future_Lab_Bots/cobot/mycobot_docker/RUN_CAMERA_TEST.sh")
-        ]
-        script_path = next((p for p in candidate_paths if p.exists()), candidate_paths[0])
-        print(f"[INFO] Disparando janela OpenCV GUI ({script_path} --nano --gui --conf {conf})...")
-        
-        def _run_gui():
-            try:
-                subprocess.run("xhost +local:root 2>/dev/null || xhost + 2>/dev/null || true", shell=True, timeout=3)
-                env = os.environ.copy()
-                env["JETSON_NANO_IP"] = nano_ip
-                env["DISPLAY"] = env.get("DISPLAY", ":0")
-                subprocess.run(f"bash {script_path} --nano --gui --conf {conf}", shell=True, env=env)
-            except Exception as ex:
-                print(f"[WARN] Erro no worker OpenCV GUI: {ex}")
-                
-        t = threading.Thread(target=_run_gui, daemon=True)
-        t.start()
-        
-        return {
-            "status": "success",
-            "message": "Janela gráfica OpenCV do YOLO disparada no monitor do PC Host com sucesso!"
-        }
-    except Exception as e:
-        print(f"[WARN] Erro ao disparar janela OpenCV do YOLO: {e}")
-        raise HTTPException(status_code=500, detail=f"Falha ao abrir janela OpenCV: {e}")

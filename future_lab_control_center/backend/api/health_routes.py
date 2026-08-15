@@ -12,6 +12,32 @@ from backend.config.settings import get_settings
 
 router = APIRouter(prefix="/api/v1/health", tags=["Health Check"])
 
+_rviz_launch_lock = threading.Lock()
+_rviz_launch_state = {
+    "run_id": None,
+    "active": False,
+    "completed": False,
+    "success": None,
+    "returncode": None,
+    "error": None,
+    "stdout": "",
+    "stderr": "",
+}
+
+
+def get_rviz_launch_status(run_id: str | None = None) -> dict:
+    with _rviz_launch_lock:
+        state = dict(_rviz_launch_state)
+    if run_id is not None and state.get("run_id") != run_id:
+        return {
+            "run_id": run_id,
+            "active": False,
+            "completed": True,
+            "success": False,
+            "error": "A geração solicitada do Planning PC foi substituída.",
+        }
+    return state
+
 def ping_host(ip: str, timeout_sec: int = 1) -> bool:
     """Executa um ping rápido para verificar presença do IP na rede."""
     if not ip or ip in ["127.0.0.1", "localhost"]:
@@ -267,23 +293,73 @@ def launch_rviz():
         ]
         script_path = next((p for p in candidate_paths if p.exists()), candidate_paths[0])
         print(f"[INFO] Executando script mestre {script_path} para lançar RViz 2 / MoveIt no PC Host...")
+        with _rviz_launch_lock:
+            if _rviz_launch_state.get("active"):
+                return {
+                    "status": "starting",
+                    "ready": False,
+                    "run_id": _rviz_launch_state.get("run_id"),
+                    "message": "A geração atual do Planning PC ainda está iniciando.",
+                }
+            run_id = f"planning-{time.time_ns()}"
+            _rviz_launch_state.update(
+                {
+                    "run_id": run_id,
+                    "active": True,
+                    "completed": False,
+                    "success": None,
+                    "returncode": None,
+                    "error": None,
+                    "stdout": "",
+                    "stderr": "",
+                }
+            )
         
         def _run_script():
             try:
-                res = subprocess.run(f"bash {script_path}", shell=True, capture_output=True, text=True, timeout=40)
+                res = subprocess.run(
+                    ["bash", str(script_path)],
+                    capture_output=True,
+                    text=True,
+                    timeout=90,
+                )
+                with _rviz_launch_lock:
+                    _rviz_launch_state.update(
+                        {
+                            "active": False,
+                            "completed": True,
+                            "success": res.returncode == 0,
+                            "returncode": res.returncode,
+                            "error": None if res.returncode == 0 else "RUN_PLANNING_PC.sh falhou.",
+                            "stdout": res.stdout[-8000:],
+                            "stderr": res.stderr[-8000:],
+                        }
+                    )
                 print(f"[INFO] RUN_PLANNING_PC.sh resultado: returncode={res.returncode}\nstdout={res.stdout}\nstderr={res.stderr}")
             except Exception as ex:
+                with _rviz_launch_lock:
+                    _rviz_launch_state.update(
+                        {
+                            "active": False,
+                            "completed": True,
+                            "success": False,
+                            "error": str(ex),
+                        }
+                    )
                 print(f"[WARN] Erro ao executar RUN_PLANNING_PC.sh: {ex}")
                 
         t = threading.Thread(target=_run_script, daemon=True)
         t.start()
         
         return {
-            "status": "success",
-            "message": "Script RUN_PLANNING_PC.sh disparado! O RViz 2 e o MoveIt serão abertos na tela do PC Host."
+            "status": "starting",
+            "ready": False,
+            "run_id": run_id,
+            "message": (
+                "Inicialização do Planning PC solicitada. A operação integrada "
+                "só continuará após medir MoveIt e RViz ativos."
+            ),
         }
     except Exception as e:
         print(f"[WARN] Erro ao disparar RUN_PLANNING_PC.sh: {e}")
         raise HTTPException(status_code=500, detail=f"Falha ao abrir RViz 2: {e}")
-
-
