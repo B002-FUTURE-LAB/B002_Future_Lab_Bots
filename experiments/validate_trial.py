@@ -6,8 +6,9 @@ from pathlib import Path
 import sys
 import yaml
 
-CORE = ["/future_lab/events", "/odom", "/tf", "/joint_states", "/dock_status"]
-REAL = ["/scan", "/battery_state", "/product_class", "/turtlebot_at_pickup",
+SMOKE = ["/future_lab/events", "/joint_states", "/dock_status"]
+REAL = ["/future_lab/events", "/odom", "/tf", "/joint_states", "/dock_status",
+        "/scan", "/battery_state", "/product_class", "/turtlebot_at_pickup",
         "/item_released_on_tb4", "/amcl_pose"]
 
 
@@ -31,7 +32,7 @@ def main():
     duration_ns = int((info.get("duration") or {}).get("nanoseconds", 0))
     if duration_ns < (2 if args.mode == "smoke" else 30) * 1_000_000_000:
         failures.append("duração gravada abaixo do mínimo")
-    required = CORE + (REAL if args.mode == "real" else [])
+    required = REAL if args.mode == "real" else SMOKE
     for topic in required:
         if topics.get(topic, 0) < 1:
             failures.append(f"tópico obrigatório sem mensagens: {topic}")

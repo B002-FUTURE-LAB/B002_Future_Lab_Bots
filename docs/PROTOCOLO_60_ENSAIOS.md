@@ -94,7 +94,7 @@ O script só anuncia `GRAVAÇÃO ATIVA` depois destes portões:
 2. telemetria do TurtleBot é fresca e ele está dockado;
 3. `mission_ready == true`;
 4. nenhum handshake/modo integrado está ativo;
-5. `/odom`, `/dock_status`, `/joint_states` e `/future_lab/events` são visíveis no DDS;
+5. `/dock_status` e `/joint_states` são visíveis no DDS; `/future_lab/events` comprova uma assinatura antes de liberar o ensaio. Na dock, `/odom`, `/scan` e TF dinâmica podem dormir e só são exigidos no bag real depois do undock;
 6. há pelo menos 10 GiB livres;
 7. o processo rosbag permaneceu vivo por três segundos.
 

@@ -89,7 +89,9 @@ fi
 available_topics="$(ros2 topic list)"
 printf '%s\n' "$available_topics" > "$trial_dir/topics_at_start.txt"
 ros2 node list > "$trial_dir/nodes_at_start.txt"
-for required in /odom /dock_status /joint_states /future_lab/events; do
+# Na dock, a Create 3 pode suspender /odom, /scan e a cadeia TF dinâmica.
+# Esses sinais são obrigatórios no bag real após o undock, não no preflight.
+for required in /dock_status /joint_states; do
   grep -Fxq "$required" <<<"$available_topics" || { echo "ERRO DDS: tópico mínimo ausente: $required"; exit 1; }
 done
 

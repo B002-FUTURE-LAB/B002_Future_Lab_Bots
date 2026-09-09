@@ -85,9 +85,34 @@ if HAS_RCLPY:
         reliability=QoSReliabilityPolicy.RELIABLE,
         durability=QoSDurabilityPolicy.VOLATILE,
     )
+    # AMCL publica /amcl_pose com durabilidade VOLATILE. Pedir
+    # TRANSIENT_LOCAL (QOS_LATCHED) torna leitor e escritor incompatíveis no
+    # Fast DDS: AMCL recebe /initialpose, mas o dashboard nunca recebe a
+    # confirmação /amcl_pose.
+    QOS_AMCL = QoSProfile(
+        depth=10,
+        reliability=QoSReliabilityPolicy.RELIABLE,
+        durability=QoSDurabilityPolicy.VOLATILE,
+    )
+    # QoS medido na Create 3: scan e' RELIABLE/VOLATILE; odom, bateria e
+    # dock_status sao RELIABLE/TRANSIENT_LOCAL. Igualar o reader evita a
+    # perda intermitente de telemetria apos reiniciar o Discovery Server.
+    QOS_ROBOT_STREAM = QoSProfile(
+        depth=10,
+        reliability=QoSReliabilityPolicy.RELIABLE,
+        durability=QoSDurabilityPolicy.VOLATILE,
+    )
+    QOS_ROBOT_STATE = QoSProfile(
+        depth=10,
+        reliability=QoSReliabilityPolicy.RELIABLE,
+        durability=QoSDurabilityPolicy.TRANSIENT_LOCAL,
+    )
 else:
     QOS_LATCHED = 10
     QOS_INITIAL_POSE = 10
+    QOS_AMCL = 10
+    QOS_ROBOT_STREAM = 10
+    QOS_ROBOT_STATE = 10
 
 
 class TurtleBotNode(Node if HAS_RCLPY else object):
@@ -135,8 +160,11 @@ class TurtleBotNode(Node if HAS_RCLPY else object):
             try:
                 super().__init__("future_lab_turtlebot_node")
 
-                # Telemetria e imagens: serializadas entre si (MutuallyExclusiveCallbackGroup)
+                # Telemetria precisa continuar fresca mesmo quando a OAK-D
+                # entrega frames grandes. Nao compartilhe uma fila exclusiva
+                # com JPEG/OpenCV, ou bateria/odom/scan ficam sem callback.
                 self._cb_sub = MutuallyExclusiveCallbackGroup()
+                self._cb_image = ReentrantCallbackGroup()
                 # Clientes de serviço e action: não mutam estado e respondem mesmo com decodificação de imagem na outra thread
                 self._cb_cli = ReentrantCallbackGroup()
 
@@ -192,14 +220,14 @@ class TurtleBotNode(Node if HAS_RCLPY else object):
                         self.init_errors.append(err)
 
                 try:
-                    self.create_subscription(BatteryState, "/battery_state", self._battery_callback, qos_profile_sensor_data, callback_group=self._cb_sub)
+                    self.create_subscription(BatteryState, "/battery_state", self._battery_callback, QOS_ROBOT_STATE, callback_group=self._cb_sub)
                 except Exception as e:
                     err = f"Falha ao assinar /battery_state: {type(e).__name__}: {e}"
                     print(f"[ERRO TB4] {err}")
                     self.init_errors.append(err)
 
                 try:
-                    self.create_subscription(Odometry, "/odom", self._odom_callback, qos_profile_sensor_data, callback_group=self._cb_sub)
+                    self.create_subscription(Odometry, "/odom", self._odom_callback, QOS_ROBOT_STATE, callback_group=self._cb_sub)
                 except Exception as e:
                     err = f"Falha ao assinar /odom: {type(e).__name__}: {e}"
                     print(f"[ERRO TB4] {err}")
@@ -210,7 +238,7 @@ class TurtleBotNode(Node if HAS_RCLPY else object):
                         LaserScan,
                         "/scan",
                         self._scan_callback,
-                        qos_profile_sensor_data,
+                        QOS_ROBOT_STREAM,
                         callback_group=self._cb_sub,
                     )
                 except Exception as e:
@@ -219,15 +247,15 @@ class TurtleBotNode(Node if HAS_RCLPY else object):
                     self.init_errors.append(err)
 
                 try:
-                    self.create_subscription(PoseWithCovarianceStamped, "/amcl_pose", self._amcl_callback, QOS_LATCHED, callback_group=self._cb_sub)
+                    self.create_subscription(PoseWithCovarianceStamped, "/amcl_pose", self._amcl_callback, QOS_AMCL, callback_group=self._cb_sub)
                 except Exception as e:
                     err = f"Falha ao assinar /amcl_pose: {type(e).__name__}: {e}"
                     print(f"[ERRO TB4] {err}")
                     self.init_errors.append(err)
 
                 try:
-                    self.create_subscription(CompressedImage, "/oakd/rgb/preview/image_raw/compressed", self._compressed_image_callback, qos_profile_sensor_data, callback_group=self._cb_sub)
-                    self.create_subscription(Image, "/oakd/rgb/preview/image_raw", self._raw_image_callback, qos_profile_sensor_data, callback_group=self._cb_sub)
+                    self.create_subscription(CompressedImage, "/oakd/rgb/preview/image_raw/compressed", self._compressed_image_callback, qos_profile_sensor_data, callback_group=self._cb_image)
+                    self.create_subscription(Image, "/oakd/rgb/preview/image_raw", self._raw_image_callback, qos_profile_sensor_data, callback_group=self._cb_image)
                 except Exception as e:
                     err = f"Falha ao assinar tópicos OAK-D: {type(e).__name__}: {e}"
                     print(f"[ERRO TB4] {err}")
@@ -235,7 +263,7 @@ class TurtleBotNode(Node if HAS_RCLPY else object):
 
                 if HAS_CREATE_MSGS and hasattr(DockStatus, '_TYPE_SUPPORT'):
                     try:
-                        self.create_subscription(DockStatus, "/dock_status", self._dock_status_callback, qos_profile_sensor_data, callback_group=self._cb_sub)
+                        self.create_subscription(DockStatus, "/dock_status", self._dock_status_callback, QOS_ROBOT_STATE, callback_group=self._cb_sub)
                     except Exception as e:
                         err = f"Falha ao assinar /dock_status: {type(e).__name__}: {e}"
                         print(f"[ERRO TB4] {err}")

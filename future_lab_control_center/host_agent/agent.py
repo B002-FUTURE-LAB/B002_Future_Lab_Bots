@@ -30,6 +30,7 @@ TOKEN_FILE = REPO_DIR / "future_lab_control_center" / ".agent_token"
 TB4_WS = REPO_DIR / "turtlebot4_jazzy"
 DOCKER_COMPOSE_FILE = REPO_DIR / "future_lab_control_center" / "docker-compose.yml"
 INITIAL_POSE_HELPER = REPO_DIR / "future_lab_control_center" / "host_agent" / "initial_pose_once.py"
+MAP_TF_HELPER = REPO_DIR / "future_lab_control_center" / "host_agent" / "wait_for_map_tf.py"
 TRIGGER_SERVICE_HELPER = REPO_DIR / "future_lab_control_center" / "host_agent" / "trigger_service_once.py"
 
 TRIGGER_SERVICES = {
@@ -44,6 +45,9 @@ JAZZY_ENV_CMD = (
     "source /opt/ros/jazzy/setup.bash && "
     f"source {TB4_WS}/setup.bash && "
     "unset ROS_AUTOMATIC_DISCOVERY_RANGE && "
+    # O Discovery Server instalado no RPi usa a configuração dinâmica de
+    # ROS_DISCOVERY_SERVER. Não misturar um perfil XML alternativo aqui.
+    "unset FASTRTPS_DEFAULT_PROFILES_FILE && "
     "export ROS_DOMAIN_ID=0 && "
     "export RMW_IMPLEMENTATION=rmw_fastrtps_cpp && "
     "export ROS_SUPER_CLIENT=True && "
@@ -90,14 +94,13 @@ LAUNCH_SPECS: Dict[str, LaunchSpec] = {
     "nav2": LaunchSpec(
         command=(
             f"{JAZZY_ENV_CMD} && exec ros2 launch "
-            f"{TB4_WS}/launch/nav2_lifecycle_timeout.launch.py "
+            f"{TB4_WS}/launch/nav2_composed.launch.py "
             f"params_file:={TB4_WS}/config/nav2_custom.yaml "
-            "use_sim_time:=false autostart:=true bond_timeout:=30.0 "
-            "lifecycle_start_delay:=10.0"
+            "use_sim_time:=false autostart:=true"
         ),
         log_path=Path("/tmp/nav2_stack.log"),
         markers=(
-            "nav2_lifecycle_timeout.launch.py",
+            "nav2_composed.launch.py",
             "/nav2_controller/controller_server",
             "/nav2_planner/planner_server",
             "/nav2_bt_navigator/bt_navigator",
@@ -211,8 +214,13 @@ def _matches(target: str, spec: LaunchSpec, argv: list[str], executable: str, cm
     if target == "nav2":
         if _is_ros2_launch(argv, "turtlebot4_navigation", "nav2.launch.py"):
             return True
-        if any(arg.endswith("/nav2_lifecycle_timeout.launch.py") for arg in argv):
+        if any(arg.endswith("/nav2_lifecycle_timeout.launch.py") or arg.endswith("/nav2_composed.launch.py") for arg in argv):
             return exe_name.startswith("python")
+        # Se a carga de componentes perde a resposta DDS, o launch pode
+        # encerrar enquanto o container permanece vivo. Ele ainda pertence à
+        # geração Nav2 e precisa ser encontrado para a limpeza ser completa.
+        if exe.endswith("/rclcpp_components/component_container"):
+            return "__node:=nav2_container" in cmdline
         nav_executables = (
             "/nav2_controller/controller_server",
             "/nav2_planner/planner_server",
@@ -231,15 +239,23 @@ def _matches(target: str, spec: LaunchSpec, argv: list[str], executable: str, cm
         if exe.endswith("/nav2_lifecycle_manager/lifecycle_manager"):
             return "lifecycle_manager_navigation" in cmdline
         return exe_name in {"bash", "sh"} and (
-            "ros2 launch turtlebot4_navigation nav2.launch.py" in cmdline
-            or "nav2_lifecycle_timeout.launch.py" in cmdline
+            # Nao basta procurar o nome do launch: uma requisicao HTTP ou
+            # shell de diagnostico pode conter esse texto e nunca deve ser
+            # incluido no PGID a encerrar. Os LaunchSpec usam `exec`, logo
+            # esta forma identifica somente o launcher de verdade.
+            "exec ros2 launch turtlebot4_navigation nav2.launch.py" in cmdline
+            or "exec ros2 launch" in cmdline and "nav2_lifecycle_timeout.launch.py" in cmdline
+            or "exec ros2 launch" in cmdline and "nav2_composed.launch.py" in cmdline
         )
 
     if target == "viz":
         if _is_ros2_launch(argv, "turtlebot4_viz", "view_navigation.launch.py"):
             return True
         if exe.endswith("/rviz2/rviz2"):
-            return True
+            # O MoveIt do Nano também executa rviz2 (inclusive de outra
+            # distribuição ROS). Ele não é a visualização do TurtleBot e não
+            # pode bloquear o lançamento de view_navigation.launch.py.
+            return "turtlebot4_viz" in cmdline or "navigation.rviz" in cmdline
         return exe_name in {"bash", "sh"} and "ros2 launch turtlebot4_viz view_navigation.launch.py" in cmdline
 
     if target == "mission_manager":
@@ -523,6 +539,31 @@ def run_initial_pose(x: float, y: float, yaw: float, timeout: float = 15.0) -> t
     return result, 200
 
 
+def wait_for_map_tf(timeout: float = 15.0) -> tuple[dict, int]:
+    """Exige duas amostras do TF que as costmaps do Nav2 realmente usam."""
+    command = f"{JAZZY_ENV_CMD} && exec python3 '{MAP_TF_HELPER}' --timeout \"$1\" --samples 2"
+    try:
+        completed = subprocess.run(
+            ["/bin/bash", "-lc", command, "wait-map-tf", str(timeout)],
+            cwd=str(REPO_DIR), capture_output=True, text=True,
+            timeout=timeout + 5.0, check=False,
+        )
+    except subprocess.TimeoutExpired:
+        return {"detail": "Timeout aguardando TF map->odom do AMCL."}, 504
+    result = None
+    for line in reversed(completed.stdout.splitlines()):
+        try:
+            candidate = json.loads(line)
+        except json.JSONDecodeError:
+            continue
+        if isinstance(candidate, dict):
+            result = candidate
+            break
+    if completed.returncode != 0 or not result or not result.get("ok"):
+        return {"detail": (result or {}).get("error", "TF map->odom não foi confirmado."), "measurement": result}, 503
+    return result, 200
+
+
 def run_trigger_service(
     service_name: str,
     discovery_timeout: float = 20.0,
@@ -711,6 +752,11 @@ class AgentRequestHandler(BaseHTTPRequestHandler):
             self._send_json(result, code)
             return
 
+        if path == "/ros/wait_map_tf":
+            result, code = wait_for_map_tf()
+            self._send_json(result, code)
+            return
+
         if path == "/ros/trigger_mission":
             try:
                 body = self._read_json()
@@ -775,13 +821,21 @@ class AgentRequestHandler(BaseHTTPRequestHandler):
 
         if path == "/robot/restart_bringup":
             res = subprocess.run(
-                ["ssh", "-o", "ConnectTimeout=5", "ubuntu@192.168.0.129", "sudo -n systemctl restart turtlebot4.service"],
+                [
+                    "ssh", "-o", "ConnectTimeout=5", "ubuntu@192.168.0.129",
+                    # discovery.service e turtlebot4.service são unidades
+                    # independentes. Reiniciar apenas o bringup preservava um
+                    # Discovery Server antigo e causava timeouts de actions e
+                    # lifecycle após muitos ciclos.
+                    "sudo -n systemctl restart discovery.service && "
+                    "sudo -n systemctl restart turtlebot4.service",
+                ],
                 capture_output=True,
                 text=True,
-                timeout=45,
+                timeout=75,
             )
             if res.returncode == 0:
-                self._send_json({"status": "success", "message": "turtlebot4.service reiniciado no Raspberry Pi."})
+                self._send_json({"status": "success", "message": "Discovery Server e turtlebot4.service reiniciados no Raspberry Pi."})
             else:
                 self._send_json({"detail": res.stderr.strip() or res.stdout.strip()}, 500)
             return

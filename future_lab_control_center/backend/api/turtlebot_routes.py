@@ -242,6 +242,29 @@ def get_nav_readiness():
         and nav2_process.get("instances") == 1
     )
 
+    # Nav2 só é lançado por esta API depois de o agente do host confirmar duas
+    # amostras de map->odom. Isso é evidência independente de que o AMCL
+    # aceitou uma pose, inclusive quando o participante ROS do container não
+    # recebeu o tópico /amcl_pose definido no RViz.
+    amcl_direct = bool(amcl_status.get("amcl_ok", False))
+    amcl_via_nav2_tf = bool(
+        nav2_running
+        and isinstance(nav2_process, dict)
+        and nav2_process.get("owned")
+    )
+    amcl_ready = amcl_direct or amcl_via_nav2_tf
+    amcl_evidence = {
+        "ready": amcl_ready,
+        "source": (
+            amcl_status.get("source") or "amcl_pose_topic"
+            if amcl_direct else
+            "map_to_odom_verified_before_nav2_launch" if amcl_via_nav2_tf else
+            None
+        ),
+        "direct_amcl_pose": amcl_direct,
+        "map_to_odom_verified": amcl_via_nav2_tf,
+    }
+
     topics = {t[0] for t in node.get_topic_names_and_types()}
     services = {s[0] for s in node.get_service_names_and_types()}
     try:
@@ -259,7 +282,7 @@ def get_nav_readiness():
         "scan":                  scan_status["fresh"] if create3_alive else None,
         # Localização
         "map":                   localization_running and node.count_publishers("/map") > 0,
-        "amcl_pose":             localization_running and amcl_status.get("amcl_ok", False),
+        "amcl_pose":             localization_running and amcl_ready,
         "amcl_converged":        localization_running and amcl_status["converged"],
         # Navegação
         "navigate_to_pose":      nav2_running and "/navigate_to_pose" in actions,
@@ -291,6 +314,7 @@ def get_nav_readiness():
             "localization_process": localization_process,
             "nav2_process": nav2_process,
             "amcl": amcl_status,
+            "amcl_gate": amcl_evidence,
         },
         "hint": _nav_hint(faltando, checks),
     }
@@ -928,12 +952,7 @@ def _run_create3_undock_action() -> tuple:
 
 @router.post("/dock")
 def trigger_dock():
-    """Envia o comando de Docking ao TurtleBot 4.
-    
-    Se o robô estiver fora da dock e o Nav2 Stack estiver ativo, navega primeiro até 
-    o predock_point (-0.5201, -0.0704) e em seguida executa o acoplamento infravermelho.
-    Sem guarda de telemetria por decisão de projeto: dock é o caminho de recuperação.
-    """
+    """Dispara somente o docking físico nativo da Create 3 (/dock)."""
     if not _dock_lock.acquire(blocking=False):
         raise HTTPException(
             status_code=409,
@@ -942,41 +961,12 @@ def trigger_dock():
 
     try:
         node = get_turtlebot_node()
-        nav_readiness = get_nav_readiness()
-        nav_active = bool(nav_readiness.get("checks", {}).get("navigate_to_pose"))
-        already_docked = bool(node.is_docked)
-
-        # Se o robô não está dockado e o Nav2 está ativo, executa a Etapa 1 (Nav2 para predock_point)
-        if not already_docked and nav_active:
-            print("[INFO TB4] Robô fora da dock com Nav2 ativo. Etapa 1/2: Navegando para 'predock_point' (-0.5201, -0.0704)...")
-            predock_x = -0.5201
-            predock_y = -0.0704
-            cmd_nav = f'{JAZZY_ENV_CMD} && ros2 action send_goal /navigate_to_pose nav2_msgs/action/NavigateToPose "{{pose: {{header: {{frame_id: map}}, pose: {{position: {{x: {predock_x}, y: {predock_y}, z: 0.0}}, orientation: {{w: 1.0}}}}}}}}"'
-            try:
-                res_nav = subprocess.run(cmd_nav, shell=True, executable="/bin/bash", stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, timeout=45)
-                nav_out = res_nav.stdout.strip()
-                print(f"[INFO TB4] Resultado da navegação ao predock_point: {nav_out}")
-            except subprocess.TimeoutExpired:
-                print("[WARN TB4] Timeout (45s) na navegação ao predock_point. Tentando alinhamento infravermelho direto...")
-
-        # Etapa 2: Alinhamento Infravermelho Create 3 (/dock)
         is_success, full_output = _run_create3_dock_action()
 
         if is_success or node.is_docked:
             return {"status": "success", "message": "Docking físico concluído com SUCESSO no TurtleBot 4!"}
         else:
-            if not nav_active:
-                raise HTTPException(
-                    status_code=500,
-                    detail="O alinhamento infravermelho local /dock não encontrou a estação de carga. "
-                           "O robô parece estar fora do alcance dos sensores infravermelhos da dock. "
-                           "Aproxime o robô da estação ou inicie a Localização + Nav2 Stack para navegação autônoma."
-                )
-            else:
-                raise HTTPException(
-                    status_code=500,
-                    detail=f"Ação /dock infravermelha não reportou sucesso: {full_output}"
-                )
+            raise HTTPException(status_code=500, detail=f"Ação /dock não reportou sucesso: {full_output}")
     except subprocess.TimeoutExpired:
         node = get_turtlebot_node()
         deadline = time.monotonic() + 10.0
@@ -1360,15 +1350,29 @@ def launch_nav2():
             detail=f"Nav2 não foi iniciado: {scan_status.get('reason') or '/scan não está fresco'}.",
         )
 
-    amcl_status = node.get_amcl()
-    if not amcl_status.get("initialized"):
+    # A prova operacional de que uma pose inicial foi aceita é o TF
+    # map->odom estável, publicado pelo AMCL. /amcl_pose é mantido como
+    # telemetria, mas não pode bloquear o Nav2: o participante ROS do
+    # dashboard pode perder essa mensagem mesmo quando o AMCL do host já
+    # aceitou a pose (por exemplo, uma pose definida no RViz).
+    # Sem map->odom o Nav2 inicia cedo demais e as costmaps ficam aguardando
+    # um frame que ainda não existe.
+    tf_result = _call_host_agent("/ros/wait_map_tf", method="POST", timeout=22.0)
+    if not tf_result.get("ok"):
         raise HTTPException(
             status_code=409,
-            detail=("Nav2 não foi iniciado: nenhuma pose inicial foi confirmada pelo AMCL. "
-                    "Defina a pose inicial e tente novamente."),
+            detail=("Nav2 não foi iniciado: TF map->odom ainda não está estável após a pose inicial. "
+                    + tf_result.get("detail", "Aguarde laser/AMCL e tente novamente.")),
         )
 
+    amcl_status = node.get_amcl()
+    if not amcl_status.get("initialized"):
+        print("[WARN TB4] /amcl_pose não chegou ao backend, mas map->odom foi confirmado "
+              "pelo host; iniciando Nav2 com a evidência independente de TF.")
+
     result = _launch_and_wait_lifecycle("nav2")
+    result["map_to_odom"] = tf_result
+    result["amcl_telemetry"] = amcl_status
     _processes_cache["timestamp"] = 0.0
     _nav_readiness_cache["timestamp"] = 0.0
     return result
