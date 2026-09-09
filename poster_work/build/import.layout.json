@@ -1,0 +1,2082 @@
+{
+  "schema": "openai.presentation.layout/v4",
+  "unit": "px",
+  "slide": {
+    "aid": "sl/y90nupkv",
+    "id": "y90nupkv",
+    "slide": 1,
+    "layoutId": "/ppt/slideLayouts/slideLayout1.xml",
+    "layoutName": "Default",
+    "layoutType": "blank",
+    "masterLayoutId": "/ppt/slideMasters/slideMaster1.xml",
+    "backgroundColor": "#FFFFFF",
+    "frame": {
+      "left": 0,
+      "top": 0,
+      "width": 2245,
+      "height": 3178.5
+    }
+  },
+  "theme": {
+    "colorSchemeName": "LibreOffice",
+    "colors": {
+      "accent1": "#18A303",
+      "accent2": "#0369A3",
+      "accent3": "#A33E03",
+      "accent4": "#8E03A3",
+      "accent5": "#C99C00",
+      "accent6": "#C9211E",
+      "dk1": "#000000",
+      "lt1": "#FFFFFF",
+      "dk2": "#000000",
+      "lt2": "#FFFFFF",
+      "hlink": "#0000EE",
+      "folHlink": "#551A8B"
+    },
+    "fontScheme": {
+      "name": "Office",
+      "majorFont": {
+        "latinTypeface": "Arial",
+        "eastAsianTypeface": "DejaVu Sans",
+        "complexScriptTypeface": "DejaVu Sans"
+      },
+      "minorFont": {
+        "latinTypeface": "Arial",
+        "eastAsianTypeface": "DejaVu Sans",
+        "complexScriptTypeface": "DejaVu Sans"
+      }
+    },
+    "typefaces": [
+      "Arial",
+      "Calibri",
+      "Sora",
+      "Sora SemiBold",
+      "Source Sans Pro"
+    ]
+  },
+  "inheritedLayers": [
+    {
+      "scope": "layout",
+      "id": "/ppt/slideLayouts/slideLayout1.xml",
+      "name": "Default",
+      "type": "blank",
+      "parentLayoutId": "/ppt/slideMasters/slideMaster1.xml",
+      "elements": []
+    },
+    {
+      "scope": "master",
+      "id": "/ppt/slideMasters/slideMaster1.xml",
+      "type": "master",
+      "backgroundColor": "#FFFFFF",
+      "elements": [
+        {
+          "order": 1,
+          "kind": "shape",
+          "scope": "master",
+          "aid": "template/master//ppt/slideMasters/slideMaster1.xml/2",
+          "id": "2",
+          "bbox": [
+            444.13,
+            2944.82,
+            549.01,
+            233.5
+          ],
+          "geometry": "rect",
+          "resolvedTextStyle": {
+            "anchor": 2,
+            "verticalAlignment": "middle",
+            "wrap": "none",
+            "autoFit": "none",
+            "insets": {
+              "top": 4.91,
+              "right": 9.45,
+              "bottom": 4.91,
+              "left": 9.45
+            }
+          },
+          "fillColor": "#F2F2F2",
+          "lineWidth": 4.01
+        },
+        {
+          "order": 2,
+          "kind": "shape",
+          "scope": "master",
+          "aid": "template/master//ppt/slideMasters/slideMaster1.xml/5",
+          "id": "5",
+          "bbox": [
+            1490.68,
+            253.15,
+            753.94,
+            502.49
+          ],
+          "rotation": 0,
+          "geometry": "rect",
+          "resolvedTextStyle": {
+            "anchor": 2,
+            "verticalAlignment": "middle",
+            "wrap": "none",
+            "autoFit": "none",
+            "insets": {
+              "top": 4.91,
+              "right": 9.45,
+              "bottom": 4.91,
+              "left": 9.45
+            }
+          },
+          "fillColor": "#FFE681",
+          "lineWidth": 4.01
+        },
+        {
+          "order": 3,
+          "kind": "shape",
+          "scope": "master",
+          "aid": "template/master//ppt/slideMasters/slideMaster1.xml/7",
+          "id": "7",
+          "bbox": [
+            0,
+            0,
+            1743.5,
+            506.15
+          ],
+          "rotation": 0,
+          "geometry": "rect",
+          "resolvedTextStyle": {
+            "anchor": 2,
+            "verticalAlignment": "middle",
+            "wrap": "none",
+            "autoFit": "none",
+            "insets": {
+              "top": 4.91,
+              "right": 9.45,
+              "bottom": 4.91,
+              "left": 9.45
+            }
+          },
+          "fillColor": "#FFDD00",
+          "lineWidth": 4.01
+        },
+        {
+          "order": 4,
+          "kind": "shape",
+          "scope": "master",
+          "aid": "template/master//ppt/slideMasters/slideMaster1.xml/8",
+          "id": "8",
+          "bbox": [
+            1490.65,
+            0,
+            252.81,
+            252.81
+          ],
+          "rotation": 0,
+          "geometry": "rect",
+          "resolvedTextStyle": {
+            "anchor": 2,
+            "verticalAlignment": "middle",
+            "wrap": "none",
+            "autoFit": "none",
+            "insets": {
+              "top": 4.91,
+              "right": 9.45,
+              "bottom": 4.91,
+              "left": 9.45
+            }
+          },
+          "fillColor": "#FFE681",
+          "lineWidth": 4.01
+        },
+        {
+          "order": 5,
+          "kind": "shape",
+          "scope": "master",
+          "aid": "template/master//ppt/slideMasters/slideMaster1.xml/9",
+          "id": "9",
+          "bbox": [
+            1490.65,
+            253.15,
+            252.81,
+            252.81
+          ],
+          "rotation": 0,
+          "geometry": "rect",
+          "resolvedTextStyle": {
+            "anchor": 2,
+            "verticalAlignment": "middle",
+            "wrap": "none",
+            "autoFit": "none",
+            "insets": {
+              "top": 4.91,
+              "right": 9.45,
+              "bottom": 4.91,
+              "left": 9.45
+            }
+          },
+          "fillColor": "#FFF2B9",
+          "lineWidth": 4.01
+        },
+        {
+          "order": 6,
+          "kind": "shape",
+          "scope": "master",
+          "aid": "template/master//ppt/slideMasters/slideMaster1.xml/10",
+          "id": "10",
+          "bbox": [
+            1545.49,
+            527.36,
+            699.17,
+            182.29
+          ],
+          "rotation": 0,
+          "geometry": "rect",
+          "text": "7. Wissenschaftliches Institutskolloquium",
+          "textPreview": "7. Wissenschaftliches Institutskolloquium",
+          "resolvedTextStyle": {
+            "anchor": 2,
+            "verticalAlignment": "middle",
+            "autoFit": "resizeShapeToFitText",
+            "insets": {
+              "top": 4.72,
+              "right": 9.45,
+              "bottom": 4.72,
+              "left": 9.45
+            }
+          },
+          "paragraphs": [
+            {
+              "index": 1,
+              "text": "7. Wissenschaftliches Institutskolloquium",
+              "lineSpacingPercent": 100000,
+              "runs": [
+                {
+                  "index": 1,
+                  "text": "7. Wissenschaftliches Institutskolloquium",
+                  "fontSize": 72,
+                  "typeface": "Calibri",
+                  "color": "#000000",
+                  "bold": true
+                }
+              ]
+            }
+          ],
+          "lineWidth": 4.01
+        },
+        {
+          "order": 7,
+          "kind": "shape",
+          "scope": "master",
+          "aid": "template/master//ppt/slideMasters/slideMaster1.xml/12",
+          "id": "12",
+          "bbox": [
+            1402.13,
+            2925.32,
+            506.19,
+            252.81
+          ],
+          "rotation": 0,
+          "geometry": "rect",
+          "resolvedTextStyle": {
+            "anchor": 2,
+            "verticalAlignment": "middle",
+            "wrap": "none",
+            "autoFit": "none",
+            "insets": {
+              "top": 4.91,
+              "right": 9.45,
+              "bottom": 4.91,
+              "left": 9.45
+            }
+          },
+          "fillColor": "#FFDD00",
+          "lineWidth": 4.01
+        },
+        {
+          "order": 8,
+          "kind": "shape",
+          "scope": "master",
+          "aid": "template/master//ppt/slideMasters/slideMaster1.xml/13",
+          "id": "13",
+          "bbox": [
+            1655.32,
+            2671.97,
+            252.81,
+            252.85
+          ],
+          "rotation": 0,
+          "geometry": "rect",
+          "resolvedTextStyle": {
+            "anchor": 2,
+            "verticalAlignment": "middle",
+            "wrap": "none",
+            "autoFit": "none",
+            "insets": {
+              "top": 4.91,
+              "right": 9.45,
+              "bottom": 4.91,
+              "left": 9.45
+            }
+          },
+          "fillColor": "#FFE681",
+          "lineWidth": 4.01
+        },
+        {
+          "order": 9,
+          "kind": "shape",
+          "scope": "master",
+          "aid": "template/master//ppt/slideMasters/slideMaster1.xml/14",
+          "id": "14",
+          "bbox": [
+            1908.66,
+            2671.97,
+            336,
+            506.15
+          ],
+          "rotation": 0,
+          "geometry": "rect",
+          "resolvedTextStyle": {
+            "anchor": 2,
+            "verticalAlignment": "middle",
+            "wrap": "none",
+            "autoFit": "none",
+            "insets": {
+              "top": 4.91,
+              "right": 9.45,
+              "bottom": 4.91,
+              "left": 9.45
+            }
+          },
+          "fillColor": "#FFFFFF",
+          "lineWidth": 4.01
+        },
+        {
+          "order": 10,
+          "kind": "shape",
+          "scope": "master",
+          "aid": "template/master//ppt/slideMasters/slideMaster1.xml/15",
+          "id": "15",
+          "bbox": [
+            454.98,
+            2970.33,
+            538.17,
+            162.03
+          ],
+          "geometry": "rect",
+          "text": "Institut für Informationssysteme der Hochschule Hof (iisys)\nAlfons-Goppel-Platz 1 – 95028 Hof\nwww.hof-university.de",
+          "textPreview": "Institut für Informationssysteme der Hochschule Hof (iisys) | Alfons-Goppel-Platz 1 – 95028 Hof | www.hof-university.de",
+          "resolvedTextStyle": {
+            "anchor": 1,
+            "verticalAlignment": "top",
+            "autoFit": "resizeShapeToFitText",
+            "insets": {
+              "top": 4.72,
+              "right": 9.45,
+              "bottom": 4.72,
+              "left": 9.45
+            }
+          },
+          "paragraphs": [
+            {
+              "index": 1,
+              "text": "Institut für Informationssysteme der Hochschule Hof (iisys)",
+              "lineSpacingPercent": 100000,
+              "runs": [
+                {
+                  "index": 1,
+                  "text": "Institut für Informationssysteme der Hochschule Hof (iisys)",
+                  "fontSize": 26.67,
+                  "typeface": "Source Sans Pro",
+                  "color": "#000000"
+                }
+              ]
+            },
+            {
+              "index": 2,
+              "text": "Alfons-Goppel-Platz 1 – 95028 Hof",
+              "lineSpacingPercent": 100000,
+              "runs": [
+                {
+                  "index": 1,
+                  "text": "Alfons-Goppel-Platz 1 – 95028 Hof",
+                  "fontSize": 26.67,
+                  "typeface": "Source Sans Pro",
+                  "color": "#000000"
+                }
+              ]
+            },
+            {
+              "index": 3,
+              "text": "www.hof-university.de",
+              "lineSpacingPercent": 100000,
+              "runs": [
+                {
+                  "index": 1,
+                  "text": "www.hof-university.de",
+                  "fontSize": 26.67,
+                  "typeface": "Source Sans Pro",
+                  "color": "#000000",
+                  "bold": true
+                }
+              ]
+            }
+          ],
+          "lineWidth": 4.01
+        },
+        {
+          "order": 11,
+          "kind": "image",
+          "scope": "master",
+          "aid": "template/master//ppt/slideMasters/slideMaster1.xml/20",
+          "id": "20",
+          "bbox": [
+            2.15,
+            2941.3,
+            399.16,
+            233.5
+          ],
+          "contentType": "image/png",
+          "asset": {
+            "assetId": "/ppt/media/image1.png",
+            "contentType": "image/png",
+            "byteLength": 23729
+          },
+          "fillImage": {
+            "assetId": "/ppt/media/image1.png",
+            "contentType": "image/png",
+            "byteLength": 23729
+          }
+        },
+        {
+          "order": 12,
+          "kind": "image",
+          "scope": "master",
+          "aid": "template/master//ppt/slideMasters/slideMaster1.xml/21",
+          "id": "21",
+          "bbox": [
+            1766.48,
+            54.46,
+            359.85,
+            138.86
+          ],
+          "contentType": "image/png",
+          "asset": {
+            "assetId": "/ppt/media/image2.png",
+            "contentType": "image/png",
+            "byteLength": 9399
+          },
+          "fillImage": {
+            "assetId": "/ppt/media/image2.png",
+            "contentType": "image/png",
+            "byteLength": 9399
+          }
+        },
+        {
+          "order": 13,
+          "kind": "shape",
+          "scope": "master",
+          "aid": "template/master//ppt/slideMasters/slideMaster1.xml/18",
+          "id": "18",
+          "name": "PlaceHolder 1",
+          "bbox": [
+            112.1,
+            126.77,
+            2020.35,
+            530.68
+          ],
+          "geometry": "rect",
+          "text": "Click to edit the title text format",
+          "textPreview": "Click to edit the title text format",
+          "resolvedTextStyle": {
+            "anchor": 2,
+            "verticalAlignment": "middle",
+            "autoFit": "none",
+            "insets": {
+              "top": 0,
+              "right": 0,
+              "bottom": 0,
+              "left": 0
+            }
+          },
+          "paragraphs": [
+            {
+              "index": 1,
+              "text": "Click to edit the title text format",
+              "lineSpacingPercent": 83000,
+              "resolvedTextStyle": {
+                "alignment": "center"
+              },
+              "runs": [
+                {
+                  "index": 1,
+                  "text": "Click to edit the title text format",
+                  "fontSize": 58.67,
+                  "typeface": "Calibri",
+                  "color": "#000000"
+                }
+              ]
+            }
+          ],
+          "lineWidth": 0
+        },
+        {
+          "order": 14,
+          "kind": "shape",
+          "scope": "master",
+          "aid": "template/master//ppt/slideMasters/slideMaster1.xml/19",
+          "id": "19",
+          "name": "PlaceHolder 2",
+          "bbox": [
+            112.1,
+            743.62,
+            2020.35,
+            1843.31
+          ],
+          "geometry": "rect",
+          "text": "Click to edit the outline text format\nSecond Outline Level\nThird Outline Level\nFourth Outline Level\nFifth Outline Level\nSixth Outline Level\nSeventh Outline Level",
+          "textPreview": "Click to edit the outline text format | Second Outline Level | Third Outline Level | Fourth Outline Level | Fifth Outline Level | Sixth O...",
+          "resolvedTextStyle": {
+            "anchor": 1,
+            "verticalAlignment": "top",
+            "autoFit": "shrinkText",
+            "insets": {
+              "top": 7.22,
+              "right": 0,
+              "bottom": 0,
+              "left": 0
+            }
+          },
+          "paragraphs": [
+            {
+              "index": 1,
+              "text": "Click to edit the outline text format",
+              "lineSpacingPercent": 83000,
+              "resolvedTextStyle": {
+                "alignment": "left"
+              },
+              "runs": [
+                {
+                  "index": 1,
+                  "text": "Click to edit the outline text format",
+                  "fontSize": 42.67,
+                  "typeface": "Calibri",
+                  "color": "#000000"
+                }
+              ]
+            },
+            {
+              "index": 2,
+              "text": "Second Outline Level",
+              "lineSpacingPercent": 83000,
+              "resolvedTextStyle": {
+                "alignment": "left"
+              },
+              "runs": [
+                {
+                  "index": 1,
+                  "text": "Second Outline Level",
+                  "fontSize": 42.67,
+                  "typeface": "Calibri",
+                  "color": "#000000"
+                }
+              ]
+            },
+            {
+              "index": 3,
+              "text": "Third Outline Level",
+              "lineSpacingPercent": 83000,
+              "resolvedTextStyle": {
+                "alignment": "left"
+              },
+              "runs": [
+                {
+                  "index": 1,
+                  "text": "Third Outline Level",
+                  "fontSize": 42.67,
+                  "typeface": "Calibri",
+                  "color": "#000000"
+                }
+              ]
+            },
+            {
+              "index": 4,
+              "text": "Fourth Outline Level",
+              "lineSpacingPercent": 83000,
+              "resolvedTextStyle": {
+                "alignment": "left"
+              },
+              "runs": [
+                {
+                  "index": 1,
+                  "text": "Fourth Outline Level",
+                  "fontSize": 42.67,
+                  "typeface": "Calibri",
+                  "color": "#000000"
+                }
+              ]
+            },
+            {
+              "index": 5,
+              "text": "Fifth Outline Level",
+              "lineSpacingPercent": 83000,
+              "resolvedTextStyle": {
+                "alignment": "left"
+              },
+              "runs": [
+                {
+                  "index": 1,
+                  "text": "Fifth Outline Level",
+                  "fontSize": 42.67,
+                  "typeface": "Calibri",
+                  "color": "#000000"
+                }
+              ]
+            },
+            {
+              "index": 6,
+              "text": "Sixth Outline Level",
+              "lineSpacingPercent": 83000,
+              "resolvedTextStyle": {
+                "alignment": "left"
+              },
+              "runs": [
+                {
+                  "index": 1,
+                  "text": "Sixth Outline Level",
+                  "fontSize": 42.67,
+                  "typeface": "Calibri",
+                  "color": "#000000"
+                }
+              ]
+            },
+            {
+              "index": 7,
+              "text": "Seventh Outline Level",
+              "lineSpacingPercent": 83000,
+              "resolvedTextStyle": {
+                "alignment": "left"
+              },
+              "runs": [
+                {
+                  "index": 1,
+                  "text": "Seventh Outline Level",
+                  "fontSize": 42.67,
+                  "typeface": "Calibri",
+                  "color": "#000000"
+                }
+              ]
+            }
+          ],
+          "lineWidth": 0
+        }
+      ]
+    }
+  ],
+  "elements": [
+    {
+      "order": 1,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/1cvuxc7e",
+      "id": "20",
+      "bbox": [
+        1908.66,
+        2671.97,
+        339.33,
+        506.34
+      ],
+      "geometry": "rect",
+      "resolvedFontSize": 18.67,
+      "resolvedTextStyle": {
+        "anchor": 2,
+        "fontSize": 18.67,
+        "verticalAlignment": "middle",
+        "wrap": "none",
+        "autoFit": "none",
+        "insets": {
+          "top": 4.91,
+          "right": 9.45,
+          "bottom": 4.91,
+          "left": 9.45
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": ""
+          }
+        ]
+      },
+      "fillColor": "#FFB9FE",
+      "lineWidth": 4.01
+    },
+    {
+      "order": 2,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/0bmd476t",
+      "id": "21",
+      "bbox": [
+        94.03,
+        149.33,
+        627.7,
+        137.46
+      ],
+      "geometry": "rect",
+      "text": "Projekttitel",
+      "textPreview": "Projekttitel",
+      "resolvedFontSize": 18.67,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 18.67,
+        "verticalAlignment": "top",
+        "wrap": "none",
+        "autoFit": "resizeShapeToFitText",
+        "insets": {
+          "top": 4.72,
+          "right": 9.45,
+          "bottom": 4.72,
+          "left": 9.45
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Projekttitel"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Projekttitel",
+          "lineSpacingPercent": 100000,
+          "runs": [
+            {
+              "index": 1,
+              "text": "Projekttitel",
+              "fontSize": 106.67,
+              "typeface": "Sora SemiBold",
+              "color": "#000000",
+              "bold": true
+            }
+          ]
+        }
+      ],
+      "lineWidth": 4.01
+    },
+    {
+      "order": 3,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/zadcv2p8",
+      "id": "22",
+      "bbox": [
+        94.34,
+        292.8,
+        457.66,
+        89.46
+      ],
+      "geometry": "rect",
+      "text": "ggf. Untertitel",
+      "textPreview": "ggf. Untertitel",
+      "resolvedFontSize": 18.67,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 18.67,
+        "verticalAlignment": "top",
+        "wrap": "none",
+        "autoFit": "resizeShapeToFitText",
+        "insets": {
+          "top": 4.72,
+          "right": 9.45,
+          "bottom": 4.72,
+          "left": 9.45
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "ggf. Untertitel"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "ggf. Untertitel",
+          "lineSpacingPercent": 100000,
+          "runs": [
+            {
+              "index": 1,
+              "text": "ggf. Untertitel",
+              "fontSize": 66.67,
+              "typeface": "Sora",
+              "color": "#000000"
+            }
+          ]
+        }
+      ],
+      "lineWidth": 4.01
+    },
+    {
+      "order": 4,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/e94v2hon",
+      "id": "23",
+      "bbox": [
+        94.49,
+        540.96,
+        389.82,
+        73.47
+      ],
+      "geometry": "rect",
+      "text": "Abstract",
+      "textPreview": "Abstract",
+      "resolvedFontSize": 18.67,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 18.67,
+        "verticalAlignment": "top",
+        "autoFit": "resizeShapeToFitText",
+        "insets": {
+          "top": 4.72,
+          "right": 9.45,
+          "bottom": 4.72,
+          "left": 9.45
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Abstract"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Abstract",
+          "lineSpacingPercent": 100000,
+          "runs": [
+            {
+              "index": 1,
+              "text": "Abstract",
+              "fontSize": 53.33,
+              "typeface": "Sora",
+              "color": "#000000",
+              "bold": true
+            }
+          ]
+        }
+      ],
+      "lineWidth": 4.01
+    },
+    {
+      "order": 5,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/90ve1w7q",
+      "id": "24",
+      "bbox": [
+        94.49,
+        611.3,
+        1322.65,
+        214.79
+      ],
+      "geometry": "rect",
+      "text": "Kurze Projektvorstellung, Einordnung der wissenschaftlichen Problemstellung und Zielsetzung in max. 4 Zeilen\n…\n…",
+      "textPreview": "Kurze Projektvorstellung, Einordnung der wissenschaftlichen Problemstellung und Zielsetzung in max. 4 Zeilen | … | …",
+      "resolvedFontSize": 18.67,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 18.67,
+        "verticalAlignment": "top",
+        "autoFit": "resizeShapeToFitText",
+        "insets": {
+          "top": 4.72,
+          "right": 9.45,
+          "bottom": 4.72,
+          "left": 9.45
+        }
+      },
+      "textLayout": {
+        "lineCount": 6,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Kurze Projektvorstellung, Einordnung der wissenschaftlichen"
+          },
+          {
+            "index": 2,
+            "text": "Problemstellung und Zielsetzung in max. 4 Zeilen"
+          },
+          {
+            "index": 3,
+            "text": ""
+          },
+          {
+            "index": 4,
+            "text": "…"
+          },
+          {
+            "index": 5,
+            "text": ""
+          },
+          {
+            "index": 6,
+            "text": "…"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Kurze Projektvorstellung, Einordnung der wissenschaftlichen Problemstellung und Zielsetzung in max. 4 Zeilen",
+          "lineSpacingPercent": 100000,
+          "runs": [
+            {
+              "index": 1,
+              "text": "Kurze Projektvorstellung, Einordnung der wissenschaftlichen Problemstellung und Zielsetzung in max. 4 Zeilen",
+              "fontSize": 42.67,
+              "typeface": "Source Sans Pro",
+              "color": "#000000"
+            }
+          ]
+        },
+        {
+          "index": 2,
+          "text": "…",
+          "lineSpacingPercent": 100000,
+          "runs": [
+            {
+              "index": 1,
+              "text": "…",
+              "fontSize": 42.67,
+              "typeface": "Source Sans Pro",
+              "color": "#000000"
+            }
+          ]
+        },
+        {
+          "index": 3,
+          "text": "…",
+          "lineSpacingPercent": 100000,
+          "runs": [
+            {
+              "index": 1,
+              "text": "…",
+              "fontSize": 42.67,
+              "typeface": "Source Sans Pro",
+              "color": "#000000"
+            }
+          ]
+        }
+      ],
+      "lineWidth": 4.01
+    },
+    {
+      "order": 6,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/ozmd8r65",
+      "id": "25",
+      "bbox": [
+        94.15,
+        1409.8,
+        1462.37,
+        73.47
+      ],
+      "geometry": "rect",
+      "text": "Forschungsplan / Ergebnisse / Forschungsschwerpunkt",
+      "textPreview": "Forschungsplan / Ergebnisse / Forschungsschwerpunkt",
+      "resolvedFontSize": 18.67,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 18.67,
+        "verticalAlignment": "top",
+        "wrap": "none",
+        "autoFit": "resizeShapeToFitText",
+        "insets": {
+          "top": 4.72,
+          "right": 9.45,
+          "bottom": 4.72,
+          "left": 9.45
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Forschungsplan / Ergebnisse / Forschungsschwerpunkt"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Forschungsplan / Ergebnisse / Forschungsschwerpunkt",
+          "lineSpacingPercent": 100000,
+          "runs": [
+            {
+              "index": 1,
+              "text": "Forschungsplan / Ergebnisse / Forschungsschwerpunkt",
+              "fontSize": 53.33,
+              "typeface": "Sora",
+              "color": "#000000",
+              "bold": true
+            }
+          ]
+        }
+      ],
+      "lineWidth": 4.01
+    },
+    {
+      "order": 7,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/nydczmpk",
+      "id": "26",
+      "bbox": [
+        94.49,
+        1485.32,
+        2040.83,
+        575.13
+      ],
+      "geometry": "rect",
+      "text": "Vorstellung des Forschungsplans, oder der (bisherigen) Ergebnisse oder des Forschungsschwerpunktes je nach Projektbearbeitungsstand\n\nLorem ipsum dolor sit amet, consetetur sadipscing elitr, sed \ndiam nonumy eirmod tempor invidunt ut labore et dolore \nmagna aliquyam erat, sed diam voluptua. At vero eos et \naccusam et justo duo dolores et ea rebum. Stet clita kasd\n gubergren, no sea takimata sanctus est \nLorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, \nconsetetur sadipscing elitr.\n",
+      "textPreview": "Vorstellung des Forschungsplans, oder der (bisherigen) Ergebnisse oder des Forschungsschwerpunktes je nach Projektbearbeitungsstand |  | ...",
+      "resolvedFontSize": 18.67,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 18.67,
+        "verticalAlignment": "top",
+        "autoFit": "resizeShapeToFitText",
+        "insets": {
+          "top": 4.72,
+          "right": 9.45,
+          "bottom": 4.72,
+          "left": 9.45
+        }
+      },
+      "textLayout": {
+        "lineCount": 20,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Vorstellung des Forschungsplans, oder der (bisherigen) Ergebnisse oder des Forschungsschwerpunktes je"
+          },
+          {
+            "index": 2,
+            "text": "nach Projektbearbeitungsstand"
+          },
+          {
+            "index": 3,
+            "text": ""
+          },
+          {
+            "index": 4,
+            "text": ""
+          },
+          {
+            "index": 5,
+            "text": ""
+          },
+          {
+            "index": 6,
+            "text": "Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed"
+          },
+          {
+            "index": 7,
+            "text": ""
+          },
+          {
+            "index": 8,
+            "text": "diam nonumy eirmod tempor invidunt ut labore et dolore"
+          },
+          {
+            "index": 9,
+            "text": ""
+          },
+          {
+            "index": 10,
+            "text": "magna aliquyam erat, sed diam voluptua. At vero eos et"
+          },
+          {
+            "index": 11,
+            "text": ""
+          },
+          {
+            "index": 12,
+            "text": "accusam et justo duo dolores et ea rebum. Stet clita kasd"
+          },
+          {
+            "index": 13,
+            "text": ""
+          },
+          {
+            "index": 14,
+            "text": " gubergren, no sea takimata sanctus est"
+          },
+          {
+            "index": 15,
+            "text": ""
+          },
+          {
+            "index": 16,
+            "text": "Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet,"
+          },
+          {
+            "index": 17,
+            "text": ""
+          },
+          {
+            "index": 18,
+            "text": "consetetur sadipscing elitr."
+          },
+          {
+            "index": 19,
+            "text": ""
+          },
+          {
+            "index": 20,
+            "text": ""
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Vorstellung des Forschungsplans, oder der (bisherigen) Ergebnisse oder des Forschungsschwerpunktes je nach Projektbearbeitungsstand",
+          "lineSpacingPercent": 100000,
+          "runs": [
+            {
+              "index": 1,
+              "text": "Vorstellung des Forschungsplans, oder der (bisherigen) Ergebnisse oder des Forschungsschwerpunktes je nach Projektbearbeitungsstand",
+              "fontSize": 42.67,
+              "typeface": "Source Sans Pro",
+              "color": "#000000"
+            }
+          ]
+        },
+        {
+          "index": 3,
+          "text": "Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed ",
+          "lineSpacingPercent": 100000,
+          "runs": [
+            {
+              "index": 1,
+              "text": "Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed ",
+              "fontSize": 42.67,
+              "typeface": "Source Sans Pro",
+              "color": "#000000"
+            }
+          ]
+        },
+        {
+          "index": 4,
+          "text": "diam nonumy eirmod tempor invidunt ut labore et dolore ",
+          "lineSpacingPercent": 100000,
+          "runs": [
+            {
+              "index": 1,
+              "text": "diam nonumy eirmod tempor invidunt ut labore et dolore ",
+              "fontSize": 42.67,
+              "typeface": "Source Sans Pro",
+              "color": "#000000"
+            }
+          ]
+        },
+        {
+          "index": 5,
+          "text": "magna aliquyam erat, sed diam voluptua. At vero eos et ",
+          "lineSpacingPercent": 100000,
+          "runs": [
+            {
+              "index": 1,
+              "text": "magna aliquyam erat, sed diam voluptua. At vero eos et ",
+              "fontSize": 42.67,
+              "typeface": "Source Sans Pro",
+              "color": "#000000"
+            }
+          ]
+        },
+        {
+          "index": 6,
+          "text": "accusam et justo duo dolores et ea rebum. Stet clita kasd",
+          "lineSpacingPercent": 100000,
+          "runs": [
+            {
+              "index": 1,
+              "text": "accusam et justo duo dolores et ea rebum. Stet clita kasd",
+              "fontSize": 42.67,
+              "typeface": "Source Sans Pro",
+              "color": "#000000"
+            }
+          ]
+        },
+        {
+          "index": 7,
+          "text": " gubergren, no sea takimata sanctus est ",
+          "lineSpacingPercent": 100000,
+          "runs": [
+            {
+              "index": 1,
+              "text": " gubergren, no sea takimata sanctus est ",
+              "fontSize": 42.67,
+              "typeface": "Source Sans Pro",
+              "color": "#000000"
+            }
+          ]
+        },
+        {
+          "index": 8,
+          "text": "Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, ",
+          "lineSpacingPercent": 100000,
+          "runs": [
+            {
+              "index": 1,
+              "text": "Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, ",
+              "fontSize": 42.67,
+              "typeface": "Source Sans Pro",
+              "color": "#000000"
+            }
+          ]
+        },
+        {
+          "index": 9,
+          "text": "consetetur sadipscing elitr.",
+          "lineSpacingPercent": 100000,
+          "runs": [
+            {
+              "index": 1,
+              "text": "consetetur sadipscing elitr.",
+              "fontSize": 42.67,
+              "typeface": "Source Sans Pro",
+              "color": "#000000"
+            }
+          ]
+        }
+      ],
+      "lineWidth": 4.01
+    },
+    {
+      "order": 8,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/mx4v6hoz",
+      "id": "27",
+      "bbox": [
+        94.49,
+        2499.67,
+        814.34,
+        73.47
+      ],
+      "geometry": "rect",
+      "text": "Zusammenfassung & Ausblick",
+      "textPreview": "Zusammenfassung & Ausblick",
+      "resolvedFontSize": 18.67,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 18.67,
+        "verticalAlignment": "top",
+        "wrap": "none",
+        "autoFit": "resizeShapeToFitText",
+        "insets": {
+          "top": 4.72,
+          "right": 9.45,
+          "bottom": 4.72,
+          "left": 9.45
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Zusammenfassung & Ausblick"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Zusammenfassung & Ausblick",
+          "lineSpacingPercent": 100000,
+          "runs": [
+            {
+              "index": 1,
+              "text": "Zusammenfassung & Ausblick",
+              "fontSize": 53.33,
+              "typeface": "Sora",
+              "color": "#000000",
+              "bold": true
+            }
+          ]
+        }
+      ],
+      "lineWidth": 4.01
+    },
+    {
+      "order": 9,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/p4bu5s76",
+      "id": "28",
+      "bbox": [
+        1899.97,
+        2792.16,
+        356.86,
+        250.09
+      ],
+      "geometry": "rect",
+      "text": "Bild\n \nProjekt-\nverantwortliche*r",
+      "textPreview": "Bild |   | Projekt- | verantwortliche*r",
+      "resolvedFontSize": 18.67,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 18.67,
+        "verticalAlignment": "top",
+        "autoFit": "resizeShapeToFitText",
+        "insets": {
+          "top": 4.72,
+          "right": 9.45,
+          "bottom": 4.72,
+          "left": 9.45
+        }
+      },
+      "textLayout": {
+        "lineCount": 6,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Bild"
+          },
+          {
+            "index": 2,
+            "text": ""
+          },
+          {
+            "index": 3,
+            "text": " "
+          },
+          {
+            "index": 4,
+            "text": ""
+          },
+          {
+            "index": 5,
+            "text": "Projekt-"
+          },
+          {
+            "index": 6,
+            "text": "verantwortliche*r"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Bild",
+          "lineSpacingPercent": 100000,
+          "resolvedTextStyle": {
+            "alignment": "center"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "Bild",
+              "fontSize": 40,
+              "typeface": "Source Sans Pro",
+              "color": "#A400A5",
+              "bold": true
+            }
+          ]
+        },
+        {
+          "index": 2,
+          "lineSpacingPercent": 100000,
+          "resolvedTextStyle": {
+            "alignment": "center"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": " ",
+              "fontSize": 40,
+              "typeface": "Source Sans Pro",
+              "color": "#A400A5",
+              "bold": true
+            }
+          ]
+        },
+        {
+          "index": 3,
+          "text": "Projekt-\nverantwortliche*r",
+          "lineSpacingPercent": 100000,
+          "resolvedTextStyle": {
+            "alignment": "center"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "Projekt-",
+              "fontSize": 40,
+              "typeface": "Source Sans Pro",
+              "color": "#A400A5",
+              "bold": true
+            },
+            {
+              "index": 2,
+              "text": "\n",
+              "alignment": "center"
+            },
+            {
+              "index": 3,
+              "text": "verantwortliche*r",
+              "fontSize": 40,
+              "typeface": "Source Sans Pro",
+              "color": "#A400A5",
+              "bold": true
+            }
+          ]
+        }
+      ],
+      "lineWidth": 4.01
+    },
+    {
+      "order": 10,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/432dwn6l",
+      "id": "29",
+      "bbox": [
+        1412.45,
+        3017.31,
+        506.57,
+        105.71
+      ],
+      "geometry": "rect",
+      "text": "Vorname Nachname\nvorname.nachname@hof-university.de\n12345/67891",
+      "textPreview": "Vorname Nachname | vorname.nachname@hof-university.de | 12345/67891",
+      "resolvedFontSize": 18.67,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 18.67,
+        "verticalAlignment": "top",
+        "wrap": "none",
+        "autoFit": "resizeShapeToFitText",
+        "insets": {
+          "top": 4.72,
+          "right": 9.45,
+          "bottom": 4.72,
+          "left": 9.45
+        }
+      },
+      "textLayout": {
+        "lineCount": 4,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Vorname Nachname"
+          },
+          {
+            "index": 2,
+            "text": "vorname.nachname@hof-university.de"
+          },
+          {
+            "index": 3,
+            "text": ""
+          },
+          {
+            "index": 4,
+            "text": "12345/67891"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Vorname Nachname\nvorname.nachname@hof-university.de",
+          "lineSpacingPercent": 100000,
+          "runs": [
+            {
+              "index": 1,
+              "text": "Vorname Nachname",
+              "fontSize": 26.67,
+              "typeface": "Source Sans Pro",
+              "color": "#000000",
+              "bold": true
+            },
+            {
+              "index": 2,
+              "text": "\n"
+            },
+            {
+              "index": 3,
+              "text": "vorname.nachname@hof-university.de",
+              "fontSize": 26.67,
+              "typeface": "Source Sans Pro",
+              "color": "#000000"
+            }
+          ]
+        },
+        {
+          "index": 2,
+          "text": "12345/67891",
+          "lineSpacingPercent": 100000,
+          "runs": [
+            {
+              "index": 1,
+              "text": "12345/67891",
+              "fontSize": 26.67,
+              "typeface": "Source Sans Pro",
+              "color": "#000000"
+            }
+          ]
+        }
+      ],
+      "lineWidth": 4.01
+    },
+    {
+      "order": 11,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/uxgjq907",
+      "id": "30",
+      "bbox": [
+        193.47,
+        2049.3,
+        878.66,
+        420.09
+      ],
+      "geometry": "rect",
+      "text": "HINWEIS\n\nFelder mit eigenen Inhalten füllen.\n\nDie Abstände zwischen den 3 Teilen sind flexibel anpassbar. Bitte die Abstände zwischen Überschrift und Textfeld beibehalten. ",
+      "textPreview": "HINWEIS |  | Felder mit eigenen Inhalten füllen. |  | Die Abstände zwischen den 3 Teilen sind flexibel anpassbar. Bitte die Abstände zwis...",
+      "resolvedFontSize": 18.67,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 18.67,
+        "verticalAlignment": "top",
+        "autoFit": "resizeShapeToFitText",
+        "insets": {
+          "top": 4.72,
+          "right": 9.45,
+          "bottom": 4.72,
+          "left": 9.45
+        }
+      },
+      "textLayout": {
+        "lineCount": 12,
+        "lines": [
+          {
+            "index": 1,
+            "text": "HINWEIS"
+          },
+          {
+            "index": 2,
+            "text": ""
+          },
+          {
+            "index": 3,
+            "text": ""
+          },
+          {
+            "index": 4,
+            "text": ""
+          },
+          {
+            "index": 5,
+            "text": "Felder mit eigenen Inhalten füllen."
+          },
+          {
+            "index": 6,
+            "text": ""
+          },
+          {
+            "index": 7,
+            "text": ""
+          },
+          {
+            "index": 8,
+            "text": ""
+          },
+          {
+            "index": 9,
+            "text": "Die Abstände zwischen den 3 Teilen sind"
+          },
+          {
+            "index": 10,
+            "text": "flexibel anpassbar. Bitte die Abstände"
+          },
+          {
+            "index": 11,
+            "text": "zwischen Überschrift und Textfeld"
+          },
+          {
+            "index": 12,
+            "text": "beibehalten."
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "HINWEIS",
+          "lineSpacingPercent": 100000,
+          "runs": [
+            {
+              "index": 1,
+              "text": "HINWEIS",
+              "fontSize": 42.67,
+              "typeface": "Source Sans Pro",
+              "color": "#A400A5",
+              "bold": true
+            }
+          ]
+        },
+        {
+          "index": 3,
+          "text": "Felder mit eigenen Inhalten füllen.",
+          "lineSpacingPercent": 100000,
+          "runs": [
+            {
+              "index": 1,
+              "text": "Felder mit eigenen Inhalten füllen.",
+              "fontSize": 42.67,
+              "typeface": "Source Sans Pro",
+              "color": "#A400A5"
+            }
+          ]
+        },
+        {
+          "index": 5,
+          "text": "Die Abstände zwischen den 3 Teilen sind flexibel anpassbar. Bitte die Abstände zwischen Überschrift und Textfeld beibehalten. ",
+          "lineSpacingPercent": 100000,
+          "runs": [
+            {
+              "index": 1,
+              "text": "Die Abstände zwischen den 3 Teilen sind flexibel anpassbar. Bitte die Abstände zwischen Überschrift und Textfeld beibehalten. ",
+              "fontSize": 42.67,
+              "typeface": "Source Sans Pro",
+              "color": "#A400A5"
+            }
+          ]
+        }
+      ],
+      "fillColor": "#FFFFFF",
+      "lineWidth": 4.01
+    },
+    {
+      "order": 12,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/vyp0je1s",
+      "id": "31",
+      "bbox": [
+        94.22,
+        895.63,
+        1406.74,
+        73.47
+      ],
+      "geometry": "rect",
+      "text": "Motivation & Hintergrund / Materialien & Methoden",
+      "textPreview": "Motivation & Hintergrund / Materialien & Methoden",
+      "resolvedFontSize": 18.67,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 18.67,
+        "verticalAlignment": "top",
+        "wrap": "none",
+        "autoFit": "resizeShapeToFitText",
+        "insets": {
+          "top": 4.72,
+          "right": 9.45,
+          "bottom": 4.72,
+          "left": 9.45
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Motivation & Hintergrund / Materialien & Methoden"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Motivation & Hintergrund / Materialien & Methoden",
+          "lineSpacingPercent": 100000,
+          "runs": [
+            {
+              "index": 1,
+              "text": "Motivation & Hintergrund / Materialien & Methoden",
+              "fontSize": 53.33,
+              "typeface": "Sora",
+              "color": "#000000",
+              "bold": true
+            }
+          ]
+        }
+      ],
+      "lineWidth": 4.01
+    },
+    {
+      "order": 13,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/wzy1szid",
+      "id": "32",
+      "bbox": [
+        94.49,
+        971.3,
+        2040.83,
+        420.09
+      ],
+      "geometry": "rect",
+      "text": "Beschreibung der Motivation & Hintergrunds des Projekts. \nSofern gegeben: Materialien & Methoden, die eingesetzt werden/wurden.\n\nLorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr.\n",
+      "textPreview": "Beschreibung der Motivation & Hintergrunds des Projekts.  | Sofern gegeben: Materialien & Methoden, die eingesetzt werden/wurden. |  | Lo...",
+      "resolvedFontSize": 18.67,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 18.67,
+        "verticalAlignment": "top",
+        "autoFit": "resizeShapeToFitText",
+        "insets": {
+          "top": 4.72,
+          "right": 9.45,
+          "bottom": 4.72,
+          "left": 9.45
+        }
+      },
+      "textLayout": {
+        "lineCount": 12,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Beschreibung der Motivation & Hintergrunds des Projekts."
+          },
+          {
+            "index": 2,
+            "text": ""
+          },
+          {
+            "index": 3,
+            "text": "Sofern gegeben: Materialien & Methoden, die eingesetzt werden/wurden."
+          },
+          {
+            "index": 4,
+            "text": ""
+          },
+          {
+            "index": 5,
+            "text": ""
+          },
+          {
+            "index": 6,
+            "text": ""
+          },
+          {
+            "index": 7,
+            "text": "Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore"
+          },
+          {
+            "index": 8,
+            "text": "et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea"
+          },
+          {
+            "index": 9,
+            "text": "rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum"
+          },
+          {
+            "index": 10,
+            "text": "dolor sit amet, consetetur sadipscing elitr."
+          },
+          {
+            "index": 11,
+            "text": ""
+          },
+          {
+            "index": 12,
+            "text": ""
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Beschreibung der Motivation & Hintergrunds des Projekts. ",
+          "lineSpacingPercent": 100000,
+          "runs": [
+            {
+              "index": 1,
+              "text": "Beschreibung der Motivation & Hintergrunds des Projekts. ",
+              "fontSize": 42.67,
+              "typeface": "Source Sans Pro",
+              "color": "#000000"
+            }
+          ]
+        },
+        {
+          "index": 2,
+          "text": "Sofern gegeben: Materialien & Methoden, die eingesetzt werden/wurden.",
+          "lineSpacingPercent": 100000,
+          "runs": [
+            {
+              "index": 1,
+              "text": "Sofern gegeben: Materialien & Methoden, die eingesetzt werden/wurden.",
+              "fontSize": 42.67,
+              "typeface": "Source Sans Pro",
+              "color": "#000000"
+            }
+          ]
+        },
+        {
+          "index": 4,
+          "text": "Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr.",
+          "lineSpacingPercent": 100000,
+          "runs": [
+            {
+              "index": 1,
+              "text": "Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr.",
+              "fontSize": 42.67,
+              "typeface": "Source Sans Pro",
+              "color": "#000000"
+            }
+          ]
+        }
+      ],
+      "lineWidth": 4.01
+    },
+    {
+      "order": 14,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/h072l4jy",
+      "id": "33",
+      "bbox": [
+        94.49,
+        2570.65,
+        1511.66,
+        214.79
+      ],
+      "geometry": "rect",
+      "text": "Ergebnisse/Highlights, Anschlusspunkte, nächste Schritte in 3 Stichpunkten\n…\n…",
+      "textPreview": "Ergebnisse/Highlights, Anschlusspunkte, nächste Schritte in 3 Stichpunkten | … | …",
+      "resolvedFontSize": 18.67,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 18.67,
+        "verticalAlignment": "top",
+        "autoFit": "resizeShapeToFitText",
+        "insets": {
+          "top": 4.72,
+          "right": 9.45,
+          "bottom": 4.72,
+          "left": 9.45
+        }
+      },
+      "textLayout": {
+        "lineCount": 5,
+        "lines": [
+          {
+            "index": 1,
+            "text": "•Ergebnisse/Highlights, Anschlusspunkte, nächste Schritte in 3 Stichpunkten"
+          },
+          {
+            "index": 2,
+            "text": ""
+          },
+          {
+            "index": 3,
+            "text": "•…"
+          },
+          {
+            "index": 4,
+            "text": ""
+          },
+          {
+            "index": 5,
+            "text": "•…"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Ergebnisse/Highlights, Anschlusspunkte, nächste Schritte in 3 Stichpunkten",
+          "lineSpacingPercent": 100000,
+          "runs": [
+            {
+              "index": 1,
+              "text": "Ergebnisse/Highlights, Anschlusspunkte, nächste Schritte in 3 Stichpunkten",
+              "fontSize": 42.67,
+              "typeface": "Source Sans Pro",
+              "color": "#000000"
+            }
+          ]
+        },
+        {
+          "index": 2,
+          "text": "…",
+          "lineSpacingPercent": 100000,
+          "runs": [
+            {
+              "index": 1,
+              "text": "…",
+              "fontSize": 42.67,
+              "typeface": "Source Sans Pro",
+              "color": "#000000"
+            }
+          ]
+        },
+        {
+          "index": 3,
+          "text": "…",
+          "lineSpacingPercent": 100000,
+          "runs": [
+            {
+              "index": 1,
+              "text": "…",
+              "fontSize": 42.67,
+              "typeface": "Source Sans Pro",
+              "color": "#000000"
+            }
+          ]
+        }
+      ],
+      "lineWidth": 4.01
+    },
+    {
+      "order": 15,
+      "kind": "image",
+      "scope": "slide",
+      "aid": "im/jih0bmhk",
+      "id": "36",
+      "bbox": [
+        1226.31,
+        1598.66,
+        878.66,
+        724.31
+      ],
+      "contentType": "image/png",
+      "imageCrop": {
+        "left": 0,
+        "top": 0.10951,
+        "right": 0,
+        "bottom": 0.06625
+      },
+      "asset": {
+        "assetId": "/ppt/media/image3.png",
+        "contentType": "image/png",
+        "byteLength": 1911
+      },
+      "fillImage": {
+        "assetId": "/ppt/media/image3.png",
+        "contentType": "image/png",
+        "byteLength": 1911
+      }
+    },
+    {
+      "order": 16,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/j2pkne14",
+      "id": "35",
+      "bbox": [
+        1226.31,
+        2284.8,
+        944.69,
+        86.51
+      ],
+      "geometry": "rect",
+      "text": "Abbildung: Beispiel Bildunterschrift.\n…",
+      "textPreview": "Abbildung: Beispiel Bildunterschrift. | …",
+      "resolvedFontSize": 18.67,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 18.67,
+        "verticalAlignment": "top",
+        "autoFit": "resizeShapeToFitText",
+        "insets": {
+          "top": 4.72,
+          "right": 9.45,
+          "bottom": 4.72,
+          "left": 9.45
+        }
+      },
+      "textLayout": {
+        "lineCount": 3,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Abbildung: Beispiel Bildunterschrift."
+          },
+          {
+            "index": 2,
+            "text": ""
+          },
+          {
+            "index": 3,
+            "text": "…"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Abbildung: Beispiel Bildunterschrift.",
+          "lineSpacingPercent": 100000,
+          "resolvedTextStyle": {
+            "alignment": "justify"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "Abbildung: ",
+              "fontSize": 32,
+              "typeface": "Source Sans Pro",
+              "color": "#000000",
+              "bold": true
+            },
+            {
+              "index": 2,
+              "text": "Beispiel Bildunterschrift.",
+              "fontSize": 32,
+              "typeface": "Source Sans Pro",
+              "color": "#000000"
+            }
+          ]
+        },
+        {
+          "index": 2,
+          "text": "…",
+          "lineSpacingPercent": 100000,
+          "resolvedTextStyle": {
+            "alignment": "justify"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "…",
+              "fontSize": 32,
+              "typeface": "Source Sans Pro",
+              "color": "#000000"
+            }
+          ]
+        }
+      ],
+      "lineWidth": 4.01
+    }
+  ],
+  "composeRuns": []
+}

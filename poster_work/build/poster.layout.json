@@ -1,0 +1,2632 @@
+{
+  "schema": "openai.presentation.layout/v4",
+  "unit": "px",
+  "slide": {
+    "aid": "sl/y90nupkv",
+    "id": "y90nupkv",
+    "slide": 1,
+    "layoutId": "/ppt/slideLayouts/slideLayout1.xml",
+    "layoutName": "Default",
+    "layoutType": "blank",
+    "masterLayoutId": "/ppt/slideMasters/slideMaster1.xml",
+    "backgroundColor": "#FFFFFF",
+    "frame": {
+      "left": 0,
+      "top": 0,
+      "width": 2245,
+      "height": 3178.5
+    }
+  },
+  "theme": {
+    "colorSchemeName": "LibreOffice",
+    "colors": {
+      "accent1": "#18A303",
+      "accent2": "#0369A3",
+      "accent3": "#A33E03",
+      "accent4": "#8E03A3",
+      "accent5": "#C99C00",
+      "accent6": "#C9211E",
+      "dk1": "#000000",
+      "lt1": "#FFFFFF",
+      "dk2": "#000000",
+      "lt2": "#FFFFFF",
+      "hlink": "#0000EE",
+      "folHlink": "#551A8B"
+    },
+    "fontScheme": {
+      "name": "Office",
+      "majorFont": {
+        "latinTypeface": "Arial",
+        "eastAsianTypeface": "DejaVu Sans",
+        "complexScriptTypeface": "DejaVu Sans"
+      },
+      "minorFont": {
+        "latinTypeface": "Arial",
+        "eastAsianTypeface": "DejaVu Sans",
+        "complexScriptTypeface": "DejaVu Sans"
+      }
+    },
+    "typefaces": [
+      "Arial",
+      "Calibri",
+      "Sora",
+      "Sora SemiBold",
+      "Source Sans Pro"
+    ]
+  },
+  "inheritedLayers": [
+    {
+      "scope": "layout",
+      "id": "/ppt/slideLayouts/slideLayout1.xml",
+      "name": "Default",
+      "type": "blank",
+      "parentLayoutId": "/ppt/slideMasters/slideMaster1.xml",
+      "elements": []
+    },
+    {
+      "scope": "master",
+      "id": "/ppt/slideMasters/slideMaster1.xml",
+      "type": "master",
+      "backgroundColor": "#FFFFFF",
+      "elements": [
+        {
+          "order": 1,
+          "kind": "shape",
+          "scope": "master",
+          "aid": "template/master//ppt/slideMasters/slideMaster1.xml/2",
+          "id": "2",
+          "bbox": [
+            444.13,
+            2944.82,
+            549.01,
+            233.5
+          ],
+          "geometry": "rect",
+          "resolvedTextStyle": {
+            "anchor": 2,
+            "verticalAlignment": "middle",
+            "wrap": "none",
+            "autoFit": "none",
+            "insets": {
+              "top": 4.91,
+              "right": 9.45,
+              "bottom": 4.91,
+              "left": 9.45
+            }
+          },
+          "fillColor": "#F2F2F2",
+          "lineWidth": 4.01
+        },
+        {
+          "order": 2,
+          "kind": "shape",
+          "scope": "master",
+          "aid": "template/master//ppt/slideMasters/slideMaster1.xml/5",
+          "id": "5",
+          "bbox": [
+            1490.68,
+            253.15,
+            753.94,
+            502.49
+          ],
+          "rotation": 0,
+          "geometry": "rect",
+          "resolvedTextStyle": {
+            "anchor": 2,
+            "verticalAlignment": "middle",
+            "wrap": "none",
+            "autoFit": "none",
+            "insets": {
+              "top": 4.91,
+              "right": 9.45,
+              "bottom": 4.91,
+              "left": 9.45
+            }
+          },
+          "fillColor": "#FFE681",
+          "lineWidth": 4.01
+        },
+        {
+          "order": 3,
+          "kind": "shape",
+          "scope": "master",
+          "aid": "template/master//ppt/slideMasters/slideMaster1.xml/7",
+          "id": "7",
+          "bbox": [
+            0,
+            0,
+            1743.5,
+            506.15
+          ],
+          "rotation": 0,
+          "geometry": "rect",
+          "resolvedTextStyle": {
+            "anchor": 2,
+            "verticalAlignment": "middle",
+            "wrap": "none",
+            "autoFit": "none",
+            "insets": {
+              "top": 4.91,
+              "right": 9.45,
+              "bottom": 4.91,
+              "left": 9.45
+            }
+          },
+          "fillColor": "#FFDD00",
+          "lineWidth": 4.01
+        },
+        {
+          "order": 4,
+          "kind": "shape",
+          "scope": "master",
+          "aid": "template/master//ppt/slideMasters/slideMaster1.xml/8",
+          "id": "8",
+          "bbox": [
+            1490.65,
+            0,
+            252.81,
+            252.81
+          ],
+          "rotation": 0,
+          "geometry": "rect",
+          "resolvedTextStyle": {
+            "anchor": 2,
+            "verticalAlignment": "middle",
+            "wrap": "none",
+            "autoFit": "none",
+            "insets": {
+              "top": 4.91,
+              "right": 9.45,
+              "bottom": 4.91,
+              "left": 9.45
+            }
+          },
+          "fillColor": "#FFE681",
+          "lineWidth": 4.01
+        },
+        {
+          "order": 5,
+          "kind": "shape",
+          "scope": "master",
+          "aid": "template/master//ppt/slideMasters/slideMaster1.xml/9",
+          "id": "9",
+          "bbox": [
+            1490.65,
+            253.15,
+            252.81,
+            252.81
+          ],
+          "rotation": 0,
+          "geometry": "rect",
+          "resolvedTextStyle": {
+            "anchor": 2,
+            "verticalAlignment": "middle",
+            "wrap": "none",
+            "autoFit": "none",
+            "insets": {
+              "top": 4.91,
+              "right": 9.45,
+              "bottom": 4.91,
+              "left": 9.45
+            }
+          },
+          "fillColor": "#FFF2B9",
+          "lineWidth": 4.01
+        },
+        {
+          "order": 6,
+          "kind": "shape",
+          "scope": "master",
+          "aid": "template/master//ppt/slideMasters/slideMaster1.xml/10",
+          "id": "10",
+          "bbox": [
+            1550,
+            535,
+            650,
+            190
+          ],
+          "rotation": 0,
+          "geometry": "rect",
+          "text": "7th Scientific\nInstitute Colloquium",
+          "textPreview": "7th Scientific | Institute Colloquium",
+          "resolvedTextStyle": {
+            "anchor": 1,
+            "fontSize": 53,
+            "typeface": "Sora",
+            "color": "#111111",
+            "bold": true,
+            "alignment": "left",
+            "verticalAlignment": "top",
+            "wrap": "square",
+            "autoFit": "none",
+            "insets": {
+              "top": 0,
+              "right": 0,
+              "bottom": 0,
+              "left": 0
+            }
+          },
+          "paragraphs": [
+            {
+              "index": 1,
+              "text": "7th Scientific",
+              "lineSpacingPercent": 100000,
+              "resolvedTextStyle": {
+                "fontSize": 53,
+                "typeface": "Sora",
+                "color": "#111111",
+                "bold": true,
+                "alignment": "left"
+              },
+              "runs": [
+                {
+                  "index": 1,
+                  "text": "7th Scientific",
+                  "fontSize": 53,
+                  "typeface": "Sora",
+                  "color": "#111111",
+                  "bold": true,
+                  "alignment": "left"
+                }
+              ]
+            },
+            {
+              "index": 2,
+              "text": "Institute Colloquium",
+              "lineSpacingPercent": 100000,
+              "resolvedTextStyle": {
+                "fontSize": 53,
+                "typeface": "Sora",
+                "color": "#111111",
+                "bold": true,
+                "alignment": "left"
+              },
+              "runs": [
+                {
+                  "index": 1,
+                  "text": "Institute Colloquium",
+                  "fontSize": 53,
+                  "typeface": "Sora",
+                  "color": "#111111",
+                  "bold": true,
+                  "alignment": "left"
+                }
+              ]
+            }
+          ],
+          "lineWidth": 4.01
+        },
+        {
+          "order": 7,
+          "kind": "shape",
+          "scope": "master",
+          "aid": "template/master//ppt/slideMasters/slideMaster1.xml/12",
+          "id": "12",
+          "bbox": [
+            1185,
+            2910,
+            1060,
+            268.5
+          ],
+          "rotation": 0,
+          "geometry": "rect",
+          "resolvedTextStyle": {
+            "anchor": 2,
+            "verticalAlignment": "middle",
+            "wrap": "none",
+            "autoFit": "none",
+            "insets": {
+              "top": 4.91,
+              "right": 9.45,
+              "bottom": 4.91,
+              "left": 9.45
+            }
+          },
+          "fillColor": "#FFDD00",
+          "lineWidth": 4.01
+        },
+        {
+          "order": 8,
+          "kind": "shape",
+          "scope": "master",
+          "aid": "template/master//ppt/slideMasters/slideMaster1.xml/13",
+          "id": "13",
+          "bbox": [
+            1992,
+            2850,
+            253,
+            60
+          ],
+          "rotation": 0,
+          "geometry": "rect",
+          "resolvedTextStyle": {
+            "anchor": 2,
+            "verticalAlignment": "middle",
+            "wrap": "none",
+            "autoFit": "none",
+            "insets": {
+              "top": 4.91,
+              "right": 9.45,
+              "bottom": 4.91,
+              "left": 9.45
+            }
+          },
+          "fillColor": "#FFE681",
+          "lineWidth": 4.01
+        },
+        {
+          "order": 9,
+          "kind": "shape",
+          "scope": "master",
+          "aid": "template/master//ppt/slideMasters/slideMaster1.xml/14",
+          "id": "14",
+          "bbox": [
+            1908.66,
+            2671.97,
+            336,
+            506.15
+          ],
+          "rotation": 0,
+          "geometry": "rect",
+          "resolvedTextStyle": {
+            "anchor": 2,
+            "verticalAlignment": "middle",
+            "wrap": "none",
+            "autoFit": "none",
+            "insets": {
+              "top": 4.91,
+              "right": 9.45,
+              "bottom": 4.91,
+              "left": 9.45
+            }
+          },
+          "lineWidth": 0
+        },
+        {
+          "order": 10,
+          "kind": "shape",
+          "scope": "master",
+          "aid": "template/master//ppt/slideMasters/slideMaster1.xml/15",
+          "id": "15",
+          "bbox": [
+            466,
+            2975,
+            510,
+            160
+          ],
+          "geometry": "rect",
+          "text": "Institute for Information Systems\nHof University of Applied Sciences\nAlfons-Goppel-Platz 1 · 95028 Hof\nwww.hof-university.de",
+          "textPreview": "Institute for Information Systems | Hof University of Applied Sciences | Alfons-Goppel-Platz 1 · 95028 Hof | www.hof-university.de",
+          "resolvedTextStyle": {
+            "anchor": 1,
+            "fontSize": 27,
+            "typeface": "Source Sans Pro",
+            "color": "#111111",
+            "alignment": "left",
+            "verticalAlignment": "top",
+            "wrap": "square",
+            "autoFit": "none",
+            "insets": {
+              "top": 0,
+              "right": 0,
+              "bottom": 0,
+              "left": 0
+            }
+          },
+          "paragraphs": [
+            {
+              "index": 1,
+              "text": "Institute for Information Systems",
+              "lineSpacingPercent": 100000,
+              "resolvedTextStyle": {
+                "fontSize": 27,
+                "typeface": "Source Sans Pro",
+                "color": "#111111",
+                "alignment": "left"
+              },
+              "runs": [
+                {
+                  "index": 1,
+                  "text": "Institute for Information Systems",
+                  "fontSize": 27,
+                  "typeface": "Source Sans Pro",
+                  "color": "#111111",
+                  "alignment": "left"
+                }
+              ]
+            },
+            {
+              "index": 2,
+              "text": "Hof University of Applied Sciences",
+              "lineSpacingPercent": 100000,
+              "resolvedTextStyle": {
+                "fontSize": 27,
+                "typeface": "Source Sans Pro",
+                "color": "#111111",
+                "alignment": "left"
+              },
+              "runs": [
+                {
+                  "index": 1,
+                  "text": "Hof University of Applied Sciences",
+                  "fontSize": 27,
+                  "typeface": "Source Sans Pro",
+                  "color": "#111111",
+                  "alignment": "left"
+                }
+              ]
+            },
+            {
+              "index": 3,
+              "text": "Alfons-Goppel-Platz 1 · 95028 Hof",
+              "lineSpacingPercent": 100000,
+              "resolvedTextStyle": {
+                "fontSize": 27,
+                "typeface": "Source Sans Pro",
+                "color": "#111111",
+                "alignment": "left"
+              },
+              "runs": [
+                {
+                  "index": 1,
+                  "text": "Alfons-Goppel-Platz 1 · 95028 Hof",
+                  "fontSize": 27,
+                  "typeface": "Source Sans Pro",
+                  "color": "#111111",
+                  "alignment": "left"
+                }
+              ]
+            },
+            {
+              "index": 4,
+              "text": "www.hof-university.de",
+              "lineSpacingPercent": 100000,
+              "resolvedTextStyle": {
+                "fontSize": 27,
+                "typeface": "Source Sans Pro",
+                "color": "#111111",
+                "alignment": "left"
+              },
+              "runs": [
+                {
+                  "index": 1,
+                  "text": "www.hof-university.de",
+                  "fontSize": 27,
+                  "typeface": "Source Sans Pro",
+                  "color": "#111111",
+                  "alignment": "left"
+                }
+              ]
+            }
+          ],
+          "lineWidth": 4.01
+        },
+        {
+          "order": 11,
+          "kind": "image",
+          "scope": "master",
+          "aid": "template/master//ppt/slideMasters/slideMaster1.xml/20",
+          "id": "20",
+          "bbox": [
+            2.15,
+            2941.3,
+            399.16,
+            233.5
+          ],
+          "contentType": "image/png",
+          "asset": {
+            "assetId": "/ppt/media/image1.png",
+            "contentType": "image/png",
+            "byteLength": 23729
+          },
+          "fillImage": {
+            "assetId": "/ppt/media/image1.png",
+            "contentType": "image/png",
+            "byteLength": 23729
+          }
+        },
+        {
+          "order": 12,
+          "kind": "image",
+          "scope": "master",
+          "aid": "template/master//ppt/slideMasters/slideMaster1.xml/21",
+          "id": "21",
+          "bbox": [
+            1766.48,
+            54.46,
+            359.85,
+            138.86
+          ],
+          "contentType": "image/png",
+          "asset": {
+            "assetId": "/ppt/media/image2.png",
+            "contentType": "image/png",
+            "byteLength": 9399
+          },
+          "fillImage": {
+            "assetId": "/ppt/media/image2.png",
+            "contentType": "image/png",
+            "byteLength": 9399
+          }
+        },
+        {
+          "order": 13,
+          "kind": "shape",
+          "scope": "master",
+          "aid": "template/master//ppt/slideMasters/slideMaster1.xml/18",
+          "id": "18",
+          "name": "PlaceHolder 1",
+          "bbox": [
+            112.1,
+            126.77,
+            2020.35,
+            530.68
+          ],
+          "geometry": "rect",
+          "text": "Click to edit the title text format",
+          "textPreview": "Click to edit the title text format",
+          "resolvedTextStyle": {
+            "anchor": 2,
+            "verticalAlignment": "middle",
+            "autoFit": "none",
+            "insets": {
+              "top": 0,
+              "right": 0,
+              "bottom": 0,
+              "left": 0
+            }
+          },
+          "paragraphs": [
+            {
+              "index": 1,
+              "text": "Click to edit the title text format",
+              "lineSpacingPercent": 83000,
+              "resolvedTextStyle": {
+                "alignment": "center"
+              },
+              "runs": [
+                {
+                  "index": 1,
+                  "text": "Click to edit the title text format",
+                  "fontSize": 58.67,
+                  "typeface": "Calibri",
+                  "color": "#000000"
+                }
+              ]
+            }
+          ],
+          "lineWidth": 0
+        },
+        {
+          "order": 14,
+          "kind": "shape",
+          "scope": "master",
+          "aid": "template/master//ppt/slideMasters/slideMaster1.xml/19",
+          "id": "19",
+          "name": "PlaceHolder 2",
+          "bbox": [
+            112.1,
+            743.62,
+            2020.35,
+            1843.31
+          ],
+          "geometry": "rect",
+          "text": "Click to edit the outline text format\nSecond Outline Level\nThird Outline Level\nFourth Outline Level\nFifth Outline Level\nSixth Outline Level\nSeventh Outline Level",
+          "textPreview": "Click to edit the outline text format | Second Outline Level | Third Outline Level | Fourth Outline Level | Fifth Outline Level | Sixth O...",
+          "resolvedTextStyle": {
+            "anchor": 1,
+            "verticalAlignment": "top",
+            "autoFit": "shrinkText",
+            "insets": {
+              "top": 7.22,
+              "right": 0,
+              "bottom": 0,
+              "left": 0
+            }
+          },
+          "paragraphs": [
+            {
+              "index": 1,
+              "text": "Click to edit the outline text format",
+              "lineSpacingPercent": 83000,
+              "resolvedTextStyle": {
+                "alignment": "left"
+              },
+              "runs": [
+                {
+                  "index": 1,
+                  "text": "Click to edit the outline text format",
+                  "fontSize": 42.67,
+                  "typeface": "Calibri",
+                  "color": "#000000"
+                }
+              ]
+            },
+            {
+              "index": 2,
+              "text": "Second Outline Level",
+              "lineSpacingPercent": 83000,
+              "resolvedTextStyle": {
+                "alignment": "left"
+              },
+              "runs": [
+                {
+                  "index": 1,
+                  "text": "Second Outline Level",
+                  "fontSize": 42.67,
+                  "typeface": "Calibri",
+                  "color": "#000000"
+                }
+              ]
+            },
+            {
+              "index": 3,
+              "text": "Third Outline Level",
+              "lineSpacingPercent": 83000,
+              "resolvedTextStyle": {
+                "alignment": "left"
+              },
+              "runs": [
+                {
+                  "index": 1,
+                  "text": "Third Outline Level",
+                  "fontSize": 42.67,
+                  "typeface": "Calibri",
+                  "color": "#000000"
+                }
+              ]
+            },
+            {
+              "index": 4,
+              "text": "Fourth Outline Level",
+              "lineSpacingPercent": 83000,
+              "resolvedTextStyle": {
+                "alignment": "left"
+              },
+              "runs": [
+                {
+                  "index": 1,
+                  "text": "Fourth Outline Level",
+                  "fontSize": 42.67,
+                  "typeface": "Calibri",
+                  "color": "#000000"
+                }
+              ]
+            },
+            {
+              "index": 5,
+              "text": "Fifth Outline Level",
+              "lineSpacingPercent": 83000,
+              "resolvedTextStyle": {
+                "alignment": "left"
+              },
+              "runs": [
+                {
+                  "index": 1,
+                  "text": "Fifth Outline Level",
+                  "fontSize": 42.67,
+                  "typeface": "Calibri",
+                  "color": "#000000"
+                }
+              ]
+            },
+            {
+              "index": 6,
+              "text": "Sixth Outline Level",
+              "lineSpacingPercent": 83000,
+              "resolvedTextStyle": {
+                "alignment": "left"
+              },
+              "runs": [
+                {
+                  "index": 1,
+                  "text": "Sixth Outline Level",
+                  "fontSize": 42.67,
+                  "typeface": "Calibri",
+                  "color": "#000000"
+                }
+              ]
+            },
+            {
+              "index": 7,
+              "text": "Seventh Outline Level",
+              "lineSpacingPercent": 83000,
+              "resolvedTextStyle": {
+                "alignment": "left"
+              },
+              "runs": [
+                {
+                  "index": 1,
+                  "text": "Seventh Outline Level",
+                  "fontSize": 42.67,
+                  "typeface": "Calibri",
+                  "color": "#000000"
+                }
+              ]
+            }
+          ],
+          "lineWidth": 0
+        }
+      ]
+    }
+  ],
+  "elements": [
+    {
+      "order": 1,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/1cvuxc7e",
+      "id": "20",
+      "bbox": [
+        0,
+        0,
+        1,
+        1
+      ],
+      "geometry": "rect",
+      "resolvedFontSize": 18.67,
+      "resolvedTextStyle": {
+        "anchor": 2,
+        "fontSize": 18.67,
+        "verticalAlignment": "middle",
+        "wrap": "none",
+        "autoFit": "none",
+        "insets": {
+          "top": 4.91,
+          "right": 9.45,
+          "bottom": 4.91,
+          "left": 9.45
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": ""
+          }
+        ]
+      },
+      "lineWidth": 0
+    },
+    {
+      "order": 2,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/0bmd476t",
+      "id": "21",
+      "bbox": [
+        104,
+        130,
+        1310,
+        265.74
+      ],
+      "geometry": "rect",
+      "text": "Cooperative Robots\nfor Smart Factories",
+      "textPreview": "Cooperative Robots | for Smart Factories",
+      "resolvedFontSize": 85,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 85,
+        "typeface": "Sora SemiBold",
+        "color": "#111111",
+        "bold": true,
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "wrap": "square",
+        "autoFit": "none",
+        "insets": {
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        }
+      },
+      "textLayout": {
+        "lineCount": 3,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Cooperative Robots"
+          },
+          {
+            "index": 2,
+            "text": ""
+          },
+          {
+            "index": 3,
+            "text": "for Smart Factories"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Cooperative Robots",
+          "lineSpacingPercent": 100000,
+          "resolvedTextStyle": {
+            "fontSize": 85,
+            "typeface": "Sora SemiBold",
+            "color": "#111111",
+            "bold": true,
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "Cooperative Robots",
+              "fontSize": 85,
+              "typeface": "Sora SemiBold",
+              "color": "#111111",
+              "bold": true,
+              "alignment": "left"
+            }
+          ]
+        },
+        {
+          "index": 2,
+          "text": "for Smart Factories",
+          "lineSpacingPercent": 100000,
+          "resolvedTextStyle": {
+            "fontSize": 85,
+            "typeface": "Sora SemiBold",
+            "color": "#111111",
+            "bold": true,
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "for Smart Factories",
+              "fontSize": 85,
+              "typeface": "Sora SemiBold",
+              "color": "#111111",
+              "bold": true,
+              "alignment": "left"
+            }
+          ]
+        }
+      ],
+      "lineWidth": 4.01
+    },
+    {
+      "order": 3,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/zadcv2p8",
+      "id": "22",
+      "bbox": [
+        104,
+        377,
+        1300,
+        89.45
+      ],
+      "geometry": "rect",
+      "text": "An open-source logistics integration blueprint",
+      "textPreview": "An open-source logistics integration blueprint",
+      "resolvedFontSize": 43,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 43,
+        "typeface": "Sora",
+        "color": "#111111",
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "wrap": "square",
+        "autoFit": "none",
+        "insets": {
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "An open-source logistics integration blueprint"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "An open-source logistics integration blueprint",
+          "lineSpacingPercent": 100000,
+          "resolvedTextStyle": {
+            "fontSize": 43,
+            "typeface": "Sora",
+            "color": "#111111",
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "An open-source logistics integration blueprint",
+              "fontSize": 43,
+              "typeface": "Sora",
+              "color": "#111111",
+              "alignment": "left"
+            }
+          ]
+        }
+      ],
+      "lineWidth": 4.01
+    },
+    {
+      "order": 4,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/e94v2hon",
+      "id": "23",
+      "bbox": [
+        104,
+        553,
+        1250,
+        73.45
+      ],
+      "geometry": "rect",
+      "text": "Abstract",
+      "textPreview": "Abstract",
+      "resolvedFontSize": 53,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 53,
+        "typeface": "Sora",
+        "color": "#111111",
+        "bold": true,
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "wrap": "square",
+        "autoFit": "none",
+        "insets": {
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Abstract"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Abstract",
+          "lineSpacingPercent": 100000,
+          "resolvedTextStyle": {
+            "fontSize": 53,
+            "typeface": "Sora",
+            "color": "#111111",
+            "bold": true,
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "Abstract",
+              "fontSize": 53,
+              "typeface": "Sora",
+              "color": "#111111",
+              "bold": true,
+              "alignment": "left"
+            }
+          ]
+        }
+      ],
+      "lineWidth": 4.01
+    },
+    {
+      "order": 5,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/90ve1w7q",
+      "id": "24",
+      "bbox": [
+        104,
+        634,
+        1340,
+        216.73
+      ],
+      "geometry": "rect",
+      "text": "TurtleBot 4 and MyCobot 280 cooperate with a Siemens\nsmart factory. Modular software connects navigation,\nvision and manipulation using onboard sensors,\nwithout external tracking or proprietary middleware.",
+      "textPreview": "TurtleBot 4 and MyCobot 280 cooperate with a Siemens | smart factory. Modular software connects navigation, | vision and manipulation usi...",
+      "resolvedFontSize": 43,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 43,
+        "typeface": "Source Sans Pro",
+        "color": "#111111",
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "wrap": "square",
+        "autoFit": "none",
+        "insets": {
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        }
+      },
+      "textLayout": {
+        "lineCount": 7,
+        "lines": [
+          {
+            "index": 1,
+            "text": "TurtleBot 4 and MyCobot 280 cooperate with a Siemens"
+          },
+          {
+            "index": 2,
+            "text": ""
+          },
+          {
+            "index": 3,
+            "text": "smart factory. Modular software connects navigation,"
+          },
+          {
+            "index": 4,
+            "text": ""
+          },
+          {
+            "index": 5,
+            "text": "vision and manipulation using onboard sensors,"
+          },
+          {
+            "index": 6,
+            "text": ""
+          },
+          {
+            "index": 7,
+            "text": "without external tracking or proprietary middleware."
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "TurtleBot 4 and MyCobot 280 cooperate with a Siemens",
+          "lineSpacingPercent": 100000,
+          "resolvedTextStyle": {
+            "fontSize": 43,
+            "typeface": "Source Sans Pro",
+            "color": "#111111",
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "TurtleBot 4 and MyCobot 280 cooperate with a Siemens",
+              "fontSize": 43,
+              "typeface": "Source Sans Pro",
+              "color": "#111111",
+              "alignment": "left"
+            }
+          ]
+        },
+        {
+          "index": 2,
+          "text": "smart factory. Modular software connects navigation,",
+          "lineSpacingPercent": 100000,
+          "resolvedTextStyle": {
+            "fontSize": 43,
+            "typeface": "Source Sans Pro",
+            "color": "#111111",
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "smart factory. Modular software connects navigation,",
+              "fontSize": 43,
+              "typeface": "Source Sans Pro",
+              "color": "#111111",
+              "alignment": "left"
+            }
+          ]
+        },
+        {
+          "index": 3,
+          "text": "vision and manipulation using onboard sensors,",
+          "lineSpacingPercent": 100000,
+          "resolvedTextStyle": {
+            "fontSize": 43,
+            "typeface": "Source Sans Pro",
+            "color": "#111111",
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "vision and manipulation using onboard sensors,",
+              "fontSize": 43,
+              "typeface": "Source Sans Pro",
+              "color": "#111111",
+              "alignment": "left"
+            }
+          ]
+        },
+        {
+          "index": 4,
+          "text": "without external tracking or proprietary middleware.",
+          "lineSpacingPercent": 100000,
+          "resolvedTextStyle": {
+            "fontSize": 43,
+            "typeface": "Source Sans Pro",
+            "color": "#111111",
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "without external tracking or proprietary middleware.",
+              "fontSize": 43,
+              "typeface": "Source Sans Pro",
+              "color": "#111111",
+              "alignment": "left"
+            }
+          ]
+        }
+      ],
+      "lineWidth": 4.01
+    },
+    {
+      "order": 6,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/ozmd8r65",
+      "id": "25",
+      "bbox": [
+        104,
+        1510,
+        1040,
+        75
+      ],
+      "geometry": "rect",
+      "text": "Three logistics missions",
+      "textPreview": "Three logistics missions",
+      "resolvedFontSize": 53,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 53,
+        "typeface": "Sora",
+        "color": "#111111",
+        "bold": true,
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "wrap": "square",
+        "autoFit": "none",
+        "insets": {
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Three logistics missions"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Three logistics missions",
+          "lineSpacingPercent": 100000,
+          "resolvedTextStyle": {
+            "fontSize": 53,
+            "typeface": "Sora",
+            "color": "#111111",
+            "bold": true,
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "Three logistics missions",
+              "fontSize": 53,
+              "typeface": "Sora",
+              "color": "#111111",
+              "bold": true,
+              "alignment": "left"
+            }
+          ]
+        }
+      ],
+      "lineWidth": 4.01
+    },
+    {
+      "order": 7,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/nydczmpk",
+      "id": "26",
+      "bbox": [
+        104,
+        1600,
+        990,
+        645
+      ],
+      "geometry": "rect",
+      "text": "Product delivery\nIdentify the product, collect it and deliver\nit to the destination for its colour.\n\nDefective-component retrieval\nTransport rejected components to an\ninspection area.\n\nMaterial restocking\nBring supplies to the factory inventory\nstation.",
+      "textPreview": "Product delivery | Identify the product, collect it and deliver | it to the destination for its colour. |  | Defective-component retrieva...",
+      "resolvedFontSize": 43,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 43,
+        "typeface": "Source Sans Pro",
+        "color": "#111111",
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "wrap": "square",
+        "autoFit": "none",
+        "insets": {
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        }
+      },
+      "textLayout": {
+        "lineCount": 21,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Product delivery"
+          },
+          {
+            "index": 2,
+            "text": ""
+          },
+          {
+            "index": 3,
+            "text": "Identify the product, collect it and deliver"
+          },
+          {
+            "index": 4,
+            "text": ""
+          },
+          {
+            "index": 5,
+            "text": "it to the destination for its colour."
+          },
+          {
+            "index": 6,
+            "text": ""
+          },
+          {
+            "index": 7,
+            "text": ""
+          },
+          {
+            "index": 8,
+            "text": ""
+          },
+          {
+            "index": 9,
+            "text": "Defective-component retrieval"
+          },
+          {
+            "index": 10,
+            "text": ""
+          },
+          {
+            "index": 11,
+            "text": "Transport rejected components to an"
+          },
+          {
+            "index": 12,
+            "text": ""
+          },
+          {
+            "index": 13,
+            "text": "inspection area."
+          },
+          {
+            "index": 14,
+            "text": ""
+          },
+          {
+            "index": 15,
+            "text": ""
+          },
+          {
+            "index": 16,
+            "text": ""
+          },
+          {
+            "index": 17,
+            "text": "Material restocking"
+          },
+          {
+            "index": 18,
+            "text": ""
+          },
+          {
+            "index": 19,
+            "text": "Bring supplies to the factory inventory"
+          },
+          {
+            "index": 20,
+            "text": ""
+          },
+          {
+            "index": 21,
+            "text": "station."
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Product delivery",
+          "lineSpacingPercent": 100000,
+          "resolvedTextStyle": {
+            "fontSize": 43,
+            "typeface": "Source Sans Pro",
+            "color": "#111111",
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "Product delivery",
+              "fontSize": 43,
+              "typeface": "Source Sans Pro",
+              "color": "#111111",
+              "bold": true,
+              "alignment": "left"
+            }
+          ]
+        },
+        {
+          "index": 2,
+          "text": "Identify the product, collect it and deliver",
+          "lineSpacingPercent": 100000,
+          "resolvedTextStyle": {
+            "fontSize": 43,
+            "typeface": "Source Sans Pro",
+            "color": "#111111",
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "Identify the product, collect it and deliver",
+              "fontSize": 43,
+              "typeface": "Source Sans Pro",
+              "color": "#111111",
+              "alignment": "left"
+            }
+          ]
+        },
+        {
+          "index": 3,
+          "text": "it to the destination for its colour.",
+          "lineSpacingPercent": 100000,
+          "resolvedTextStyle": {
+            "fontSize": 43,
+            "typeface": "Source Sans Pro",
+            "color": "#111111",
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "it to the destination for its colour.",
+              "fontSize": 43,
+              "typeface": "Source Sans Pro",
+              "color": "#111111",
+              "alignment": "left"
+            }
+          ]
+        },
+        {
+          "index": 5,
+          "text": "Defective-component retrieval",
+          "lineSpacingPercent": 100000,
+          "resolvedTextStyle": {
+            "fontSize": 43,
+            "typeface": "Source Sans Pro",
+            "color": "#111111",
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "Defective-component retrieval",
+              "fontSize": 43,
+              "typeface": "Source Sans Pro",
+              "color": "#111111",
+              "bold": true,
+              "alignment": "left"
+            }
+          ]
+        },
+        {
+          "index": 6,
+          "text": "Transport rejected components to an",
+          "lineSpacingPercent": 100000,
+          "resolvedTextStyle": {
+            "fontSize": 43,
+            "typeface": "Source Sans Pro",
+            "color": "#111111",
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "Transport rejected components to an",
+              "fontSize": 43,
+              "typeface": "Source Sans Pro",
+              "color": "#111111",
+              "alignment": "left"
+            }
+          ]
+        },
+        {
+          "index": 7,
+          "text": "inspection area.",
+          "lineSpacingPercent": 100000,
+          "resolvedTextStyle": {
+            "fontSize": 43,
+            "typeface": "Source Sans Pro",
+            "color": "#111111",
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "inspection area.",
+              "fontSize": 43,
+              "typeface": "Source Sans Pro",
+              "color": "#111111",
+              "alignment": "left"
+            }
+          ]
+        },
+        {
+          "index": 9,
+          "text": "Material restocking",
+          "lineSpacingPercent": 100000,
+          "resolvedTextStyle": {
+            "fontSize": 43,
+            "typeface": "Source Sans Pro",
+            "color": "#111111",
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "Material restocking",
+              "fontSize": 43,
+              "typeface": "Source Sans Pro",
+              "color": "#111111",
+              "bold": true,
+              "alignment": "left"
+            }
+          ]
+        },
+        {
+          "index": 10,
+          "text": "Bring supplies to the factory inventory",
+          "lineSpacingPercent": 100000,
+          "resolvedTextStyle": {
+            "fontSize": 43,
+            "typeface": "Source Sans Pro",
+            "color": "#111111",
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "Bring supplies to the factory inventory",
+              "fontSize": 43,
+              "typeface": "Source Sans Pro",
+              "color": "#111111",
+              "alignment": "left"
+            }
+          ]
+        },
+        {
+          "index": 11,
+          "text": "station.",
+          "lineSpacingPercent": 100000,
+          "resolvedTextStyle": {
+            "fontSize": 43,
+            "typeface": "Source Sans Pro",
+            "color": "#111111",
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "station.",
+              "fontSize": 43,
+              "typeface": "Source Sans Pro",
+              "color": "#111111",
+              "alignment": "left"
+            }
+          ]
+        }
+      ],
+      "lineWidth": 4.01
+    },
+    {
+      "order": 8,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/mx4v6hoz",
+      "id": "27",
+      "bbox": [
+        104,
+        2590,
+        1650,
+        75
+      ],
+      "geometry": "rect",
+      "text": "Contribution & next steps",
+      "textPreview": "Contribution & next steps",
+      "resolvedFontSize": 53,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 53,
+        "typeface": "Sora",
+        "color": "#111111",
+        "bold": true,
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "wrap": "square",
+        "autoFit": "none",
+        "insets": {
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Contribution & next steps"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Contribution & next steps",
+          "lineSpacingPercent": 100000,
+          "resolvedTextStyle": {
+            "fontSize": 53,
+            "typeface": "Sora",
+            "color": "#111111",
+            "bold": true,
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "Contribution & next steps",
+              "fontSize": 53,
+              "typeface": "Sora",
+              "color": "#111111",
+              "bold": true,
+              "alignment": "left"
+            }
+          ]
+        }
+      ],
+      "lineWidth": 4.01
+    },
+    {
+      "order": 9,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/p4bu5s76",
+      "id": "28",
+      "bbox": [
+        0,
+        0,
+        1,
+        1
+      ],
+      "geometry": "rect",
+      "resolvedFontSize": 18.67,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 18.67,
+        "verticalAlignment": "top",
+        "autoFit": "resizeShapeToFitText",
+        "insets": {
+          "top": 4.72,
+          "right": 9.45,
+          "bottom": 4.72,
+          "left": 9.45
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": ""
+          }
+        ]
+      },
+      "lineWidth": 0
+    },
+    {
+      "order": 10,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/432dwn6l",
+      "id": "29",
+      "bbox": [
+        1215,
+        3010,
+        950,
+        133
+      ],
+      "geometry": "rect",
+      "text": "Matheus Hipólito Carvalho\nEESC–USP / Hof University of Applied Sciences\nmatheus.carvalho@hof-university.de",
+      "textPreview": "Matheus Hipólito Carvalho | EESC–USP / Hof University of Applied Sciences | matheus.carvalho@hof-university.de",
+      "resolvedFontSize": 30,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 30,
+        "typeface": "Source Sans Pro",
+        "color": "#111111",
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "wrap": "square",
+        "autoFit": "none",
+        "insets": {
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        }
+      },
+      "textLayout": {
+        "lineCount": 5,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Matheus Hipólito Carvalho"
+          },
+          {
+            "index": 2,
+            "text": ""
+          },
+          {
+            "index": 3,
+            "text": "EESC–USP / Hof University of Applied Sciences"
+          },
+          {
+            "index": 4,
+            "text": ""
+          },
+          {
+            "index": 5,
+            "text": "matheus.carvalho@hof-university.de"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Matheus Hipólito Carvalho",
+          "lineSpacingPercent": 100000,
+          "resolvedTextStyle": {
+            "fontSize": 30,
+            "typeface": "Source Sans Pro",
+            "color": "#111111",
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "Matheus Hipólito Carvalho",
+              "fontSize": 30,
+              "typeface": "Source Sans Pro",
+              "color": "#111111",
+              "alignment": "left"
+            }
+          ]
+        },
+        {
+          "index": 2,
+          "text": "EESC–USP / Hof University of Applied Sciences",
+          "lineSpacingPercent": 100000,
+          "resolvedTextStyle": {
+            "fontSize": 30,
+            "typeface": "Source Sans Pro",
+            "color": "#111111",
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "EESC–USP / Hof University of Applied Sciences",
+              "fontSize": 30,
+              "typeface": "Source Sans Pro",
+              "color": "#111111",
+              "alignment": "left"
+            }
+          ]
+        },
+        {
+          "index": 3,
+          "text": "matheus.carvalho@hof-university.de",
+          "lineSpacingPercent": 100000,
+          "resolvedTextStyle": {
+            "fontSize": 30,
+            "typeface": "Source Sans Pro",
+            "color": "#111111",
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "matheus.carvalho@hof-university.de",
+              "fontSize": 30,
+              "typeface": "Source Sans Pro",
+              "color": "#111111",
+              "alignment": "left"
+            }
+          ]
+        }
+      ],
+      "lineWidth": 4.01
+    },
+    {
+      "order": 11,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/uxgjq907",
+      "id": "30",
+      "bbox": [
+        0,
+        0,
+        1,
+        1
+      ],
+      "geometry": "rect",
+      "resolvedFontSize": 18.67,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 18.67,
+        "verticalAlignment": "top",
+        "autoFit": "resizeShapeToFitText",
+        "insets": {
+          "top": 4.72,
+          "right": 9.45,
+          "bottom": 4.72,
+          "left": 9.45
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": ""
+          }
+        ]
+      },
+      "lineWidth": 0
+    },
+    {
+      "order": 12,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/vyp0je1s",
+      "id": "31",
+      "bbox": [
+        104,
+        907,
+        1000,
+        75
+      ],
+      "geometry": "rect",
+      "text": "System & methods",
+      "textPreview": "System & methods",
+      "resolvedFontSize": 53,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 53,
+        "typeface": "Sora",
+        "color": "#111111",
+        "bold": true,
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "wrap": "square",
+        "autoFit": "none",
+        "insets": {
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "System & methods"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "System & methods",
+          "lineSpacingPercent": 100000,
+          "resolvedTextStyle": {
+            "fontSize": 53,
+            "typeface": "Sora",
+            "color": "#111111",
+            "bold": true,
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "System & methods",
+              "fontSize": 53,
+              "typeface": "Sora",
+              "color": "#111111",
+              "bold": true,
+              "alignment": "left"
+            }
+          ]
+        }
+      ],
+      "lineWidth": 4.01
+    },
+    {
+      "order": 13,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/wzy1szid",
+      "id": "32",
+      "bbox": [
+        104,
+        992,
+        995,
+        476.2
+      ],
+      "geometry": "rect",
+      "text": "TurtleBot 4: ROS 2 Jazzy, Nav2 and AMCL\nfor mapping, localisation and delivery.\n\nMyCobot 280: Jetson Nano, MoveIt 2\nand camera-based product recognition.\n\nFactory gateway: OPC UA links the\nrobotics stack to Siemens S7-1500 PLCs.\nA shared dashboard coordinates operation.",
+      "textPreview": "TurtleBot 4: ROS 2 Jazzy, Nav2 and AMCL | for mapping, localisation and delivery. |  | MyCobot 280: Jetson Nano, MoveIt 2 | and camera-ba...",
+      "resolvedFontSize": 43,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 43,
+        "typeface": "Source Sans Pro",
+        "color": "#111111",
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "wrap": "square",
+        "autoFit": "none",
+        "insets": {
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        }
+      },
+      "textLayout": {
+        "lineCount": 17,
+        "lines": [
+          {
+            "index": 1,
+            "text": "TurtleBot 4: ROS 2 Jazzy, Nav2 and AMCL"
+          },
+          {
+            "index": 2,
+            "text": ""
+          },
+          {
+            "index": 3,
+            "text": "for mapping, localisation and delivery."
+          },
+          {
+            "index": 4,
+            "text": ""
+          },
+          {
+            "index": 5,
+            "text": ""
+          },
+          {
+            "index": 6,
+            "text": ""
+          },
+          {
+            "index": 7,
+            "text": "MyCobot 280: Jetson Nano, MoveIt 2"
+          },
+          {
+            "index": 8,
+            "text": ""
+          },
+          {
+            "index": 9,
+            "text": "and camera-based product recognition."
+          },
+          {
+            "index": 10,
+            "text": ""
+          },
+          {
+            "index": 11,
+            "text": ""
+          },
+          {
+            "index": 12,
+            "text": ""
+          },
+          {
+            "index": 13,
+            "text": "Factory gateway: OPC UA links the"
+          },
+          {
+            "index": 14,
+            "text": ""
+          },
+          {
+            "index": 15,
+            "text": "robotics stack to Siemens S7-1500 PLCs."
+          },
+          {
+            "index": 16,
+            "text": ""
+          },
+          {
+            "index": 17,
+            "text": "A shared dashboard coordinates operation."
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "TurtleBot 4: ROS 2 Jazzy, Nav2 and AMCL",
+          "lineSpacingPercent": 100000,
+          "resolvedTextStyle": {
+            "fontSize": 43,
+            "typeface": "Source Sans Pro",
+            "color": "#111111",
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "TurtleBot 4: ROS 2 Jazzy, Nav2 and AMCL",
+              "fontSize": 43,
+              "typeface": "Source Sans Pro",
+              "color": "#111111",
+              "alignment": "left"
+            }
+          ]
+        },
+        {
+          "index": 2,
+          "text": "for mapping, localisation and delivery.",
+          "lineSpacingPercent": 100000,
+          "resolvedTextStyle": {
+            "fontSize": 43,
+            "typeface": "Source Sans Pro",
+            "color": "#111111",
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "for mapping, localisation and delivery.",
+              "fontSize": 43,
+              "typeface": "Source Sans Pro",
+              "color": "#111111",
+              "alignment": "left"
+            }
+          ]
+        },
+        {
+          "index": 4,
+          "text": "MyCobot 280: Jetson Nano, MoveIt 2",
+          "lineSpacingPercent": 100000,
+          "resolvedTextStyle": {
+            "fontSize": 43,
+            "typeface": "Source Sans Pro",
+            "color": "#111111",
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "MyCobot 280: Jetson Nano, MoveIt 2",
+              "fontSize": 43,
+              "typeface": "Source Sans Pro",
+              "color": "#111111",
+              "alignment": "left"
+            }
+          ]
+        },
+        {
+          "index": 5,
+          "text": "and camera-based product recognition.",
+          "lineSpacingPercent": 100000,
+          "resolvedTextStyle": {
+            "fontSize": 43,
+            "typeface": "Source Sans Pro",
+            "color": "#111111",
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "and camera-based product recognition.",
+              "fontSize": 43,
+              "typeface": "Source Sans Pro",
+              "color": "#111111",
+              "alignment": "left"
+            }
+          ]
+        },
+        {
+          "index": 7,
+          "text": "Factory gateway: OPC UA links the",
+          "lineSpacingPercent": 100000,
+          "resolvedTextStyle": {
+            "fontSize": 43,
+            "typeface": "Source Sans Pro",
+            "color": "#111111",
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "Factory gateway: OPC UA links the",
+              "fontSize": 43,
+              "typeface": "Source Sans Pro",
+              "color": "#111111",
+              "alignment": "left"
+            }
+          ]
+        },
+        {
+          "index": 8,
+          "text": "robotics stack to Siemens S7-1500 PLCs.",
+          "lineSpacingPercent": 100000,
+          "resolvedTextStyle": {
+            "fontSize": 43,
+            "typeface": "Source Sans Pro",
+            "color": "#111111",
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "robotics stack to Siemens S7-1500 PLCs.",
+              "fontSize": 43,
+              "typeface": "Source Sans Pro",
+              "color": "#111111",
+              "alignment": "left"
+            }
+          ]
+        },
+        {
+          "index": 9,
+          "text": "A shared dashboard coordinates operation.",
+          "lineSpacingPercent": 100000,
+          "resolvedTextStyle": {
+            "fontSize": 43,
+            "typeface": "Source Sans Pro",
+            "color": "#111111",
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "A shared dashboard coordinates operation.",
+              "fontSize": 43,
+              "typeface": "Source Sans Pro",
+              "color": "#111111",
+              "alignment": "left"
+            }
+          ]
+        }
+      ],
+      "lineWidth": 4.01
+    },
+    {
+      "order": 14,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/h072l4jy",
+      "id": "33",
+      "bbox": [
+        104,
+        2680,
+        2040,
+        180
+      ],
+      "geometry": "rect",
+      "text": "Replaceable modules connect heterogeneous robotics and industrial systems.\nCoordinated handoffs exchange product class, arrival and release status.\nNext: benchmark complete cycles in clear, static and dynamic obstacle scenarios.",
+      "textPreview": "Replaceable modules connect heterogeneous robotics and industrial systems. | Coordinated handoffs exchange product class, arrival and rel...",
+      "resolvedFontSize": 43,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 43,
+        "typeface": "Source Sans Pro",
+        "color": "#111111",
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "wrap": "square",
+        "autoFit": "none",
+        "insets": {
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        }
+      },
+      "textLayout": {
+        "lineCount": 5,
+        "lines": [
+          {
+            "index": 1,
+            "text": "•Replaceable modules connect heterogeneous robotics and industrial systems."
+          },
+          {
+            "index": 2,
+            "text": ""
+          },
+          {
+            "index": 3,
+            "text": "•Coordinated handoffs exchange product class, arrival and release status."
+          },
+          {
+            "index": 4,
+            "text": ""
+          },
+          {
+            "index": 5,
+            "text": "•Next: benchmark complete cycles in clear, static and dynamic obstacle scenarios."
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Replaceable modules connect heterogeneous robotics and industrial systems.",
+          "lineSpacingPercent": 100000,
+          "resolvedTextStyle": {
+            "fontSize": 43,
+            "typeface": "Source Sans Pro",
+            "color": "#111111",
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "Replaceable modules connect heterogeneous robotics and industrial systems.",
+              "fontSize": 43,
+              "typeface": "Source Sans Pro",
+              "color": "#111111",
+              "alignment": "left"
+            }
+          ]
+        },
+        {
+          "index": 2,
+          "text": "Coordinated handoffs exchange product class, arrival and release status.",
+          "lineSpacingPercent": 100000,
+          "resolvedTextStyle": {
+            "fontSize": 43,
+            "typeface": "Source Sans Pro",
+            "color": "#111111",
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "Coordinated handoffs exchange product class, arrival and release status.",
+              "fontSize": 43,
+              "typeface": "Source Sans Pro",
+              "color": "#111111",
+              "alignment": "left"
+            }
+          ]
+        },
+        {
+          "index": 3,
+          "text": "Next: benchmark complete cycles in clear, static and dynamic obstacle scenarios.",
+          "lineSpacingPercent": 100000,
+          "resolvedTextStyle": {
+            "fontSize": 43,
+            "typeface": "Source Sans Pro",
+            "color": "#111111",
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "Next: benchmark complete cycles in clear, static and dynamic obstacle scenarios.",
+              "fontSize": 43,
+              "typeface": "Source Sans Pro",
+              "color": "#111111",
+              "alignment": "left"
+            }
+          ]
+        }
+      ],
+      "lineWidth": 4.01
+    },
+    {
+      "order": 15,
+      "kind": "image",
+      "scope": "slide",
+      "aid": "im/jih0bmhk",
+      "id": "36",
+      "bbox": [
+        1160,
+        920,
+        985,
+        738.75
+      ],
+      "alt": "Project team with the TurtleBot 4, MyCobot 280 and didactic Siemens factory in the B002 laboratory.",
+      "contentType": "image/png",
+      "imageCrop": {
+        "left": 0,
+        "top": 0,
+        "right": 0,
+        "bottom": 0
+      },
+      "imageFit": "contain",
+      "asset": {
+        "assetId": "/ppt/media/image3.png",
+        "contentType": "image/png",
+        "byteLength": 1277661
+      },
+      "fillImage": {
+        "assetId": "/ppt/media/image3.png",
+        "contentType": "image/png",
+        "byteLength": 1277661
+      }
+    },
+    {
+      "order": 16,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/j2pkne14",
+      "id": "35",
+      "bbox": [
+        1160,
+        1680,
+        985,
+        85
+      ],
+      "geometry": "rect",
+      "text": "B002 Future Lab: robots, team and factory testbed.",
+      "textPreview": "B002 Future Lab: robots, team and factory testbed.",
+      "resolvedFontSize": 32,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 32,
+        "typeface": "Source Sans Pro",
+        "color": "#111111",
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "wrap": "square",
+        "autoFit": "none",
+        "insets": {
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "B002 Future Lab: robots, team and factory testbed."
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "B002 Future Lab: robots, team and factory testbed.",
+          "lineSpacingPercent": 100000,
+          "resolvedTextStyle": {
+            "fontSize": 32,
+            "typeface": "Source Sans Pro",
+            "color": "#111111",
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "B002 Future Lab: robots, team and factory testbed.",
+              "fontSize": 32,
+              "typeface": "Source Sans Pro",
+              "color": "#111111",
+              "alignment": "left"
+            }
+          ]
+        }
+      ],
+      "lineWidth": 4.01
+    },
+    {
+      "order": 17,
+      "kind": "image",
+      "scope": "slide",
+      "aid": "im/ih8jih0z",
+      "id": "37",
+      "bbox": [
+        1160,
+        1860,
+        985,
+        554.06
+      ],
+      "alt": "Hof University and USP project collaboration, including a participant joining remotely.",
+      "contentType": "image/jpeg",
+      "imageFit": "contain",
+      "asset": {
+        "assetId": "4ebd44f5-e5e2-4950-a688-92791de3ac35",
+        "contentType": "image/jpeg",
+        "byteLength": 127768
+      }
+    },
+    {
+      "order": 18,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/y5wjip0z",
+      "id": "38",
+      "name": "Team photo caption",
+      "bbox": [
+        1160,
+        2434,
+        985,
+        70
+      ],
+      "geometry": "rect",
+      "text": "Research collaboration at Hof University.",
+      "textPreview": "Research collaboration at Hof University.",
+      "resolvedFontSize": 32,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 32,
+        "typeface": "Source Sans Pro",
+        "color": "#111111",
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "wrap": "square",
+        "autoFit": "none",
+        "insets": {
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Research collaboration at Hof University."
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Research collaboration at Hof University.",
+          "resolvedTextStyle": {
+            "fontSize": 32,
+            "typeface": "Source Sans Pro",
+            "color": "#111111",
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "Research collaboration at Hof University.",
+              "fontSize": 32,
+              "typeface": "Source Sans Pro",
+              "color": "#111111",
+              "alignment": "left"
+            }
+          ]
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 19,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/z650ba1k",
+      "id": "39",
+      "name": "Workflow",
+      "bbox": [
+        104,
+        2310,
+        995,
+        155
+      ],
+      "geometry": "rect",
+      "text": "Delivery cycle: detect → pick up → hand off → deliver → return to dock",
+      "textPreview": "Delivery cycle: detect → pick up → hand off → deliver → return to dock",
+      "resolvedFontSize": 42,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 42,
+        "typeface": "Source Sans Pro",
+        "color": "#111111",
+        "bold": true,
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "wrap": "square",
+        "autoFit": "none",
+        "insets": {
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        }
+      },
+      "textLayout": {
+        "lineCount": 2,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Delivery cycle: detect → pick up → hand off →"
+          },
+          {
+            "index": 2,
+            "text": "deliver → return to dock"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Delivery cycle: detect → pick up → hand off → deliver → return to dock",
+          "resolvedTextStyle": {
+            "fontSize": 42,
+            "typeface": "Source Sans Pro",
+            "color": "#111111",
+            "bold": true,
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "Delivery cycle: detect → pick up → hand off → deliver → return to dock",
+              "fontSize": 42,
+              "typeface": "Source Sans Pro",
+              "color": "#111111",
+              "bold": true,
+              "alignment": "left"
+            }
+          ]
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 20,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/z2xgf6to",
+      "id": "40",
+      "name": "Supervision",
+      "bbox": [
+        1215,
+        2924,
+        950,
+        76
+      ],
+      "geometry": "rect",
+      "text": "Supervision: Prof. Dr.-Ing. Christoph Koch\nFuture Lab: Shantall Marucia Cisneros Saldana",
+      "textPreview": "Supervision: Prof. Dr.-Ing. Christoph Koch | Future Lab: Shantall Marucia Cisneros Saldana",
+      "resolvedFontSize": 29,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 29,
+        "typeface": "Source Sans Pro",
+        "color": "#111111",
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "wrap": "square",
+        "autoFit": "none",
+        "insets": {
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        }
+      },
+      "textLayout": {
+        "lineCount": 2,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Supervision: Prof. Dr.-Ing. Christoph Koch"
+          },
+          {
+            "index": 2,
+            "text": "Future Lab: Shantall Marucia Cisneros Saldana"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Supervision: Prof. Dr.-Ing. Christoph Koch",
+          "resolvedTextStyle": {
+            "fontSize": 29,
+            "typeface": "Source Sans Pro",
+            "color": "#111111",
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "Supervision: Prof. Dr.-Ing. Christoph Koch",
+              "fontSize": 29,
+              "typeface": "Source Sans Pro",
+              "color": "#111111",
+              "alignment": "left"
+            }
+          ]
+        },
+        {
+          "index": 2,
+          "text": "Future Lab: Shantall Marucia Cisneros Saldana",
+          "resolvedTextStyle": {
+            "fontSize": 29,
+            "typeface": "Source Sans Pro",
+            "color": "#111111",
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "Future Lab: Shantall Marucia Cisneros Saldana",
+              "fontSize": 29,
+              "typeface": "Source Sans Pro",
+              "color": "#111111",
+              "alignment": "left"
+            }
+          ]
+        }
+      ],
+      "lineWidth": 0
+    }
+  ],
+  "composeRuns": []
+}
