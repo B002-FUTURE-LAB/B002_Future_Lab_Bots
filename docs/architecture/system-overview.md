@@ -1,5 +1,7 @@
 # System overview
 
+At a high level, **B002 Future Lab Bots** combines three independent ROS 2 hardware/visualization submodules (`turtlebot4_jazzy`, `cobot`, `integration_cobot_tb4`) under a single supervisory web platform (`future_lab_control_center`). The web **Dashboard (`Next.js :3000`)** gives operators real-time visibility and safe control over every subsystem through the **FastAPI + rclpy Backend (`:8000`)** and the local **Host Agent (`:8100`)**. See [Using the Web Dashboard](../guides/using-the-dashboard.md) for the operator UI guide and [Frontend Dashboard (Internals & Dev)](../reference/frontend.md) to extend the dashboard source code.
+
 ## Components
 
 ```mermaid

@@ -65,6 +65,7 @@ nav:
       - Install and first run: getting-started/install-and-first-run.md
       - First delivery mission: getting-started/first-delivery-mission.md
   - Guides:
+      - Using the web dashboard: guides/using-the-dashboard.md
       - Start and stop the lab: guides/start-and-stop-the-lab.md
       - Emergency stop: guides/emergency-stop.md
       - Set initial and dock pose: guides/set-initial-pose-and-dock-pose.md
@@ -79,7 +80,7 @@ nav:
       - REST API: reference/rest-api.md
       - ROS interfaces: reference/ros-interfaces.md
       - Host agent: reference/host-agent.md
-      - Frontend dashboard: reference/frontend.md
+      - Frontend dashboard (Internals & Dev): reference/frontend.md
       - Operational scripts: reference/scripts.md
       - Configuration: reference/configuration.md
       - Ports and addresses: reference/ports-and-addresses.md

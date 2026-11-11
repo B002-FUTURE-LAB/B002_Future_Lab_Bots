@@ -1,6 +1,13 @@
 # Cell Overview
 
-The **B002 Future Lab Bots** robotic cell is a cooperative multi-robot research platform located in Laboratory B002. It integrates a stationary 6-DOF manipulator (**Elephant Robotics MyCobot 280** powered by a Jetson Nano) with an autonomous mobile robot (**Clearpath / iRobot TurtleBot 4** powered by a Raspberry Pi 4 and an iRobot Create 3 base), orchestrated by a central **Host Control PC**.
+The **B002 Future Lab Bots** robotic cell is an Industry 4.0 cooperative multi-robot research and demonstration platform located in Laboratory B002. It simulates an autonomous smart-manufacturing sorting line by integrating a stationary 6-DOF manipulator (**Elephant Robotics MyCobot 280** powered by a Jetson Nano) with an autonomous mobile robot (**Clearpath / iRobot TurtleBot 4** powered by a Raspberry Pi 4 and an iRobot Create 3 base), all supervised and operated from the **Future Lab Control Center** web application on a central **Host Control PC**.
+
+## What the Project Solves End-to-End
+
+1. **Automated Inspection & Sorting**: Cans placed on the supply workbench are inspected overhead by a wrist camera running YOLOv8 (`best.pt`), separating valid blue cans, valid red cans, and defective/invalid items.
+2. **Closed-Loop Robot-to-Robot Transfer**: Instead of blind open-loop delays, the manipulator holds the picked can above the loading point until the mobile robot confirms physical arrival at `pickup_point` (`/turtlebot_at_pickup`), and the mobile robot waits for verified vacuum release (`/item_released_on_tb4`) before driving away.
+3. **Browser-First Laboratory Orchestration**: Operators do not need to manually open half a dozen SSH terminals and ROS 2 launch files. From `http://localhost:3000`, the **Control Center Dashboard** brings up Nav2/AMCL, MoveIt 2, 3D RViz visualization, live camera feeds, Teach Mode pose calibration, manual D-Pad driving, safety/panic stops, and real-time terminal logs.
+4. **Reproducible Research Telemetry**: Every run can be captured alongside Zstd MCAP rosbags, `1 Hz` dashboard snapshots, and `future_lab.event.v1` audit trails for obstacle-avoidance benchmarking (`60-trial protocol`).
 
 ---
 
