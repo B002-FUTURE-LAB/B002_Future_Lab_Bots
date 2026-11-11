@@ -4,7 +4,7 @@ import { translations, translateBackendText } from '../utils/translations';
 const LanguageContext = createContext();
 
 export const LanguageProvider = ({ children }) => {
-  const [lang, setLang] = useState('pt');
+  const [lang, setLang] = useState('en');
 
   useEffect(() => {
     const saved = localStorage.getItem('future_lab_lang');
