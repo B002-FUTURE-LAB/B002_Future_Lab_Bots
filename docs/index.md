@@ -10,6 +10,10 @@ Welcome to the technical documentation and maintainer handbook for the **B002 Fu
 - **Autonomous Mobile Transport (`TurtleBot 4` + `Nav2`)**: Undocks from its infrared charging station, navigates to `pickup_point`, performs a closed-loop ROS 2 handoff (`/turtlebot_at_pickup` ↔ `/item_released_on_tb4`), delivers the can to `delivery_blue` or `delivery_red`, and returns to its dock.
 - **Unified Web Control Center (`Next.js 14` + `FastAPI` + `Host Agent`)**: Provides the complete browser-based operator console (`http://localhost:3000`) for starting/stopping ROS 2 stacks, running calibration (Teach Mode & AMCL dock poses), viewing live wrist and OAK-D cameras, triggering cooperative sorting missions, enforcing safety/panic locks, and recording auditable 60-trial experimental campaigns.
 
+![Annotated Control Center Dashboard Overview](assets/dashboard_header_and_cell_control.png)
+
+> Looking for a quick visual walkthrough of every button on the screen? Start with **[Using the Web Dashboard](guides/using-the-dashboard.md)**.
+
 ## Project Origin & How the Pieces Fit Together
 
 **B002 Future Lab Bots** is an Industry 4.0 cooperative intralogistics and smart-sorting testbed developed at Laboratory B002:

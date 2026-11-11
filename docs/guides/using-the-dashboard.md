@@ -1,6 +1,8 @@
 # Using the Web Control Center Dashboard
 
-The **Future Lab Control Center Dashboard** (`http://localhost:3000`) is the central graphical operator console for the **B002 Future Lab Bots** robotic cell. It unifies real-time telemetry, camera feeds, manual calibration, process supervision, and cooperative mission execution for both the **MyCobot 280** manipulator and the **TurtleBot 4** mobile robot inside a single browser interface.
+The **Future Lab Control Center Dashboard** (`http://localhost:3000`) lets anyone operate both the **MyCobot 280** robotic arm and the **TurtleBot 4** mobile robot from a web browser—without needing to memorize ROS 2 commands or open multiple terminals.
+
+This guide uses annotated screenshots of the live interface so you can locate every button, indicator, and workflow at a glance.
 
 For internal React/Next.js architecture and instructions on modifying the source code, see [Frontend Dashboard: Internals & Developer Guide](../reference/frontend.md).
 
@@ -8,150 +10,99 @@ For internal React/Next.js architecture and instructions on modifying the source
 
 ## 1. Opening the Dashboard
 
-- **Local Access (Host Control PC)**: Open `http://localhost:3000` in Chrome/Firefox after running `./START_CONTROL_CENTER.sh` (or `./future_lab_control_center/START_LAB.sh`).
-- **Lab LAN / Remote Tailscale Access**: Open `http://<HOST_PC_IP>:3000` (e.g., `http://192.168.0.129:3000` on Lab Wi-Fi, or `http://100.86.49.29:3000` over Tailscale). The frontend automatically points API calls to `:8000` on whichever hostname appears in your browser's address bar.
+- **On the Lab Control PC**: Open Chrome or Firefox at `http://localhost:3000` after starting the lab (`./START_CONTROL_CENTER.sh` or `./future_lab_control_center/START_LAB.sh`).
+- **From Another Computer (Lab Wi-Fi or Tailscale VPN)**: Open `http://<HOST_PC_IP>:3000` (for example, `http://192.168.0.129:3000` inside the lab or `http://100.86.49.29:3000` over Tailscale). The dashboard automatically connects to the backend on port `:8000` at that same address.
 
 ---
 
-## 2. Top Network Status Header & Language Switcher
+## 2. Top Bar, Tabs & Cell Master Control (`Tab 1`)
 
-At the top of every screen, the **`NetworkStatusHeader`** displays real-time system health polled every `2 s`:
+![Annotated Dashboard Header and Cell Master Control](../assets/dashboard_header_and_cell_control.png)
 
-| Element | Meaning |
-| :--- | :--- |
-| **`EN / PT` Toggle Button** | Switches the entire dashboard instantaneously between **English** and **Portuguese** (persisted in browser `localStorage` under `future_lab_lang`). Defaults to English. |
-| **`PC Host` Badge** | `ONLINE` (green) when the FastAPI backend (`:8000`) responds cleanly. |
-| **`Nano (Cobot)` Badge** | `ONLINE` (green) when the Jetson Nano HTTP hardware bridge (`:8088`) is reachable on `.62` or `.250`. |
-| **`Camera MJPEG` Badge** | `STREAM` (green) when the MyCobot wrist camera stream (`:8080/stream.mjpg`) is serving frames; `OFFLINE` (amber) when stopped. |
-| **`TurtleBot 4` Badge** | `ONLINE` (green) when the TurtleBot 4 Discovery Server / RPi4 telemetry link is active; `DISCONNECTED` otherwise. |
+Use the numbered callouts in the screenshot above as your quick map:
 
-Below the header sits the **Tab Switcher**, letting you jump between the two main workspaces without interrupting active background polling:
+| # | Area / Button | What It Does & How to Use It |
+| :-: | :--- | :--- |
+| **1** | **EN / PT Language Toggle** | Switches all labels, alerts, and backend status messages instantaneously between **English** and **Portuguese** (saved in browser `localStorage`). |
+| **2** | **Live Device Status Badges** | Shows live health every `2 s`: **`PC Host`** (FastAPI backend `:8000`), **`Nano (Cobot)`** (Jetson Nano bridge `:8088`), **`MJPEG Camera`** (`:8080/stream.mjpg`), and **`TurtleBot 4`** (RPi4 telemetry / Discovery Server). |
+| **3** | **Workspace Tab Switcher** | Switches between **Robotic Cell (`MyCobot 280 & Vision`)** and **TurtleBot 4 (`AMR & 3D Integrated Vision`)** without interrupting background monitoring. |
+| **4** | **Hardware Recovery (`RESTART NANO HW`)** | Emergency hardware reset for the manipulator: locks servos safely, frees `/dev/ttyTHS1`, restarts the Nano bridge + camera, and relaunches MoveIt 2 while displaying the 5-step progress modal. |
+| **5** | **Real Integrated Operation** | **Recommended one-click full mission.** Starts MoveIt + RViz, unified 3D view, and headless YOLOv8 inspection (`MoveIt + RViz`, `Joint RViz`, `Real YOLO` pills turn green). Once a valid can is confirmed (`5` consistent samples), an amber banner asks you to click **Confirm & Execute** before the robot moves. Enabled only when `Turtle ready: YES` and `Single manager: YES`. |
+| **6** | **Auto / Manual / Emergency Home** | **`START AUTOMATIC MODE`** runs continuous sorting loops. **`MANUAL MODE`** reveals the 3-step human approval bar (`1. Go to SCAN` → `2. Authorize PICK` → `3. Authorize PLACE`). While *any* cycle is running, this middle button pulses orange as **`INTERRUPT OPERATION`** to pause mid-motion. **`EMERGENCY (HOME)`** halts the cycle and returns the arm safely to `home`. |
+| **7** | **Synthetic Handshake Test (`Blue` / `Red`)** | Runs a full physical pick-place-deliver-dock test using a simulated YOLO label (`tin_valid_blue` or `tin_valid_red`)—ideal for verifying robot coordination before testing with live vision. |
+| **8** | **Runtime Sliders** | Adjusts **`Post-Pick Cooldown`** (`1–10 s` pause between auto cycles), **`Minimum YOLO Confidence`** (`30–90%`, `60%` recommended), and **`Arm Speed`** cap. |
 
-1. **Cell Control (`MyCobot 280 & Vision`)**
-2. **TurtleBot 4 (`AMR & Integrated 3D View`)**
+### Step-by-Step: Manual Approval Bar (`MANUAL MODE`)
 
----
+When you click **`MANUAL MODE`** (`#6`), a 3-step approval strip opens directly below the mode buttons:
 
-## 3. Tab 1: Cell Control (`MyCobot 280 & Vision`)
-
-This tab controls cooperative multi-robot sorting cycles, live wrist-camera YOLO inspection, suction pump actuation, and manipulator pose calibration.
-
-### 3.1 Master Cell Control Card (`CellControlPanel`)
-
-#### A. Integrated Real Operation (Full Cooperative Mode)
-
-Located at the top of the panel, the **Integrated Real Mode** box runs the complete physical workflow with MoveIt, 3D visualization, and real YOLOv8 inspection:
-
-- **Visual Readiness Pills**: Live green/gray indicators for **`MoveIt + RViz`**, **`Integrated 3D`** (`rviz2_cobot_tb4_3d`), and **`Headless YOLO`**.
-- **Start / Stop Integrated Real Button**: Enabled when no other cycle is running and both **TurtleBot Ready** (`mission_ready`) and **Single Manager** (`mission_manager` running with `instances === 1`) are true.
-  - Clicking **Start** brings up MoveIt, re-verifies Nano hardware, opens the unified 3D view, verifies the camera stream, launches headless YOLO, and moves the arm to `scan`.
-- **YOLO Candidate Confirmation Banner**: When the model classifies a candidate can (`tin_valid_blue*` or `tin_valid_red*`), an amber confirmation box shows the detected class and confidence percentage. Click **Confirm & Execute** to release the physical pick-and-place and TurtleBot 4 delivery cycle.
-
-#### B. Master Operation Buttons & Tuning Sliders
-
-| Control | Behavior |
-| :--- | :--- |
-| **`RESTART NANO (HW)`** (top-right red button) | Opens the `RebootOverlayModal` progress tracker while remotely releasing/locking servos, freeing `/dev/ttyTHS1`, restarting the Jetson Nano bridge + camera, and relaunching MoveIt 2 inside Docker. |
-| **`START AUTO MODE`** | Sets cell mode to `auto` and starts continuous inspection/delivery cycles. |
-| **`MANUAL MODE` / `INTERRUPT OPERATION`** | When idle, switches to step-by-step **Manual Mode** (`Go to SCAN` → `Authorize PICK` → `Authorize PLACE`). While *any* cycle is running, this button pulses orange and becomes **`INTERRUPT OPERATION`**, pausing motion immediately and opening the confirmation modal (`Abort` vs. `Resume`). |
-| **`EMERGENCY (HOME)`** | Calls `POST /api/v1/cell/stop`, halting the cycle cleanly and sending the arm back to `home`. |
-| **Cooldown Slider (`1.0 s – 10.0 s`)** | Delay between consecutive automatic cycles. |
-| **YOLO Confidence Slider (`30% – 90%`)** | Minimum detection threshold required to validate a can (`60%` recommended). |
-| **Arm Speed Slider (`1% – 15%`)** | Conservative speed percentage cap (`arm_speed`) applied to joint motions. |
-
-#### C. Manual Step-by-Step Controls (Visible in Manual Mode)
-
-When `mode === 'manual'`, a 3-column approval bar appears:
-
-1. **Step 1 — Go to SCAN**: Moves the MyCobot to `scan` and turns on YOLO vision.
-2. **Step 2 — Authorize PICK**: Remains disabled (`Waiting YOLO detection...`) until a valid can is detected; once detected, pulses green with the class and confidence. Clicking it executes `pick_approach → pick → pick_approach → place_approach`.
-3. **Step 3 — Authorize PLACE**: Activates once the arm reaches `place_approach`. Clicking it moves to `place`, triggers the TurtleBot 4 handoff, turns the vacuum pump OFF, and returns to `home`.
-
-#### D. Inter-Robot Handshake Test Panel (`Cobot -> TurtleBot 4`)
-
-Use **`TEST HANDSHAKE (BLUE TIN)`** or **`TEST HANDSHAKE (RED TIN)`** to test the full 8-stage physical pick-place-deliver-dock cycle using a synthetic classification without waiting for live YOLO.
-
-The status card underneath shows:
-
-- Current phase (`idle`, `preflight_passed`, `moving_scan`, `starting_turtlebot`, `cobot_picking`, `cobot_placing`, `waiting_turtlebot_pickup`, `releasing_item`, `cobot_returning_home`, `waiting_delivery_and_dock`, `rollback`, `completed`, `failed`).
-- Live gating booleans: **Turtle Ready**, **Single Manager**, and **Docked**.
-- Active `run_id`, canonical class, and destination waypoint (`delivery_blue` or `delivery_red`).
+1. **Step 1 — Go to SCAN**: Moves the MyCobot arm above the supply table and turns on YOLOv8 vision.
+2. **Step 2 — Authorize PICK**: Lights up green as soon as a valid blue or red can is detected (`Waiting YOLO detection...` clears). Clicking it picks up the can and carries it to `place_approach`.
+3. **Step 3 — Authorize PLACE**: Lights up blue once the arm arrives above the TurtleBot tray. Clicking it triggers the TurtleBot 4 handoff, releases the vacuum pump, and returns the arm to `home`.
 
 ---
 
-### 3.2 Camera Vision & Suction Control (`CameraVisionPanel`)
+## 3. Wrist Camera, Suction Pump & Pose Calibration (`Tab 1` Bottom)
 
-- **Top Action Buttons**:
-  - **Start / Restart Camera**: Restarts `nano_camera_server.py` on `:8080` and automatically schedules frame reconnection retries (`7 s`, `10 s`, `13 s`, `16 s`).
-  - **Turn Off Camera**: Stops the Jetson Nano MJPEG stream.
-  - **Test YOLO / Stop YOLO Test**: Toggles live standalone YOLOv8 inference overlay for bench testing.
-  - **Turn On / Off Pump**: Direct suction pump toggle with **0 ms optimistic button feedback** while waiting for hardware confirmation.
-  - **Raw Stream (`:8080`)**: Opens `http://<nano-ip>:8080/stream.mjpg` in a raw browser tab.
-- **Video Viewport & Classification Badge**: Displays live camera frames and highlights the most recent fresh classification (`Red Tin`, `Blue Tin`, or generic object class with confidence `%`).
+![Annotated Camera Vision and Teach Mode Calibration Panels](../assets/dashboard_camera_and_teach.png)
 
----
-
-### 3.3 Teach Mode & Pose Calibration (`TeachModePanel`)
+| # | Area / Button | What It Does & How to Use It |
+| :-: | :--- | :--- |
+| **1** | **Camera Controls** | **`START / RESTART CAMERA`** launches or restarts `nano_camera_server.py` on `:8080` and automatically retries frames (`7–16 s`). **`TURN OFF CAMERA`** stops the video stream cleanly. |
+| **2** | **YOLO Test Toggle** | Runs live standalone YOLOv8 object classification on the wrist-camera feed and displays the detected class (`Blue Tin`, `Red Tin`, etc.) and confidence `%` in the classification bar below the video. |
+| **3** | **Pump & Raw Stream** | **`TURN ON / OFF PUMP`** directly toggles the pneumatic suction cup with instant optimistic feedback. **`RAW STREAM (:8080)`** opens the direct MJPEG feed in a new browser tab. |
+| **4** | **Open 3D RViz2** | Opens the manipulator's MoveIt 2 + RViz2 3D window on the Host Control PC desktop. |
+| **5** | **Torque Release / Lock** | Used for hand-guiding calibration: hold the arm with one hand, click **`RELEASE MOTORS (1)`**, move the arm physically to the target spot, then click **`LOCK MOTORS (2)`** to hold it in place. |
+| **6** | **6 Required Poses Table** | Displays `home`, `scan`, `pick_approach`, `pick`, `place_approach`, and `place` with **`RECORDED / PENDING`** badges and joint angles (rad). Click **`RECORD (3)`** to capture the current arm posture, or **`GO TO`** to test moving safely to a saved pose. |
+| **7** | **Calibration Actions** | **`PLAYBACK TEST (4)`** steps through all recorded poses in sequence. **`SAVE TO DISK (5)`** writes `cobot_poses.yaml` (creating an automatic `.bak` backup). **`CLEAR POSES (6)`** clears poses; **`RESTORE LAST`** reverts to the `.bak` backup. |
 
 > [!IMPORTANT]
-> When **Auto Mode** is actively running (`cellState.auto_running == true`), the entire Teach Mode panel displays an amber lock banner and disables pointer interaction so an operator cannot release servo torque mid-cycle.
-
-Use this panel to calibrate the 6 poses stored in `cobot/mycobot_docker/cobot_poses.yaml`:
-
-1. **Click `OPEN RVIZ 2 (3D)`** (optional) to view MoveIt 2 alongside physical calibration.
-2. **Click `RELEASE MOTORS (1)`** while holding the arm with your hand, then guide the arm to the desired posture.
-3. **Click `LOCK MOTORS (2)`** to re-engage holding torque.
-4. **Click `RECORD (3)`** in the row for `home`, `scan`, `pick_approach`, `pick`, `place_approach`, or `place`.
-5. **Test individually with `GO TO`** on any `Recorded` pose, or click **`PLAYBACK TEST`** to step through the recorded sequence.
-6. **Click `SAVE TO DISK`** to persist the calibration cleanly (automatically creating `cobot_poses.yaml.bak`), **`CLEAR POSES`** to wipe, or **`RESTORE BACKUP`** to revert to the previous `.bak` snapshot.
+> While **Auto Mode** is actively running (`auto_running == true`), the entire **Teach Mode & Pose Calibration** card locks automatically with an amber banner so nobody can accidentally release motor torque mid-cycle.
 
 ---
 
-## 4. Tab 2: TurtleBot 4 (`AMR & Integrated 3D View`)
+## 4. TurtleBot 4 Telemetry, OAK-D Video & Manual Driving (`Tab 2` Top)
 
-This tab manages TurtleBot 4 localization, Nav2 bringup, OAK-D camera video, manual D-Pad driving, ROS 2 diagnostics, and Mission Manager routines.
+Switch to the **`TurtleBot 4 (AMR & 3D Integrated Vision)`** tab (`#3` in the top bar) to inspect and drive the mobile robot directly:
 
-### 4.1 Telemetry, Readiness Traffic Light & System Recovery
+![Annotated TurtleBot 4 Telemetry, System Inventory, OAK-D Feed, and Teleop D-Pad](../assets/dashboard_tb4_telemetry_teleop.png)
 
-- **Telemetry Alert Banner**: Appears prominently in red if `telemetry_ok === false` (meaning `/odom`, `/battery_state`, or `/dock_status` stopped arriving from the Create 3 base).
-- **Navigation Readiness & ROS 2 Traffic Light**: Displays live introspection badges for `/odom`, `/scan`, `/amcl_pose`, `/dock_status`, `/navigate_to_pose`, and `Mission Manager`.
-- **Metric Cards**: Battery `%` & current (`A`) & charging indicator, Dock status (`Docked` vs. `Undocked`), live odometry/map pose `(x, y, yaw)`, and OAK-D status.
-- **System Health & Inventory**: Lists detected nodes/services and provides 3 recovery buttons: **Restart Backend**, **Restart Cobot Discovery**, and **Restart TB4 Bringup** (with confirmation prompts).
-
-### 4.2 OAK-D Live Feed, D-Pad Teleop & Network Diagnostics
-
-- **OAK-D Camera Card**: Shows the live OAK-D RGB preview streamed via `GET /api/v1/turtlebot/camera_feed` (rate-limited at 5 FPS) with a **Start OAK-D Camera** button.
-- **Manual Teleop D-Pad**:
-  - Quick **`UNDOCK`** and **`DOCK`** buttons in the card header (plus an amber reminder whenever `isDocked == true`, because Create 3 ignores `/cmd_vel` while docked).
-  - Directional pad buttons send velocity pulses (`+0.25 m/s` forward, `-0.25 m/s` reverse, `±0.6 rad/s` turn left/right) and a red center **Stop** button (`0.0, 0.0`).
-- **ROS 2 Network Diagnostics**: Clicking **Diagnose** probes ping reachability (`192.168.0.129`) and counts visible ROS 2 topics on the Discovery Server.
-
-### 4.3 Nav2 Startup Sequencer, Initial Pose & Mission Manager
-
-The **Nav2 Sequencer** enforces the safe 5-step mobile navigation startup order:
-
-1. **Step 1 — Start Localization** (`map_server` + `amcl`) + Stop button.
-2. **Step 2 — Launch RViz2** (`view_navigation`) + Stop button.
-3. **Steps 3 & 4 — Undock & Initial Pose**:
-   - Enter `X`, `Y`, `Yaw (rad)` manually or click **`Use Dock Pose`** to prefill `dock_station` coordinates from `waypoints.yaml`.
-   - Click **`Send Initial Pose`** (`/initialpose`) and watch the **AMCL Convergence** badge (`converged` / covariance).
-   - Optionally click **`Save Current Dock Pose`** (`/save_dock_pose`) if the physical dock moved, or **`Clear Costmaps`** if Nav2 is blocked by phantom obstacle ghosts.
-4. **Step 5 — Launch Nav2 Stack** (`controller_server`, `planner_server`, `bt_navigator`, `opennav_docking`) + Stop button.
-5. **Integrated 3D View Card**: Click **`Launch 3D View`** to open the unified `integration_cobot_tb4` RViz2 scene combining both robots.
-
-The **Mission Manager** panel lets you start/stop `mission_manager.py` and manually test individual mission signals (`Test Delivery: Blue / Red`, `Signal Item Released`, `Failure Routine`, `Restock Routine`, or **`CANCEL MISSION`**).
-
-### 4.4 Real-Time Terminal Log Console
-
-At the bottom of the TurtleBot 4 tab, the live log viewer tails host process logs with category tabs (**Localization**, **Nav2**, **Mission**, **RViz**, **All**), color-coding `ERROR`/`Failed` in red, `WARN` in amber, and `INFO`/`active` in green.
+| # | Area / Button | What It Does & How to Use It |
+| :-: | :--- | :--- |
+| **1** | **Navigation Readiness & ROS 2 Gates** | Instant green/red checklist showing whether `create3_alive`, `odom`, `scan`, `map`, `amcl_pose`, `amcl_converged`, `navigate_to_pose`, `global_costmap`, and the 4 Mission Manager services (`/start_delivery`, `/start_failure`, `/start_restock`, `/stop_mission`) are active. Explains why readiness is blocked (for instance, when LIDAR power-saver is active while docked). |
+| **2** | **Battery, Dock & Live Pose Cards** | Displays live Create 3 **`Battery %` & charging current (`A`)**, **`Charging Station`** (`Docked` vs. `Undocked`), **`Coordinates (Odom)`** `(X, Y)`, and **`Nav2 Status`**. |
+| **3** | **10-Service Health & Inventory** | Monitors all 10 laboratory services (`Docker Daemon`, `Backend`, `Frontend`, `Cobot Discovery`, `Host Agent :8100`, `X11 Session`, `TurtleBot 4 Service RPi4`, `TB4 Discovery :11811`, `Create 3 Base`, `Jetson Nano Stream`) with one-click **`Restart`** buttons where supported. |
+| **4** | **OAK-D Live Vision Feed** | Streams the TurtleBot 4 front OAK-D Lite camera (`GET /api/v1/turtlebot/camera_feed`). Use **`TURN ON OAK-D CAMERA`** or **`RESTART CONNECTION`** if the feed is offline. |
+| **5** | **Quick Undock/Dock & Manual D-Pad** | **`UNDOCK`** / **`DOCK`** quick actions plus directional arrow buttons for manual driving (`+0.25 m/s` forward/back, `±0.6 rad/s` turn left/right) and the red center **Stop** button (`0, 0`). *Note: Create 3 ignores drive commands while docked—click `UNDOCK` first.* |
+| **6** | **Network Diagnosis (`AUDIT CONN & TOPICS`)** | Pings `192.168.0.129` and counts live ROS 2 topics visible on the FastDDS Discovery Server. |
 
 ---
 
-## 5. Global Safety & Progress Modals
+## 5. Docking, Unified 3D View, Nav2 Startup, Missions & Logs (`Tab 2` Bottom)
 
-| Modal | When It Appears | Operator Action Required |
+Scroll down in the **TurtleBot 4** tab to access autonomous navigation bringup, AMCL pose initialization, mission routines, and real-time logs:
+
+![Annotated Docking, 3D View, Nav2 Sequencer, Mission Manager, and Terminal Logs](../assets/dashboard_tb4_nav2_mission_logs.png)
+
+| # | Area / Button | What It Does & How to Use It |
+| :-: | :--- | :--- |
+| **1** | **Charging Station Control** | Large **`DOCK (Charge)`** and **`UNDOCK FROM CHARGER`** action buttons for infrared station docking. |
+| **2** | **3D Integrated View (`Cobot + TB4`)** | Launches the unified Digital Twin (`rviz2_cobot_tb4_3d`) on the Host PC showing both the MyCobot 280 and TurtleBot 4 inside Lab B002 (`integration_cobot_tb4`). |
+| **3** | **Nav2 Launch Sequencer & Costmap Tools** | Guides safe mobile navigation bringup in exact order: **`1. Start Localization`** (`localization.launch.py`) → **`2. Open Nav2 RViz`** → *(Steps 3 & 4 Undock & Initial Pose)* → **`5. Launch Nav2 Stack`** (`nav2.launch.py`), each paired with a **`Ctrl+C`** stop button. Below them sit **`Restart ROS 2 Daemon`** and **`Clear Costmaps`** (to erase phantom obstacles). |
+| **4** | **AMCL Initial Pose (`/initialpose`)** | Initializes localization on the lab map. When the robot is on the charging dock, simply click **`Use Dock Pose`** followed by **`Set Initial Pose`** and confirm the **`AMCL`** pill turns converged. Use **`Save Dock Pose`** only if the physical dock moved. |
+| **5** | **Master Mission Manager** | Starts or kills `mission_manager.py`, displays **`Missions ready`** status, and lets you trigger **`/start_failure`**, **`/start_restock`**, or **`/start_patrol`**. |
+| **6** | **Simulated Cobot Signals & Cancel Mission** | Lets you test the TurtleBot 4 delivery loop independently (**`Start blue delivery`**, **`Start red delivery`**, **`Confirm item released`**) without moving the MyCobot arm. **`CANCEL / STOP CURRENT MISSION`** calls `/stop_mission` immediately. |
+| **7** | **Real-Time Terminal Logs** | Live color-coded log viewer (`INFO` green, `WARN` amber, `ERROR` red) with source filter tabs (**Localization**, **Nav2 Stack**, **Mission Manager**, **RViz2**, **All**), **`Refresh`**, and **`Clear Terminal`**. |
+
+---
+
+## 6. Global Safety & Progress Popups
+
+These full-screen modals protect hardware and keep the operator informed regardless of which tab is open:
+
+| Modal | When It Appears | What You Should Do |
 | :--- | :--- | :--- |
-| **`PanicOverlayModal`** | Full-screen red lock whenever `cell.panic_locked === true`. Indicates pump OFF, camera/MoveIt halted, and servo motors locked. | Verify the physical table and floor are completely clear, then click **Reset Panic & Restart Hardware**. |
-| **`InterruptOverlayModal`** | Appears when `cell.status === 'interrupted_paused'` after clicking **Interrupt Operation**. | Choose **Abort Operation** (`abort: true` — returns any held item safely to `pick` and sends arm to `home`) or **Resume Operation** (`abort: false` — re-dispatches the interrupted pose). |
-| **`RebootOverlayModal`** | Appears after clicking **Restart Nano (HW)** and displays a 5-stage progress bar (`~14 s` total) before refreshing status. | Wait for completion; the modal closes automatically. |
-| **`NotificationToast`** | Top-right floating banner triggered by any API success, warning, or connection error. Auto-dismisses after `15 s` or on clicking `×`. | Read status or error message; errors from Portuguese backend routes are automatically translated when the UI is in English. |
+| **`PanicOverlayModal`** | Appears in bright red whenever **`panic_locked === true`** (suction pump OFF, MoveIt/camera stopped, motors locked). | Visually confirm the table and floor are safe and clear, then click **Reset Panic & Restart Hardware**. |
+| **`InterruptOverlayModal`** | Appears when you click **`INTERRUPT OPERATION`** mid-cycle. | Click **`Abort Operation`** (`abort: true` — returns any held can safely to `pick` and sends the arm `home`) or **`Resume Operation`** (`abort: false` — resumes from the interrupted step). |
+| **`RebootOverlayModal`** | Appears after clicking **`RESTART NANO (HW)`**, showing a 5-stage progress bar (`~14 s`). | Wait for the bar to reach 100%; it closes automatically once fresh telemetry resumes. |
+| **`NotificationToast`** | Floating banner in the top-right corner on every action result or error (auto-dismisses after `15 s`). | Check confirmation or warning details (automatically translated into English when `EN` is selected). |
