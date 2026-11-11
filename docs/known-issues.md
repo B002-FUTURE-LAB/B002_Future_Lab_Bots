@@ -4,17 +4,17 @@ This page documents the known hardware quirks, software limitations, and planned
 
 ---
 
-## 1. Security & Credentials Debt (Planned `.env` Migration)
+## 1. Security & Credentials Management (`.env` Isolation)
 
-> [!WARNING]
-> **Do Not Flip Repository to Public Before Completing Credential Sanitization**
-> While the published documentation under `docs/` is 100% free of passwords and tokens, several operational shell and Python scripts in the codebase still contain fallback lab passwords (`sshpass -p ...` and fallback `HOST_AGENT_TOKEN` defaults) so that existing lab workflows do not break during active testing.
+> [!IMPORTANT]
+> **Keep `.env` and `.agent_token` Local Only**
+> All SSH passwords (`JETSON_NANO_SSH_PASSWORD`), OPC-UA credentials (`OPCUA_PASSWORD`), and Host Agent authentication tokens (`HOST_AGENT_TOKEN`) have been extracted from the codebase into `future_lab_control_center/.env` (symlinked at `.env` in the repository root). Both `.env` and `.agent_token` are listed in `.gitignore` and must never be committed to Git.
 
-### Files Requiring `.env` Extraction Before Public Release
+### Credential Variables Loaded from `future_lab_control_center/.env`
 
-1. `future_lab_control_center/host_agent/host_agent.py` and `future_lab_control_center/backend/api/health_routes.py`: Remove fallback `.agent_token` default string and require `HOST_AGENT_TOKEN` from `.env`.
-2. `future_lab_control_center/START_LAB.sh` and `cobot/mycobot_docker/START_NANO_BRIDGE.sh`: Replace inline `sshpass` password arguments with `SSHPASS` / `NANO_SSH_PASSWORD` / `TB4_SSH_PASSWORD` read from `.env` (or SSH key-only authentication).
-3. `turtlebot4_jazzy/` helper scripts (`restart_tb4_bringup.sh`, etc.): Read RPi4 SSH credentials from environment variables.
+1. `HOST_AGENT_TOKEN`: Loaded by `future_lab_control_center/host_agent/agent.py` and `future_lab_control_center/backend/api/turtlebot_routes.py` (`settings.get_agent_token()`).
+2. `JETSON_NANO_SSH_USER` and `JETSON_NANO_SSH_PASSWORD`: Loaded by `backend/api/{cell_routes,health_routes}.py`, `backend/ros2_nodes/cobot_node.py`, and the shell scripts in `cobot/mycobot_docker/`.
+3. `OPCUA_USER` and `OPCUA_PASSWORD`: Loaded by `turtlebot4_jazzy/factory_integration/{app.py,opcua_net_test.py}`.
 
 ---
 

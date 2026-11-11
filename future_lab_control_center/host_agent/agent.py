@@ -59,9 +59,23 @@ JAZZY_ENV_CMD = (
 
 
 def load_token() -> str:
+    env_tok = os.getenv("HOST_AGENT_TOKEN", "").strip()
+    if env_tok:
+        return env_tok
+    for env_file in (
+        REPO_DIR / "future_lab_control_center" / ".env",
+        REPO_DIR / ".env",
+    ):
+        if env_file.exists():
+            for line in env_file.read_text(encoding="utf-8").splitlines():
+                line = line.strip()
+                if line.startswith("HOST_AGENT_TOKEN="):
+                    val = line.split("=", 1)[1].strip().strip('"').strip("'")
+                    if val:
+                        return val
     if TOKEN_FILE.exists():
-        return TOKEN_FILE.read_text().strip()
-    return "futurelab_agent_secret_token_2026_x8100"
+        return TOKEN_FILE.read_text(encoding="utf-8").strip()
+    return ""
 
 
 AGENT_TOKEN = load_token()

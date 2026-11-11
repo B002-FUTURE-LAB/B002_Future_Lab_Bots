@@ -8,21 +8,51 @@ from dataclasses import dataclass, asdict
 
 # Carregador simples de .env sem exigir pydantic-settings no SO host
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
-ENV_PATH = BASE_DIR / ".env"
+CONTROL_CENTER_DIR = Path(__file__).resolve().parent.parent
+ENV_CANDIDATES = [
+    CONTROL_CENTER_DIR / ".env",
+    BASE_DIR / ".env",
+    Path("/home/future-lab/B002_Future_Lab_Bots/future_lab_control_center/.env"),
+    Path("/home/future-lab/B002_Future_Lab_Bots/.env"),
+]
+ENV_PATH = CONTROL_CENTER_DIR / ".env"
 
 def load_env_file():
-    if ENV_PATH.exists():
-        with open(ENV_PATH, "r") as f:
-            for line in f:
-                line = line.strip()
-                if line and not line.startswith("#") and "=" in line:
-                    k, v = line.split("=", 1)
-                    k = k.strip()
-                    if k.startswith("ROS_") or k == "RMW_IMPLEMENTATION":
-                        continue
-                    os.environ[k] = v.strip()
+    for candidate in ENV_CANDIDATES:
+        if candidate.exists():
+            with open(candidate, "r", encoding="utf-8") as f:
+                for line in f:
+                    line = line.strip()
+                    if line and not line.startswith("#") and "=" in line:
+                        k, v = line.split("=", 1)
+                        k = k.strip()
+                        if k.startswith("ROS_") or k == "RMW_IMPLEMENTATION":
+                            continue
+                        os.environ[k] = v.strip().strip('"').strip("'")
+            break
 
 load_env_file()
+
+def get_nano_ssh_user() -> str:
+    load_env_file()
+    return os.getenv("JETSON_NANO_SSH_USER", "er")
+
+def get_nano_ssh_password() -> str:
+    load_env_file()
+    return os.getenv("JETSON_NANO_SSH_PASSWORD", "")
+
+def get_agent_token() -> str:
+    load_env_file()
+    env_tok = os.getenv("HOST_AGENT_TOKEN", "").strip()
+    if env_tok:
+        return env_tok
+    for token_file in (
+        CONTROL_CENTER_DIR / ".agent_token",
+        Path("/home/future-lab/B002_Future_Lab_Bots/future_lab_control_center/.agent_token"),
+    ):
+        if token_file.exists():
+            return token_file.read_text(encoding="utf-8").strip()
+    return ""
 
 def get_auto_ip() -> str:
     """Detecta automaticamente o IP primário da máquina na rede local."""

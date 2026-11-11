@@ -1106,12 +1106,16 @@ HOST_AGENT_URL = "http://127.0.0.1:8100"
 MISSION_SIGNAL_AGENT_URL = "http://127.0.0.1:8101"
 
 def _load_agent_token() -> str:
+    from backend.config.settings import get_agent_token
+    token = get_agent_token()
+    if token:
+        return token
     token_file = Path(__file__).resolve().parent.parent / ".agent_token"
     if not token_file.exists():
         token_file = Path("/home/future-lab/B002_Future_Lab_Bots/future_lab_control_center/.agent_token")
     if token_file.exists():
-        return token_file.read_text().strip()
-    return "futurelab_agent_secret_token_2026_x8100"
+        return token_file.read_text(encoding="utf-8").strip()
+    return os.getenv("HOST_AGENT_TOKEN", "")
 
 AGENT_TOKEN = _load_agent_token()
 

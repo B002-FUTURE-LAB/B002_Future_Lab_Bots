@@ -2,3 +2,11 @@ node_modules/
 **/node_modules/
 .DS_Store
 *.tmp
+.env
+.env.local
+.env.*.local
+**/.env
+!**/.env.example
+.agent_token
+**/.agent_token
+site/

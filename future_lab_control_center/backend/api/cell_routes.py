@@ -1790,8 +1790,11 @@ def panic_stop():
             print(f"[WARN] Erro ao matar MoveIt planning no pânico: {e}")
 
         try:
+            from backend.config.settings import get_nano_ssh_password, get_nano_ssh_user
+            nano_user = get_nano_ssh_user()
+            nano_pass = get_nano_ssh_password()
             print(f"[INFO] Matando ponte mycobot_bridge na Jetson Nano ({nano_ip})...")
-            cmd_kill_nano = f"sshpass -p Elephant ssh -o StrictHostKeyChecking=no er@{nano_ip} 'pkill -9 -f mycobot_bridge 2>/dev/null || true; fuser -k 8088/tcp 2>/dev/null || true'"
+            cmd_kill_nano = f"sshpass -p '{nano_pass}' ssh -o StrictHostKeyChecking=no {nano_user}@{nano_ip} 'pkill -9 -f mycobot_bridge 2>/dev/null || true; fuser -k 8088/tcp 2>/dev/null || true'"
             subprocess.run(cmd_kill_nano, shell=True, timeout=5)
         except Exception as e:
             print(f"[WARN] Erro ao encerrar mycobot_bridge no Nano: {e}")

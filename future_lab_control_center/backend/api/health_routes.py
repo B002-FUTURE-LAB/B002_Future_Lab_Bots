@@ -209,15 +209,17 @@ def restart_nano_hardware():
     def async_restart_hw():
         # 1. Reinicia a ponte de hardware na Jetson Nano (liberação de porta serial /dev/ttyTHS1 + start_bridge.sh)
         try:
-            from backend.config.settings import get_settings
+            from backend.config.settings import get_settings, get_nano_ssh_password, get_nano_ssh_user
             nano_ip = get_settings().JETSON_NANO_IP
+            nano_user = get_nano_ssh_user()
+            nano_pass = get_nano_ssh_password()
             print(f"[INFO] Reiniciando ponte de hardware na Jetson Nano ({nano_ip}) via SSH (start_bridge.sh)...")
             ssh_flags = "-o ConnectTimeout=4 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
-            kill_cmd = f"sshpass -p Elephant ssh {ssh_flags} er@{nano_ip} 'echo Elephant | sudo -S fuser -k /dev/ttyTHS1 2>/dev/null || true; pkill -9 -f mycobot_bridge 2>/dev/null || true; fuser -k 8088/tcp 2>/dev/null || true; truncate -s 0 /tmp/bridge.log'"
+            kill_cmd = f"sshpass -p '{nano_pass}' ssh {ssh_flags} {nano_user}@{nano_ip} 'echo \"{nano_pass}\" | sudo -S fuser -k /dev/ttyTHS1 2>/dev/null || true; pkill -9 -f mycobot_bridge 2>/dev/null || true; fuser -k 8088/tcp 2>/dev/null || true; truncate -s 0 /tmp/bridge.log'"
             subprocess.run(kill_cmd, shell=True, timeout=6)
             time.sleep(2.5)
 
-            launch_cmd = f"sshpass -p Elephant ssh {ssh_flags} er@{nano_ip} 'bash -c \"nohup bash ~/start_bridge.sh >/tmp/bridge.log 2>&1 </dev/null &\" </dev/null >/dev/null 2>/dev/null'"
+            launch_cmd = f"sshpass -p '{nano_pass}' ssh {ssh_flags} {nano_user}@{nano_ip} 'bash -c \"nohup bash ~/start_bridge.sh >/tmp/bridge.log 2>&1 </dev/null &\" </dev/null >/dev/null 2>/dev/null'"
             subprocess.run(launch_cmd, shell=True, timeout=8)
             print(f"[INFO] Ponte de hardware (start_bridge.sh) relançada na Jetson Nano ({nano_ip}) com sucesso!")
         except Exception as e:

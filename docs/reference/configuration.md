@@ -17,6 +17,11 @@ The control center reads its settings from the file
 | `DEFAULT_COOLDOWN_SEC` | `5.0` | Pause between automatic cycles. |
 | `DEFAULT_YOLO_CONF` | `0.60` | Minimum YOLO confidence to accept a detection. |
 | `DEFAULT_VELOCITY_SCALING` | `0.20` | Arm velocity scaling factor. |
+| `JETSON_NANO_SSH_USER` | `er` | SSH username for the MyCobot Jetson Nano. |
+| `JETSON_NANO_SSH_PASSWORD` | `replace_with_nano_ssh_password` | SSH password for the MyCobot Jetson Nano (private, loaded from `.env`). |
+| `HOST_AGENT_TOKEN` | `replace_with_host_agent_token` | Shared authentication token (`X-Agent-Token`) for the Host Agent and Mission Signal Agent. |
+| `OPCUA_USER` | `MES` | Username for optional OPC-UA factory integration tests. |
+| `OPCUA_PASSWORD` | `replace_with_opcua_password` | Password for optional OPC-UA factory integration tests (private, loaded from `.env`). |
 
 !!! warning "The settings route writes to this file"
     `PUT /api/v1/settings/` updates `.env` while the backend is running. Edits

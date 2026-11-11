@@ -471,8 +471,10 @@ class CobotNode(BaseNode):
             return False
 
         try:
-            from backend.config.settings import get_settings
+            from backend.config.settings import get_settings, get_nano_ssh_password, get_nano_ssh_user
             nano_ip = get_settings().JETSON_NANO_IP
+            nano_user = get_nano_ssh_user()
+            nano_pass = get_nano_ssh_password()
             print(f"[INFO] Disparando serviço '{srv_name}' via fallback SSH na Jetson Nano ({nano_ip})...")
             # Remove socket obsoleto de pânico anterior se existir
             import glob
@@ -482,7 +484,7 @@ class CobotNode(BaseNode):
                 except Exception:
                     pass
 
-            cmd = f"sshpass -p Elephant ssh -o ConnectTimeout=5 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null er@{nano_ip} 'export ROS_DOMAIN_ID=42 && source /opt/ros/galactic/setup.bash && source ~/custom_ws/install/setup.bash && ros2 service call {srv_name} std_srvs/srv/Trigger'"
+            cmd = f"sshpass -p '{nano_pass}' ssh -o ConnectTimeout=5 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null {nano_user}@{nano_ip} 'export ROS_DOMAIN_ID=42 && source /opt/ros/galactic/setup.bash && source ~/custom_ws/install/setup.bash && ros2 service call {srv_name} std_srvs/srv/Trigger'"
             res = subprocess.run(cmd, shell=True, timeout=12, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
             output = (res.stdout or "") + (res.stderr or "")
             if "success=True" in output or "success=true" in output or "success: true" in output or "Servos soltos" in output or "Servos travados" in output or "Pump" in output:
