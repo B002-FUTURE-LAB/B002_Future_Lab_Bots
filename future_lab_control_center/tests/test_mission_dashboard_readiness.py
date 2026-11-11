@@ -21,6 +21,7 @@ def ready_checks(*, undocked):
         "amcl_pose": False,
         "navigate_to_pose": True,
         "global_costmap": True,
+        "nav2_paused_standby": False,
         "start_delivery": True,
         "stop_mission": True,
     }
@@ -28,9 +29,15 @@ def ready_checks(*, undocked):
 
 class MissionReadinessTest(unittest.TestCase):
     def test_docked_mission_does_not_require_sleeping_lidar_or_fresh_amcl(self):
-        status = mission_readiness(ready_checks(undocked=False))
+        checks = ready_checks(undocked=False)
+        # A Create 3 suspende odom->base_link na dock, da mesma forma que o
+        # TurtleBot desliga o motor do RPLidar. A missão precisa poder chegar
+        # ao seu próprio passo de undock sem falsificar esses sinais.
+        checks["odom"] = False
+        status = mission_readiness(checks)
         self.assertTrue(status["ready"])
         self.assertEqual("docked", status["start_mode"])
+        self.assertNotIn("odom", status["required"])
         self.assertNotIn("scan", status["required"])
         self.assertNotIn("amcl_pose", status["required"])
 
@@ -46,6 +53,17 @@ class MissionReadinessTest(unittest.TestCase):
         status = mission_readiness(checks)
         self.assertFalse(status["ready"])
         self.assertIn("start_delivery", status["missing"])
+
+    def test_docked_paused_nav2_is_valid_only_for_a_mission(self):
+        checks = ready_checks(undocked=False)
+        checks["navigate_to_pose"] = False
+        checks["global_costmap"] = False
+        checks["nav2_paused_standby"] = True
+        status = mission_readiness(checks)
+        self.assertTrue(status["ready"])
+        self.assertIn("nav2_paused_standby", status["required"])
+        self.assertNotIn("navigate_to_pose", status["required"])
+        self.assertIn("RESUME", status["hint"])
 
 
 class MissionSignalEvidenceTest(unittest.TestCase):

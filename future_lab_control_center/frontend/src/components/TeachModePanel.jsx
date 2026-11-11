@@ -37,10 +37,10 @@ export default function TeachModePanel({ cellState, posesData, onRelease, onLock
         <div className="bg-amber-500/20 border border-amber-500/40 text-amber-300 p-3 rounded-lg flex items-center justify-between text-xs font-bold shadow-lg">
           <span className="flex items-center gap-2">
             <Lock className="w-4 h-4 text-amber-400" />
-            🔒 AUTOMATIC MODE RUNNING — Teach & Pose Calibration Panel Locked.
+            {t('autoModeLockedBanner')}
           </span>
           <span className="text-[10px] bg-amber-900/60 px-2 py-0.5 rounded text-amber-200 uppercase font-mono">
-            Turn off auto mode to unlock
+            {t('turnOffAutoToUnlock')}
           </span>
         </div>
       )}
@@ -110,7 +110,7 @@ export default function TeachModePanel({ cellState, posesData, onRelease, onLock
                     </span>
                   ) : (
                     <span className="text-xs px-2.5 py-1 rounded-full bg-red-500/20 text-red-300 font-bold flex items-center gap-1 w-max">
-                      <XCircle className="w-3.5 h-3.5" /> PENDING
+                      <XCircle className="w-3.5 h-3.5" /> {t('pendingBadge')}
                     </span>
                   )}
                 </td>
@@ -168,7 +168,7 @@ export default function TeachModePanel({ cellState, posesData, onRelease, onLock
           }`}
         >
           <Play className="w-4 h-4 fill-current" />
-          PLAYBACK TEST (4)
+          {t('playbackTestBtn')}
         </button>
 
         <button
@@ -177,7 +177,7 @@ export default function TeachModePanel({ cellState, posesData, onRelease, onLock
           className="py-2.5 px-3 bg-blue-600 hover:bg-blue-500 text-xs font-bold rounded-xl flex items-center justify-center gap-1.5 btn-hover"
         >
           <Save className="w-4 h-4" />
-          SAVE TO DISK (5)
+          {t('saveToDiskBtn')}
         </button>
 
         <button
@@ -186,7 +186,7 @@ export default function TeachModePanel({ cellState, posesData, onRelease, onLock
           className="py-2.5 px-3 bg-red-600/30 hover:bg-red-600 text-red-300 border border-red-500/40 text-xs font-bold rounded-xl flex items-center justify-center gap-1.5 btn-hover"
         >
           <Trash2 className="w-4 h-4" />
-          CLEAR POSES (6)
+          {t('clearPosesBtn')}
         </button>
 
         <button
@@ -199,7 +199,7 @@ export default function TeachModePanel({ cellState, posesData, onRelease, onLock
           }`}
         >
           <RotateCcw className="w-4 h-4" />
-          RESTORE LAST
+          {t('restoreLastBtn')}
         </button>
       </div>
     </div>

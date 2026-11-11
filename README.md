@@ -1,83 +1,69 @@
 # B002 Future Lab Bots
 
-Repositorio agregador para manter juntos os tres projetos do laboratorio B002:
-TurtleBot4, MyCobot e a camada de integracao/visualizacao 3D. Cada pasta e um
-submodulo Git; este repositorio salva quais versoes dos tres devem andar juntas.
+Aggregator repository that keeps the three B002 laboratory robotics projects together:
+**TurtleBot 4**, **MyCobot 280**, and the **3D Integration / Visualization Overlay**, along with the **Future Lab Control Center** web dashboard. Each robot subsystem folder is a Git submodule so this repository pins the exact versions that work together.
 
-## Estrutura
+## Structure
 
 ```text
 B002_Future_Lab_Bots/
-  turtlebot4_jazzy/       # TurtleBot4 Jazzy, mapa B002, Nav2 e rotinas
-  cobot/                  # MyCobot, Docker, MoveIt e bridge do braco
-  integration_cobot_tb4/  # visualizacao 3D, overlay e ponte de juntas
+  turtlebot4_jazzy/          # TurtleBot 4 (ROS 2 Jazzy), B002 map, Nav2 & mission routines
+  cobot/                     # MyCobot 280, Docker, MoveIt 2 & Jetson Nano hardware bridge
+  integration_cobot_tb4/     # 3D visualization, static TF overlay & UDP joint-state bridge
+  future_lab_control_center/ # Unified Web Control Center (Next.js frontend + FastAPI/ROS 2 backend)
+  docs/                      # Technical & operational documentation (MkDocs)
 ```
 
-Os diretorios antigos em `/home/mhc/Germany/turtlebot4_jazzy`,
-`/home/mhc/Germany/Cobot` e `/home/mhc/Germany/cobot_tb4_integration` ainda
-funcionam, mas o caminho preferido para novos testes e:
+## Official References
 
-```bash
-cd /home/mhc/Germany/B002_Future_Lab_Bots
-```
+Each robot subsystem builds upon the official platform documentation:
 
-## Referencias oficiais usadas
+### TurtleBot 4
 
-Para manter cada robo proximo do uso recomendado, a base foi feita a partir dos
-tutoriais oficiais de cada plataforma.
+- [TurtleBot 4 Basic Setup](https://turtlebot.github.io/turtlebot4-user-manual/setup/basic.html)
+- [TurtleBot 4 Navigation Tutorial](https://turtlebot.github.io/turtlebot4-user-manual/tutorials/navigation.html)
+- Observed issues & hardware notes: [turtlebot4_jazzy/KNOWN_ISSUES.md](turtlebot4_jazzy/KNOWN_ISSUES.md)
 
-### TurtleBot4
-
-- [TurtleBot4 basic setup](https://turtlebot.github.io/turtlebot4-user-manual/setup/basic.html)
-- [TurtleBot4 navigation tutorial](https://turtlebot.github.io/turtlebot4-user-manual/tutorials/navigation.html)
-- Issues e limitacoes observadas: [turtlebot4_jazzy/KNOWN_ISSUES.md](turtlebot4_jazzy/KNOWN_ISSUES.md)
-
-### MyCobot
+### MyCobot 280
 
 - [Elephant Robotics GitBook](https://docs.elephantrobotics.com/docs/gitbook-en/)
-- [MyCobot 280 Pi SSH/software notes](https://docs.elephantrobotics.com/docs/mycobot_280_pi_en/3-FunctionsAndApplications/5.BasicFunction/5.2-Softwarelnstructions/3.5.2-SW-detail-description.html#ssh)
-- [MyCobot 280 MoveIt documentation](https://docs.elephantrobotics.com/docs/mycobot-m5-en/12-ApplicationBaseROS/12.1-ROS1/12.1.5-Moveit/myCobot-280.html)
-- [MyCobot 280 Arduino ROS/MoveIt documentation](https://docs.elephantrobotics.com/docs/mycobot-280-Arduino-en/3-FunctionsAndApplications/6.developmentGuide/ROS/12.1-ROS1/12.1.5-Moveit/)
+- [MyCobot 280 Pi SSH / Software Notes](https://docs.elephantrobotics.com/docs/mycobot_280_pi_en/3-FunctionsAndApplications/5.BasicFunction/5.2-Softwarelnstructions/3.5.2-SW-detail-description.html#ssh)
+- [MyCobot 280 MoveIt Documentation](https://docs.elephantrobotics.com/docs/mycobot-m5-en/12-ApplicationBaseROS/12.1-ROS1/12.1.5-Moveit/myCobot-280.html)
+- [MyCobot 280 Arduino ROS/MoveIt Documentation](https://docs.elephantrobotics.com/docs/mycobot-280-Arduino-en/3-FunctionsAndApplications/6.developmentGuide/ROS/12.1-ROS1/12.1.5-Moveit/)
 - [MoveIt 2 Galactic README](https://github.com/moveit/moveit2/tree/galactic?tab=readme-ov-file)
-- [MoveIt Galactic announcement](https://moveit.ai/ros/moveit/galactic/2021/07/08/moveit-galactic.html)
-- [Install MoveIt 2 from source](https://moveit.ai/install-moveit2/source/)
-- [Elephant Robotics MyCobot 280 Jetson Nano support](https://www.elephantrobotics.com/en/support-280-jetson-nano-en/)
+- [MoveIt Galactic Announcement](https://moveit.ai/ros/moveit/galactic/2021/07/08/moveit-galactic.html)
+- [Install MoveIt 2 from Source](https://moveit.ai/install-moveit2/source/)
+- [Elephant Robotics MyCobot 280 Jetson Nano Support](https://www.elephantrobotics.com/en/support-280-jetson-nano-en/)
 
-### Network and factory references
+### Network & Factory References
 
-- Router/lab network: TP-Link AX5400.
-- Factory PDFs used locally during integration:
-  - `/home/mhc/Downloads/System Overview Hof University 1.pdf`
-  - `/home/mhc/Downloads/0Q7_00001-ENG_Teil_1.pdf`
-  - `/home/mhc/Downloads/109737901_OPC_UA_Client_S7-1500_DOKU_V1_5_en.pdf`
+- Router / lab network: TP-Link AX5400.
 
-## Clonar tudo
+## Cloning the Repository
 
 ```bash
-git clone --recurse-submodules https://github.com/MHC-CodeSmith/B002_Future_Lab_Bots.git
+git clone --recurse-submodules https://github.com/B002-FUTURE-LAB/B002_Future_Lab_Bots.git
 cd B002_Future_Lab_Bots
 ```
 
-Se ja clonou sem submodulos:
+If already cloned without submodules:
 
 ```bash
 git submodule update --init --recursive
 ```
 
-Para atualizar as versoes dos tres submodulos:
+To update the repository and submodules:
 
 ```bash
 git pull
 git submodule update --init --recursive
 ```
 
-## Como rodar os tres sistemas
+## Running the Three Systems Manually
 
-A forma pratica de operar no laboratorio e abrir tres janelas no Terminator e
-deixar cada janela em uma parte do sistema: MyCobot, TurtleBot4 e integracao 3D.
+To operate the cell manually from terminals, open three windows (e.g., in Terminator) for MyCobot, TurtleBot 4, and the 3D Integration View.
 
-Antes de comecar, pare processos antigos de RViz/Nav2/mission manager se a
-sessao anterior falhou:
+Before starting, clean up any stale RViz / Nav2 / Mission Manager processes from previous sessions:
 
 ```bash
 pkill -f "mission_manager.py" || true
@@ -89,30 +75,29 @@ ros2 daemon stop
 ros2 daemon start
 ```
 
-### Janela 1 - MyCobot
+### Window 1 — MyCobot 280
 
 ```bash
-cd /home/mhc/Germany/B002_Future_Lab_Bots/cobot/mycobot_docker
+cd ~/B002_Future_Lab_Bots/cobot/mycobot_docker
 xhost +local:root
 docker compose up -d mycobot_ros2
 ```
 
-Depois rode o planejamento/MoveIt no PC:
+Then launch MoveIt 2 planning on the host PC:
 
 ```bash
-cd /home/mhc/Germany/B002_Future_Lab_Bots/cobot
+cd ~/B002_Future_Lab_Bots/cobot
 ./mycobot_docker/RUN_PLANNING_PC.sh
 ```
 
-Esse fluxo sobe o container, prepara o bridge do MyCobot e abre MoveIt/RViz para
-planejar e executar movimentos do braco.
+This starts the container, prepares the MyCobot bridge on the Jetson Nano, and opens MoveIt 2 + RViz to plan and execute arm motions.
 
-### Janela 2 - TurtleBot4 fisico no mapa B002
+### Window 2 — Physical TurtleBot 4 on Map B002
 
-Entre no workspace do TurtleBot4:
+Enter the TurtleBot 4 workspace:
 
 ```bash
-cd /home/mhc/Germany/B002_Future_Lab_Bots/turtlebot4_jazzy
+cd ~/B002_Future_Lab_Bots/turtlebot4_jazzy
 source /opt/ros/jazzy/setup.bash
 export ROS_DOMAIN_ID=0
 export ROS_AUTOMATIC_DISCOVERY_RANGE=SUBNET
@@ -121,37 +106,36 @@ export ROS_SUPER_CLIENT=True
 export ROS_DISCOVERY_SERVER="192.168.0.129:11811;"
 ```
 
-Se o robo estiver dockado, primeiro faca undock:
+If the robot is docked, undock first:
 
 ```bash
 ros2 action send_goal /undock irobot_create_msgs/action/Undock "{}"
 ```
 
-Depois suba a localizacao com o mapa B002:
+Launch localization with the B002 map:
 
 ```bash
 ros2 launch turtlebot4_navigation localization.launch.py \
-  map:=/home/mhc/Germany/B002_Future_Lab_Bots/turtlebot4_jazzy/maps/B002_map.yaml
+  map:=$HOME/B002_Future_Lab_Bots/turtlebot4_jazzy/maps/B002_map.yaml
 ```
 
-Quando o mapa aparecer no RViz, use **2D Pose Estimate** para setar a pose
-inicial do robo no mapa. Depois suba o Nav2 com os parametros do projeto:
+Once the map appears in RViz, set the robot's initial pose using **2D Pose Estimate**, then launch Nav2 with the custom project parameters:
 
 ```bash
 ros2 launch turtlebot4_navigation nav2.launch.py \
-  params_file:=/home/mhc/Germany/B002_Future_Lab_Bots/turtlebot4_jazzy/config/nav2_custom.yaml
+  params_file:=$HOME/B002_Future_Lab_Bots/turtlebot4_jazzy/config/nav2_custom.yaml
 ```
 
-Quando os controllers estiverem ativos, abra a visualizacao de navegacao:
+To open the navigation RViz view:
 
 ```bash
 ros2 launch turtlebot4_viz view_navigation.launch.py
 ```
 
-### Janela 3 - Visualizacao 3D integrada
+### Window 3 — Integrated 3D Visualization
 
 ```bash
-cd /home/mhc/Germany/B002_Future_Lab_Bots/integration_cobot_tb4
+cd ~/B002_Future_Lab_Bots/integration_cobot_tb4
 source /opt/ros/jazzy/setup.bash
 export ROS_DOMAIN_ID=0
 export ROS_AUTOMATIC_DISCOVERY_RANGE=SUBNET
@@ -161,26 +145,25 @@ export ROS_DISCOVERY_SERVER="192.168.0.129:11811;"
 ./scripts/run_3d_view.sh
 ```
 
-### Configuração de Chave SSH sem Senha (PC ↔ Robô)
+### Passwordless SSH Key Setup (PC ↔ Robot)
 
-Para que o script `mission_manager.py` consiga ligar a câmera OAK-D no robô automaticamente via SSH, você precisa autorizar a chave SSH do seu PC no robô:
+So `mission_manager.py` and the Control Center can manage the OAK-D camera and services on the robot over SSH without password prompts:
 
-1. Gere uma chave SSH no PC (se já não tiver uma):
+1. Generate an SSH key on the PC (if you don't already have one):
    ```bash
    ssh-keygen -t ed25519 -N "" -f ~/.ssh/id_ed25519
    ```
-2. Copie a chave para o robô:
+2. Copy the key to the TurtleBot 4 Raspberry Pi:
    ```bash
    ssh-copy-id ubuntu@192.168.0.129
    ```
-   *(Insira a senha do usuário `ubuntu` do robô quando solicitado).*
 
-### Janela 2 ou nova aba - Mission manager
+### Mission Manager
 
-Depois que localizacao, Nav2 e sensores estiverem estaveis:
+Once localization, Nav2, and sensors are active:
 
 ```bash
-cd /home/mhc/Germany/B002_Future_Lab_Bots/turtlebot4_jazzy
+cd ~/B002_Future_Lab_Bots/turtlebot4_jazzy
 source /opt/ros/jazzy/setup.bash
 export ROS_DOMAIN_ID=0
 export ROS_AUTOMATIC_DISCOVERY_RANGE=SUBNET
@@ -190,106 +173,92 @@ export ROS_DISCOVERY_SERVER="192.168.0.129:11811;"
 python3 scripts/mission_manager.py --ros-args --params-file params/waypoints.yaml
 ```
 
-Para iniciar a rotina de delivery:
+Trigger a delivery mission:
 
 ```bash
 ros2 service call /start_delivery std_srvs/srv/Trigger {}
 ```
 
-## Simulacao
+## Simulation
 
-Para testar o TurtleBot4 em Gazebo com o ambiente Docker do projeto:
+To test TurtleBot 4 in Gazebo Harmonic using the project Docker environment:
 
 ```bash
-cd /home/mhc/Germany/B002_Future_Lab_Bots/turtlebot4_jazzy
+cd ~/B002_Future_Lab_Bots/turtlebot4_jazzy
 ./sim/run_lab_world.sh false false 0.0 0.0 0.0
 ```
 
-A simulacao e util para desenvolvimento, mas nao substitui totalmente os testes
-fisicos no B002: dock/undock, RPLidar, OAK-D, Wi-Fi e a recuperacao dos sensores
-apos undock podem se comportar diferente no robo real.
+Simulation is useful for development, though physical hardware behavior in B002 (dock/undock, RPLidar, OAK-D, Wi-Fi, and post-undock sensor recovery) should always be validated on the real robot.
 
-## Observacoes de integracao
+## Integration Notes
 
-- TurtleBot4: ROS 2 Jazzy, FastDDS, `ROS_DOMAIN_ID=0`.
-- MyCobot: ROS 2 Galactic, MoveIt 2, bridge DDS separado para o braco.
-- Integracao 3D: nao controla o robo nem o braco; ela visualiza os dois no
-  mesmo frame `map`.
-- O mapa usado para navegacao e `turtlebot4_jazzy/maps/B002_map.yaml`.
-- Os waypoints usados pelas rotinas ficam em `turtlebot4_jazzy/params/waypoints.yaml`.
+- **TurtleBot 4**: ROS 2 Jazzy, FastDDS, `ROS_DOMAIN_ID=0`.
+- **MyCobot 280**: ROS 2 Galactic, MoveIt 2, CycloneDDS (`ROS_DOMAIN_ID=42`) for the arm bridge.
+- **3D Integration**: Visualizes both robots in the shared `map` frame without mixing ROS distributions.
+- **Navigation Map**: `turtlebot4_jazzy/maps/B002_map.yaml`.
+- **Mission Waypoints**: `turtlebot4_jazzy/params/waypoints.yaml`.
+- **TurtleBot 4 RPi Backup Configs**: `turtlebot4_jazzy/config/rpi_turtlebot4/`.
 
 ---
 
-## 🎛️ Future Lab Control Center (Dashboard Web & Célula Robótica)
+## 🎛️ Future Lab Control Center (Web Dashboard & Robotic Cell)
 
-A pasta `future_lab_control_center/` contém a interface web completa de supervisão, controle e calibração da célula robótica.
+The `future_lab_control_center/` directory contains the full web interface for supervising, controlling, and calibrating the robotic cell.
 
-### Arquitetura de Comunicação e Portas
+### Communication Architecture & Ports
 
 ```text
-  [ Frontend Next.js (Porta 3000) ]
+  [ Next.js Frontend (Port 3000) ]
                  │ (HTTP REST / Polling)
                  ▼
-  [ Backend FastAPI (Porta 8000) ] ── (ROS 2 DDS / Docker) ──► [ MoveIt Planning (mycobot_ros2) ]
+  [ FastAPI Backend (Port 8000) ] ── (ROS 2 DDS / Docker) ──► [ MoveIt Planning (mycobot_ros2) ]
                  │ (SSH ControlMaster / HTTP Micro-Bridge)
                  ▼
-  [ Jetson Nano (192.168.0.250) ]
-     ├── HTTP Micro-Bridge (Porta 8088) -> Bomba, Soltar/Travar Motores, Direct Joints (<30ms)
-     └── Servidor Câmera MJPEG (Porta 8080) -> Stream ao vivo de visão computacional
+  [ Jetson Nano (192.168.0.62) ]
+     ├── HTTP Micro-Bridge (Port 8088) -> Suction Pump, Release/Lock Servos, Direct Joints (<30ms)
+     └── MJPEG Camera Server (Port 8080) -> Live computer vision stream
 ```
 
 ---
 
-### 🚨 Documentação do Modo Pânico (Panic Mode) e Limitações de Hardware
+### 🚨 Panic Mode & Hardware Safety Notes
 
-O botão **`🚨 BOTÃO DE PÂNICO`** no Dashboard executa uma parada master de segurança da célula robótica.
+The **`🚨 PANIC`** button on the Dashboard executes a master safety shutdown of the robotic cell:
 
-#### Sequência de Execução do Pânico:
-1. **Trava Físico-Mecânica (`< 5ms`)**: Envia uma requisição HTTP prioritária para `http://192.168.0.250:8088/panic`, interrompendo o envio de novas posições seriais e forçando o travamento de torque em todas as 6 juntas no microcontrolador da base MyCobot.
-2. **Desligamento de Periféricos**: Desliga a bomba de sucção e mata o teste de visão YOLO.
-3. **Parada da Câmera**: Encerra o processo `nano_camera_server.py` na Jetson Nano.
-4. **Encerramento do Planejador MoveIt**: Executa `pkill -9` nos nós `move_group` e `rviz` dentro do container Docker `mycobot_ros2` no PC.
-5. **Encerramento da Ponte Nano**: Mata o nó `mycobot_bridge` na Jetson Nano (as juntas permanecem energizadas/travadas pela placa de controle do robô).
-6. **Panic Lockout**: Bloqueia o Dashboard em estado de segurança até que o usuário solicite a reinicialização.
-
-#### ⚠️ Más Otimizações Conhecidas, Gargalos e Cuidados Futuros:
+1. **Immediate Servo Lock (`< 5ms`)**: Sends a priority HTTP request to `http://<JETSON_NANO_IP>:8088/panic`, halting serial joint commands and locking torque on all 6 joints.
+2. **Peripheral Shutdown**: Turns off the suction pump and stops any running YOLO vision test.
+3. **Camera Shutdown**: Terminates `nano_camera_server.py` on the Jetson Nano.
+4. **MoveIt Planner Termination**: Runs `pkill -9` on `move_group` and `rviz` inside the `mycobot_ros2` Docker container on the PC.
+5. **Nano Bridge Termination**: Stops `mycobot_bridge` on the Jetson Nano while keeping servos locked.
+6. **Panic Lockout**: Locks the Dashboard in a safety state until the operator explicitly triggers a full system restart.
 
 > [!WARNING]
-> **1. Contenção da Porta Serial (`/dev/ttyTHS1`) na Jetson Nano**:
-> Ao encerrar abruptamente o nó `mycobot_bridge` na Jetson Nano com `pkill -9`, o driver serial do kernel Linux pode demorar até **1 a 2 segundos** para liberar totalmente a porta `/dev/ttyTHS1`. Se a reinicialização for disparada antes dessa liberação, a comunicação serial pode falhar com o erro `device reports readiness to read but returned no data` ou a porta `8088` indicar `Address already in use`.
+> **1. Serial Port Contention (`/dev/ttyTHS1`) on Jetson Nano**:
+> When `mycobot_bridge` is killed abruptly with `pkill -9`, the Linux kernel serial driver may take **1–2 seconds** to release `/dev/ttyTHS1`. Restarting before release completes can cause `device reports readiness to read but returned no data` or `Address already in use` on port `8088`.
 
 > [!WARNING]
-> **2. Inércia de Buffer do Firmware Interno (MyCobot 280)**:
-> Se o Pânico for acionado enquanto o braço está em movimento de velocidade alta (ex: retorno para `HOME`), a ordem de pânico HTTP é enviada em `< 5ms`, mas o robô físico ainda pode deslocar de 1cm a 3cm devido aos pacotes já armazenados no buffer de recebimento do firmware interno da base antes que a ordem de trava de motores sobressaia.
+> **2. Internal Firmware Buffer Inertia (MyCobot 280)**:
+> If Panic is triggered while the arm is moving at high speed, the HTTP panic command arrives in `< 5ms`, but the arm may still travel 1–3 cm due to packets already buffered in the microcontroller firmware before the torque lock takes effect.
 
 > [!IMPORTANT]
-> **3. Necessidade do Modal de Bloqueio Durante a Reinicialização (`RebootOverlayModal`)**:
-> Por conta dos tempos de estabilização do hardware (~5 a 8 segundos para reiniciar a porta serial, subir o servidor de vídeo e aquecer as ações do MoveIt ROS 2), a interface web exibe um **Popup Modal de Bloqueio em Tela Cheia** com barra de progresso e checklist dinâmico. O acesso a botões e comandos fica **100% desabilitado** até que todos os 5 passos do boot passem na verificação de saúde.
+> **3. Full-Screen Reboot Lockout Modal (`RebootOverlayModal`)**:
+> Because hardware stabilization takes ~5–8 seconds (releasing the serial port, starting the video server, and warming up MoveIt ROS 2 actions), the web UI displays a full-screen blocking modal with a progress bar and 5-step health checklist.
 
 ---
 
-### 🔄 Como Inicializar o Control Center
+### 🔄 Starting the Control Center
 
 ```bash
-cd /home/future-lab/B002_Future_Lab_Bots/future_lab_control_center
+cd ~/B002_Future_Lab_Bots/future_lab_control_center
 docker compose down && docker compose up --build -d
 ```
 
-Acesse no navegador: **`http://localhost:3000`** (Frontend) ou **`http://localhost:8000/docs`** (API REST Swagger).
+Open in your browser: **`http://localhost:3000`** (Frontend) or **`http://localhost:8000/docs`** (Swagger REST API).
 
 ---
 
-## Nunca alterar os transportes do Fast DDS
+## Never Override FastDDS Built-in Transports
 
-Não definir FASTDDS_BUILTIN_TRANSPORTS (env, compose ou linha de comando) e não
-usar <useBuiltinTransports>false</useBuiltinTransports> em perfil RMW — nem no
-host, nem no container, nem no RMW Profile Override da Create 3.
+Do **not** set `FASTDDS_BUILTIN_TRANSPORTS` (in environment variables, Docker Compose, or CLI) and do **not** use `<useBuiltinTransports>false</useBuiltinTransports>` in any RMW XML profile — neither on the host, nor in containers, nor in the Create 3 RMW Profile Override.
 
-Substituir a lista de transportes embutidos derruba o registro no Discovery
-Server (192.168.0.129:11811). Sintoma: o robô responde a ping, mas /dock_status,
-/battery_state e /odom param de chegar; o dashboard mostra valores default e as
-actions /dock e /undock ficam sem action server — inclusive quando executadas
-diretamente no próprio robô.
-
-Isso já derrubou o sistema duas vezes.
-
+Overriding the built-in transport list breaks registration with the FastDDS Discovery Server (`192.168.0.129:11811`). Symptom: the robot responds to ping, but `/dock_status`, `/battery_state`, and `/odom` stop arriving, and `/dock` and `/undock` lose their action servers.

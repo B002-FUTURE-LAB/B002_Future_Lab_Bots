@@ -34,7 +34,7 @@ export default function TurtleBotDashboardTab({
   onStopViz,
   onStopMissionManagerProcess
 }) {
-  const { t } = useLanguage();
+  const { t, tb } = useLanguage();
   const telemetryOk = tbStatus?.telemetry_ok === true;
   const isOnline = tbStatus?.ping_ok !== false && tbStatus?.status !== 'offline';
   const batteryPct = telemetryOk && tbStatus?.battery_percentage != null ? tbStatus.battery_percentage : null;
@@ -113,7 +113,7 @@ export default function TurtleBotDashboardTab({
   const handleSystemAction = async (action, name) => {
     const host = typeof window !== 'undefined' ? window.location.hostname : 'localhost';
     if (action === 'restart_backend') {
-      if (!window.confirm('Deseja realmente reiniciar o container do Backend? A operação em curso poderá ser pausada por ~10s.')) return;
+      if (!window.confirm(t('confirmRestartBackend'))) return;
       setActionLoading(name);
       await fetch(`http://${host}:8000/api/v1/turtlebot/system/restart_backend`, { method: 'POST' }).catch(() => null);
       setTimeout(() => setActionLoading(null), 3000);
@@ -122,7 +122,7 @@ export default function TurtleBotDashboardTab({
       await fetch(`http://${host}:8000/api/v1/turtlebot/system/restart_cobot_discovery`, { method: 'POST' }).catch(() => null);
       setTimeout(() => setActionLoading(null), 2000);
     } else if (action === 'restart_tb4_bringup') {
-      if (!window.confirm('Deseja realmente reiniciar o serviço turtlebot4.service no robô? OAK-D e LiDAR ficarão indisponíveis por ~40s.')) return;
+      if (!window.confirm(t('confirmRestartTb4Bringup'))) return;
       setActionLoading(name);
       await fetch(`http://${host}:8000/api/v1/turtlebot/robot/restart_bringup`, { method: 'POST' }).catch(() => null);
       setTimeout(() => setActionLoading(null), 4000);
@@ -139,9 +139,9 @@ export default function TurtleBotDashboardTab({
       });
       const data = await res.json();
       if (res.ok) {
-        setPoseMsg({ type: 'success', text: data.message || 'Costmaps limpos!' });
+        setPoseMsg({ type: 'success', text: tb(data.message) || t('costmapsClearedMsg') });
       } else {
-        setPoseMsg({ type: 'error', text: data.detail || 'Falha ao limpar costmaps.' });
+        setPoseMsg({ type: 'error', text: tb(data.detail) || t('costmapsClearFailedMsg') });
       }
     } catch (e) {
       setPoseMsg({ type: 'error', text: e.message });
@@ -190,10 +190,10 @@ export default function TurtleBotDashboardTab({
       });
       const data = await res.json();
       if (res.ok) {
-        setPoseMsg({ type: 'success', text: data.message || 'Pose da dock gravada com sucesso!' });
+        setPoseMsg({ type: 'success', text: tb(data.message) || t('dockPoseSavedMsg') });
         fetchAmclAndPoses();
       } else {
-        setPoseMsg({ type: 'error', text: data.detail || 'Falha ao gravar pose da dock.' });
+        setPoseMsg({ type: 'error', text: tb(data.detail) || t('dockPoseSaveFailedMsg') });
       }
     } catch (e) {
       setPoseMsg({ type: 'error', text: e.message });
@@ -210,7 +210,7 @@ export default function TurtleBotDashboardTab({
       const y = Number(initY);
       const yaw = Number(initYaw);
       if (![x, y, yaw].every(Number.isFinite)) {
-        setPoseMsg({ type: 'error', text: 'X, Y e yaw precisam ser números válidos medidos no mapa.' });
+        setPoseMsg({ type: 'error', text: t('invalidXYYawMsg') });
         return;
       }
       const res = await fetch(`http://${window.location.hostname}:8000/api/v1/turtlebot/set_initial_pose`, {
@@ -220,10 +220,10 @@ export default function TurtleBotDashboardTab({
       });
       const data = await res.json();
       if (res.ok) {
-        setPoseMsg({ type: 'success', text: data.message || 'Pose inicial enviada!' });
+        setPoseMsg({ type: 'success', text: tb(data.message) || t('initialPoseSentMsg') });
         await fetchAmclAndPoses();
       } else {
-        setPoseMsg({ type: 'error', text: data.detail || 'Falha ao enviar pose inicial.' });
+        setPoseMsg({ type: 'error', text: tb(data.detail) || t('initialPoseSendFailedMsg') });
       }
     } catch (e) {
       setPoseMsg({ type: 'error', text: e.message });
@@ -250,7 +250,7 @@ export default function TurtleBotDashboardTab({
 
   const handleSelectLogSource = (src) => {
     setLogSource(src);
-    setLogs([`Carregando logs de '${src}'...`]);
+    setLogs([`${t('loadingLogsFrom')} '${src}'...`]);
     fetchLogs(src);
   };
 
@@ -303,8 +303,8 @@ export default function TurtleBotDashboardTab({
           <div className="mt-4 p-4 rounded-xl bg-red-950/60 border border-red-500/60 flex items-center gap-3 text-red-200 font-bold shadow-lg animate-pulse">
             <ShieldAlert className="w-6 h-6 text-red-400 shrink-0" />
             <div>
-              <p className="text-sm font-black text-red-100">🔴 SEM TELEMETRIA DA BASE (Create 3)</p>
-              <p className="text-xs font-normal text-red-300">As leituras da Create 3 estão inativas há mais de 5s. Os comandos de movimento foram bloqueados automaticamente por segurança.</p>
+              <p className="text-sm font-black text-red-100">{t('noBaseTelemetryTitle')}</p>
+              <p className="text-xs font-normal text-red-300">{t('noBaseTelemetryDesc')}</p>
             </div>
           </div>
         )}
@@ -323,16 +323,16 @@ export default function TurtleBotDashboardTab({
                 </div>
                 <div>
                   <div className="flex items-center gap-2">
-                    <span className="text-sm font-bold text-slate-200">Prontidão da Navegação:</span>
+                    <span className="text-sm font-bold text-slate-200">{t('navReadinessLabel')}</span>
                     <span className={`text-xs px-2.5 py-0.5 rounded-full font-black ${
                       tbNavReadiness.ready 
                         ? 'bg-emerald-500/30 text-emerald-300 border border-emerald-500/50' 
                         : 'bg-amber-500/30 text-amber-300 border border-amber-500/50'
                     }`}>
-                      {tbNavReadiness.ready ? '✅ STACK PRONTA' : '⚠️ NÃO PRONTA'}
+                      {tbNavReadiness.ready ? t('stackReadyBadge') : t('stackNotReadyBadge')}
                     </span>
                   </div>
-                  <p className="text-xs text-slate-300 mt-0.5 font-medium">{tbNavReadiness.hint}</p>
+                  <p className="text-xs text-slate-300 mt-0.5 font-medium">{tb(tbNavReadiness.hint)}</p>
                 </div>
               </div>
             </div>
@@ -365,8 +365,8 @@ export default function TurtleBotDashboardTab({
                 {telemetryOk && batteryPct !== null ? `${batteryPct}%` : '—'}
               </p>
               {telemetryOk && (
-                <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold inline-block mt-0.5 ${isCharging ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40' : 'bg-amber-500/20 text-amber-300 border border-amber-500/40'}`} title={`Corrente elétrica: ${batteryCurrent != null ? batteryCurrent + ' A' : 'N/A'}`}>
-                  {isCharging ? '⚡ Carregando' : '🔋 Descarregando'} ({batteryCurrent != null ? `${batteryCurrent} A` : ''})
+                <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold inline-block mt-0.5 ${isCharging ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40' : 'bg-amber-500/20 text-amber-300 border border-amber-500/40'}`} title={`${t('electricCurrentTitle')} ${batteryCurrent != null ? batteryCurrent + ' A' : 'N/A'}`}>
+                  {isCharging ? t('chargingBadge') : t('dischargingBadge')} ({batteryCurrent != null ? `${batteryCurrent} A` : ''})
                 </span>
               )}
             </div>
@@ -416,8 +416,8 @@ export default function TurtleBotDashboardTab({
               <div className="flex items-center gap-2.5">
                 <Activity className="w-5 h-5 text-emerald-400" />
                 <div>
-                  <h3 className="text-base font-bold text-slate-100">Painel de Saúde do Sistema & Inventário</h3>
-                  <p className="text-xs text-slate-400">Monitoramento em tempo de execução dos 10 serviços do laboratório</p>
+                  <h3 className="text-base font-bold text-slate-100">{t('sysHealthInventoryTitle')}</h3>
+                  <p className="text-xs text-slate-400">{t('sysHealthInventorySub')}</p>
                 </div>
               </div>
             </div>
@@ -428,15 +428,15 @@ export default function TurtleBotDashboardTab({
                   <div className="flex items-start justify-between gap-1">
                     <div>
                       <span className="text-[10px] font-mono text-slate-400">{item.host}</span>
-                      <p className="text-xs font-bold text-slate-200 line-clamp-2">{item.name}</p>
+                      <p className="text-xs font-bold text-slate-200 line-clamp-2">{tb(item.name)}</p>
                     </div>
-                    <span className={`w-2.5 h-2.5 rounded-full shrink-0 mt-1 ${item.ok ? 'bg-emerald-400 shadow-sm shadow-emerald-400/50' : 'bg-red-500 shadow-sm shadow-red-500/50 animate-ping'}`} title={item.ok ? 'Serviço OK' : 'Inativo / Indisponível'} />
+                    <span className={`w-2.5 h-2.5 rounded-full shrink-0 mt-1 ${item.ok ? 'bg-emerald-400 shadow-sm shadow-emerald-400/50' : 'bg-red-500 shadow-sm shadow-red-500/50 animate-ping'}`} title={item.ok ? t('serviceOkTitle') : t('serviceInactiveTitle')} />
                   </div>
 
                   <div>
                     {item.action === 'none' ? (
                       <span className="text-[10px] text-slate-400 italic block leading-tight">
-                        Use o ícone <strong>Future Lab Control Center</strong> na área de trabalho.
+                        {t('useDesktopIconHint')}
                       </span>
                     ) : (
                       <button
@@ -445,7 +445,7 @@ export default function TurtleBotDashboardTab({
                         className="w-full py-1.5 px-2 bg-slate-700 hover:bg-slate-600 text-slate-200 border border-slate-600 rounded-lg text-[10px] font-bold transition-all active:scale-95 flex items-center justify-center gap-1 disabled:opacity-50"
                       >
                         <RefreshCw className={`w-3 h-3 text-amber-400 ${actionLoading === item.name ? 'animate-spin' : ''}`} />
-                        <span>{actionLoading === item.name ? 'Reiniciando...' : 'Reiniciar'}</span>
+                        <span>{actionLoading === item.name ? t('restartingBtn') : t('restartBtn')}</span>
                       </button>
                     )}
                   </div>
@@ -490,7 +490,7 @@ export default function TurtleBotDashboardTab({
                 }}
                 disabled={restartingOakd}
                 className="py-2 px-3 bg-slate-800 hover:bg-slate-700 text-amber-300 border border-amber-500/40 font-bold rounded-xl shadow-lg flex items-center justify-center gap-2 transition-all active:scale-95 text-xs disabled:opacity-50"
-                title="Reiniciar Conexão / Reinstanciar Streaming MJPEG"
+                title={t('restartOakdTitle')}
               >
                 <RefreshCw className={`w-3.5 h-3.5 ${restartingOakd ? 'animate-spin' : ''}`} />
                 <span>{t('btnRestartOakd')}</span>
@@ -503,7 +503,7 @@ export default function TurtleBotDashboardTab({
             {oakdStreaming ? (
               <img
                 src={typeof window !== 'undefined' ? `http://${window.location.hostname}:8000/api/v1/turtlebot/oakd_stream?t=${streamKey}` : `http://localhost:8000/api/v1/turtlebot/oakd_stream?t=${streamKey}`}
-                alt="Stream da Câmera OAK-D"
+                alt={t('oakdStreamAlt')}
                 className="w-full h-full object-contain"
               />
             ) : (
@@ -532,7 +532,7 @@ export default function TurtleBotDashboardTab({
               <div className="flex gap-1.5">
                 <button
                   onClick={onUndock}
-                  title="Forçar Saída da Dock e Destravar Motores"
+                  title={t('forceUndockTitle')}
                   className={`py-1.5 px-3 border rounded-lg text-xs font-bold transition-all flex items-center gap-1 ${
                     !isDocked 
                       ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40 shadow-sm' 
@@ -544,7 +544,7 @@ export default function TurtleBotDashboardTab({
                 </button>
                 <button
                   onClick={onDock}
-                  title="Forçar Entrada na Dock"
+                  title={t('forceDockTitle')}
                   className={`py-1.5 px-3 border rounded-lg text-xs font-bold transition-all flex items-center gap-1 ${
                     isDocked 
                       ? 'bg-blue-500/20 text-blue-300 border-blue-500/40 shadow-sm' 
@@ -641,7 +641,7 @@ export default function TurtleBotDashboardTab({
 
               <span className="px-3 py-1 bg-purple-500/20 text-purple-300 border border-purple-500/30 rounded-full font-bold text-xs flex items-center gap-1">
                 <Activity className="w-3.5 h-3.5 text-purple-400" />
-                {tbDiag.topics_count} ROS 2 Topics Found
+                {tbDiag.topics_count} {t('topicsFoundSuffix')}
               </span>
             </div>
 
@@ -729,7 +729,7 @@ export default function TurtleBotDashboardTab({
             <div className="p-2.5 bg-amber-500/10 border border-amber-500/30 rounded-xl text-amber-300 text-xs flex items-start gap-2 font-sans">
               <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
               <span>
-                <strong>Aviso de Robô Acoplado:</strong> Faça <em>UNDOCK</em> (Passo 3) antes de enviar metas diretas ao Nav2. A Create 3 ignora <code className="text-[10px] font-mono bg-amber-950/40 px-1 py-0.5 rounded border border-amber-500/20">/cmd_vel</code> na dock e o costmap nasce com a dock na footprint. As rotinas de missão executam o undock sozinhas.
+                <strong>{t('dockedRobotWarningTitle')}</strong> {t('dockedRobotWarningPre')} <em>UNDOCK</em> {t('dockedRobotWarningMid')} <code className="text-[10px] font-mono bg-amber-950/40 px-1 py-0.5 rounded border border-amber-500/20">/cmd_vel</code> {t('dockedRobotWarningPost')}
               </span>
             </div>
           )}
@@ -752,7 +752,7 @@ export default function TurtleBotDashboardTab({
               >
                 <span className="flex items-center gap-2">
                   {startingLocalization ? <RefreshCw className="w-4 h-4 text-emerald-400 animate-spin" /> : <MapPin className="w-4 h-4 text-emerald-400" />}
-                  {startingLocalization ? 'Aguardando lifecycle...' : t('step1Loc')}
+                  {startingLocalization ? t('waitingLifecycle') : t('step1Loc')}
                 </span>
                 <span className="text-[10px] sm:text-xs text-slate-400 font-normal hidden sm:inline">localization.launch.py</span>
               </button>
@@ -800,7 +800,7 @@ export default function TurtleBotDashboardTab({
                 <Compass className="w-3.5 h-3.5 text-amber-400" />
                 {t('step3Undock')} & {t('step4Pose')}
               </span>
-              <span className="text-[10px] text-slate-500 hidden sm:inline">↓ veja abaixo / D-Pad</span>
+              <span className="text-[10px] text-slate-500 hidden sm:inline">{t('seeBelowDpad')}</span>
             </div>
 
             {/* Passo 5: Nav2 Stack */}
@@ -820,7 +820,7 @@ export default function TurtleBotDashboardTab({
               >
                 <span className="flex items-center gap-2">
                   {startingNav2 ? <RefreshCw className="w-4 h-4 text-amber-400 animate-spin" /> : <Navigation className="w-4 h-4 text-amber-400" />}
-                  {startingNav2 ? 'Aguardando lifecycle...' : t('step2Nav')}
+                  {startingNav2 ? t('waitingLifecycle') : t('step2Nav')}
                 </span>
                 <span className="text-[10px] sm:text-xs text-slate-400 font-normal hidden sm:inline">nav2.launch.py</span>
               </button>
@@ -857,7 +857,7 @@ export default function TurtleBotDashboardTab({
                     ? 'bg-amber-950/50 hover:bg-amber-900/60 text-amber-200 border-amber-500/40 shadow-md shadow-amber-900/20'
                     : 'bg-slate-900 text-slate-500 border-slate-800 cursor-not-allowed'
                 }`}
-                title={tbNavReadiness?.checks?.navigate_to_pose ? 'Limpa costmaps global e local do Nav2' : 'Requer Nav2 Stack ativo'}
+                title={tbNavReadiness?.checks?.navigate_to_pose ? t('clearCostmapsTitleReady') : t('clearCostmapsTitleNotReady')}
               >
                 <span className="flex items-center gap-1.5">
                   <Trash2 className="w-4 h-4 text-amber-400" />
@@ -872,7 +872,7 @@ export default function TurtleBotDashboardTab({
               <div className="flex items-center justify-between">
                 <span className="text-xs font-bold text-slate-300 flex items-center gap-1.5">
                   <MapPin className="w-3.5 h-3.5 text-purple-400" />
-                  Pose Inicial (2D Pose Estimate)
+                  {t('initialPoseBlockTitle')}
                 </span>
                 <span className="text-[10px] text-slate-500 font-mono">/initialpose</span>
               </div>
@@ -884,8 +884,8 @@ export default function TurtleBotDashboardTab({
                     : 'bg-red-500/10 text-red-300 border-red-500/40'
                 }`}>
                   {isDocked
-                    ? 'LiDAR pausado enquanto o TurtleBot está na dock. O mapa continua válido, mas não haverá pontos do LaserScan até um undock autorizado ou acionamento explícito do motor do lidar.'
-                    : `LaserScan sem fluxo: ${tbNavReadiness?.evidence?.scan?.reason || 'nenhuma mensagem /scan recebida.'}`}
+                    ? t('lidarPausedDockedWarning')
+                    : `${t('laserScanNoFlowPrefix')} ${tb(tbNavReadiness?.evidence?.scan?.reason) || t('noScanMsgReceived')}`}
                 </div>
               )}
 
@@ -897,15 +897,15 @@ export default function TurtleBotDashboardTab({
                 </span>
                 {!amclStatus?.amcl_ok ? (
                   <span className="px-2 py-0.5 bg-slate-800 text-slate-400 border border-slate-700 rounded-full font-bold text-[10px]">
-                    ⚪ AMCL fora do ar
+                    {t('amclOfflineBadge')}
                   </span>
                 ) : !amclStatus?.converged ? (
-                  <span className="px-2 py-0.5 bg-amber-500/20 text-amber-300 border border-amber-500/40 rounded-full font-bold font-mono text-[10px]" title={`Covariância: σ²x=${amclStatus.covariance?.x} σ²y=${amclStatus.covariance?.y} σ²yaw=${amclStatus.covariance?.yaw}`}>
-                    🟡 Não Convergido (σ²x={amclStatus.covariance?.x}, σ²yaw={amclStatus.covariance?.yaw})
+                  <span className="px-2 py-0.5 bg-amber-500/20 text-amber-300 border border-amber-500/40 rounded-full font-bold font-mono text-[10px]" title={`${t('covarianceTitle')} σ²x=${amclStatus.covariance?.x} σ²y=${amclStatus.covariance?.y} σ²yaw=${amclStatus.covariance?.yaw}`}>
+                    {t('amclNotConvergedBadge')} (σ²x={amclStatus.covariance?.x}, σ²yaw={amclStatus.covariance?.yaw})
                   </span>
                 ) : (
-                  <span className="px-2 py-0.5 bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 rounded-full font-bold font-mono text-[10px]" title={`Pose Real AMCL: x=${amclStatus.pose?.x} y=${amclStatus.pose?.y} yaw=${amclStatus.pose?.yaw}`}>
-                    🟢 Convergido (x={amclStatus.pose?.x}, y={amclStatus.pose?.y}, yaw={amclStatus.pose?.yaw})
+                  <span className="px-2 py-0.5 bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 rounded-full font-bold font-mono text-[10px]" title={`${t('realAmclPoseTitle')} x=${amclStatus.pose?.x} y=${amclStatus.pose?.y} yaw=${amclStatus.pose?.yaw}`}>
+                    {t('amclConvergedBadge')} (x={amclStatus.pose?.x}, y={amclStatus.pose?.y}, yaw={amclStatus.pose?.yaw})
                   </span>
                 )}
               </div>
@@ -921,11 +921,11 @@ export default function TurtleBotDashboardTab({
                       ? 'bg-slate-800 hover:bg-slate-700 text-blue-300 border-blue-500/40'
                       : 'bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 border-amber-500/40'
                   }`}
-                  title={navPoses?.dock_pose?.measured ? 'Preencher com pose medida da dock' : 'Preencher com semente estimada'}
+                  title={navPoses?.dock_pose?.measured ? t('useDockPoseTitleMeasured') : t('useDockPoseTitleSeed')}
                 >
                   <Compass className="w-3.5 h-3.5" />
                   <span>
-                    {navPoses?.dock_pose?.measured ? 'Usar Pose da Dock' : 'Usar Pose da Dock (Semente)'}
+                    {navPoses?.dock_pose?.measured ? t('useDockPoseBtn') : t('useDockPoseSeedBtn')}
                   </span>
                 </button>
 
@@ -938,10 +938,10 @@ export default function TurtleBotDashboardTab({
                       ? 'bg-emerald-600 hover:bg-emerald-500 text-white border-emerald-400 shadow'
                       : 'bg-slate-800 text-slate-500 border-slate-700 cursor-not-allowed'
                   }`}
-                  title={isDocked && (amclStatus?.converged_dock ?? amclStatus?.converged) ? 'Gravar pose real no nav_poses.yaml' : 'Requer AMCL convergido e robô acoplado na dock'}
+                  title={isDocked && (amclStatus?.converged_dock ?? amclStatus?.converged) ? t('saveDockPoseTitleReady') : t('saveDockPoseTitleNotReady')}
                 >
                   <CheckCircle2 className="w-3.5 h-3.5" />
-                  <span>{savingDockPose ? 'Gravando...' : 'Gravar Pose da Dock'}</span>
+                  <span>{savingDockPose ? t('savingBtn') : t('saveDockPoseBtn')}</span>
                 </button>
               </div>
 
@@ -987,7 +987,7 @@ export default function TurtleBotDashboardTab({
                 }`}
               >
                 <MapPin className="w-3.5 h-3.5" />
-                <span>{settingPose ? 'Enviando...' : 'Definir Pose Inicial'}</span>
+                <span>{settingPose ? t('sendingBtn') : t('setInitialPoseBtn')}</span>
               </button>
               {poseMsg && (
                 <p className={`text-[10px] font-bold ${poseMsg.type === 'success' ? 'text-emerald-400' : 'text-red-400'}`}>
@@ -1020,7 +1020,7 @@ export default function TurtleBotDashboardTab({
                 if (onLaunchMissionManager) onLaunchMissionManager();
                 handleSelectLogSource('mission');
               }}
-              title={missionManagerRunning ? "Mission Manager já está rodando em instância única" : ""}
+              title={missionManagerRunning ? t('mmSingleInstanceTitle') : ""}
               className="flex-1 py-3 px-4 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 disabled:from-slate-800 disabled:to-slate-800 disabled:text-slate-500 disabled:cursor-not-allowed text-white font-bold rounded-xl shadow-lg flex items-center justify-center gap-2 transition-all active:scale-95 text-xs sm:text-sm"
             >
               <Play className="w-4.5 h-4.5 fill-current" />
@@ -1046,14 +1046,14 @@ export default function TurtleBotDashboardTab({
                   ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-300'
                   : 'bg-amber-500/10 border-amber-500/30 text-amber-300'
               }`}>
-                <strong>{missionReady ? '✅ Missões prontas: ' : '⚠️ Missões bloqueadas: '}</strong>
-                {tbNavReadiness.mission_hint || 'Aguardando medição de prontidão.'}
+                <strong>{missionReady ? t('missionsReadyPrefix') : t('missionsBlockedPrefix')}</strong>
+                {tb(tbNavReadiness.mission_hint) || t('waitingReadinessMeas')}
               </div>
             )}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
               <button
                 disabled={!failureAllowed}
-                title={!failureAllowed ? "Rotina de falha bloqueada: consulte a prontidão específica de missões" : ""}
+                title={!failureAllowed ? t('failureBlockedTitle') : ""}
                 onClick={onTriggerFailure}
                 className={`py-3 px-2 font-bold rounded-xl border flex flex-col items-center justify-center gap-1 transition-all text-xs ${
                   failureAllowed
@@ -1068,7 +1068,7 @@ export default function TurtleBotDashboardTab({
 
               <button
                 disabled={!restockAllowed}
-                title={!restockAllowed ? "Restock bloqueado: consulte a prontidão específica de missões" : ""}
+                title={!restockAllowed ? t('restockBlockedTitle') : ""}
                 onClick={onTriggerRestock}
                 className={`py-3 px-2 font-bold rounded-xl border flex flex-col items-center justify-center gap-1 transition-all text-xs ${
                   restockAllowed
@@ -1083,7 +1083,7 @@ export default function TurtleBotDashboardTab({
 
               <button
                 disabled
-                title="Patrulha indisponível: o Mission Manager não expõe /start_patrol"
+                title={t('patrolUnavailableTitle')}
                 className={`py-3 px-2 font-bold rounded-xl border flex flex-col items-center justify-center gap-1 transition-all text-xs ${
                   'bg-slate-900 text-slate-600 border-slate-800 cursor-not-allowed'
                 }`}
@@ -1105,21 +1105,21 @@ export default function TurtleBotDashboardTab({
                   onClick={() => startMissionTestDelivery('blue')}
                   className="py-2 px-3 rounded-lg border border-blue-500/40 bg-blue-950/40 hover:bg-blue-900/60 disabled:bg-slate-900 disabled:text-slate-600 disabled:border-slate-800 text-blue-200 text-[11px] font-bold disabled:cursor-not-allowed"
                 >
-                  {missionSignalLoading === 'blue' ? 'Iniciando...' : t('tbSimulateBlueClass')}
+                  {missionSignalLoading === 'blue' ? t('startingBtn') : t('tbSimulateBlueClass')}
                 </button>
                 <button
                   disabled={!deliveryAllowed || Boolean(missionSignalLoading)}
                   onClick={() => startMissionTestDelivery('red')}
                   className="py-2 px-3 rounded-lg border border-red-500/40 bg-red-950/40 hover:bg-red-900/60 disabled:bg-slate-900 disabled:text-slate-600 disabled:border-slate-800 text-red-200 text-[11px] font-bold disabled:cursor-not-allowed"
                 >
-                  {missionSignalLoading === 'red' ? 'Iniciando...' : t('tbSimulateRedClass')}
+                  {missionSignalLoading === 'red' ? t('startingBtn') : t('tbSimulateRedClass')}
                 </button>
                 <button
                   disabled={!missionManagerRunning || Boolean(missionSignalLoading)}
                   onClick={publishMissionTestRelease}
                   className="py-2 px-3 rounded-lg border border-emerald-500/40 bg-emerald-950/40 hover:bg-emerald-900/60 disabled:bg-slate-900 disabled:text-slate-600 disabled:border-slate-800 text-emerald-200 text-[11px] font-bold disabled:cursor-not-allowed"
                 >
-                  {missionSignalLoading === 'release' ? 'Publicando...' : t('tbSimulateItemReleased')}
+                  {missionSignalLoading === 'release' ? t('publishingBtn') : t('tbSimulateItemReleased')}
                 </button>
               </div>
             </div>

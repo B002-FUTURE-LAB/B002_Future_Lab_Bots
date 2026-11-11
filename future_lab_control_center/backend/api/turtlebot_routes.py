@@ -272,6 +272,22 @@ def get_nav_readiness():
     except Exception:
         actions = set()
 
+    # PAUSE é a condição esperada após um docking bem-sucedido: o processo
+    # Nav2 e seu lifecycle manager seguem vivos, mas os servidores/costmaps
+    # ficam inativos para não consultar o TF que a Create 3 suspende na dock.
+    # Não basta inferir isso de uma action ausente: exigimos uma única geração
+    # lançada pelo dashboard e o serviço do lifecycle manager no grafo.
+    nav2_paused_standby = bool(
+        nav2_running
+        and isinstance(nav2_process, dict)
+        and nav2_process.get("owned") is True
+        and nav2_process.get("instances") == 1
+        and create3_alive
+        and node.is_docked is True
+        and "/lifecycle_manager_navigation/manage_nodes" in services
+        and "/navigate_to_pose" not in actions
+    )
+
     checks = {
         # Base física (Create 3)
         "create3_alive":         create3_alive,
@@ -287,6 +303,7 @@ def get_nav_readiness():
         # Navegação
         "navigate_to_pose":      nav2_running and "/navigate_to_pose" in actions,
         "global_costmap":        nav2_running and node.count_publishers("/global_costmap/costmap") > 0,
+        "nav2_paused_standby":   nav2_paused_standby,
         # Missões
         "start_delivery":        "/start_delivery" in services,
         "start_failure":         "/start_failure" in services,
@@ -950,6 +967,55 @@ def _run_create3_undock_action() -> tuple:
     is_success = ("SUCCEEDED" in full_output) and not any(k in full_output for k in ["ABORTED", "CANCELED", "FAILED"])
     return is_success, full_output
 
+
+def _manage_nav2_lifecycle(command: int, label: str) -> dict:
+    """Pausa/retoma a geração Nav2 já existente, sem criar ou encerrar processos."""
+    try:
+        host_status = _call_host_agent("/status", method="GET", timeout=3.0)
+        nav2 = host_status.get("nav2") or {}
+        if not (isinstance(nav2, dict) and nav2.get("running") is True):
+            return {
+                "attempted": False,
+                "success": False,
+                "reason": "Nav2 não está em execução; nenhuma transição lifecycle foi enviada.",
+            }
+    except Exception as exc:
+        return {
+            "attempted": False,
+            "success": False,
+            "reason": f"Estado do processo Nav2 não pôde ser medido: {exc}",
+        }
+
+    cmd = (
+        f'{JAZZY_ENV_CMD} && ros2 service call '
+        "/lifecycle_manager_navigation/manage_nodes "
+        'nav2_msgs/srv/ManageLifecycleNodes '
+        f'"{{command: {int(command)}}}"'
+    )
+    try:
+        result = subprocess.run(
+            cmd,
+            shell=True,
+            executable="/bin/bash",
+            capture_output=True,
+            text=True,
+            timeout=12,
+        )
+    except subprocess.TimeoutExpired:
+        return {
+            "attempted": True,
+            "success": False,
+            "reason": f"Timeout aguardando {label} no lifecycle do Nav2.",
+        }
+    output = ((result.stdout or "") + (result.stderr or "")).strip()
+    success = result.returncode == 0 and "success: true" in output.lower()
+    return {
+        "attempted": True,
+        "success": success,
+        "output": output[-2000:],
+        "reason": None if success else f"Nav2 não confirmou {label}.",
+    }
+
 @router.post("/dock")
 def trigger_dock():
     """Dispara somente o docking físico nativo da Create 3 (/dock)."""
@@ -964,7 +1030,12 @@ def trigger_dock():
         is_success, full_output = _run_create3_dock_action()
 
         if is_success or node.is_docked:
-            return {"status": "success", "message": "Docking físico concluído com SUCESSO no TurtleBot 4!"}
+            lifecycle = _manage_nav2_lifecycle(1, "PAUSE")
+            return {
+                "status": "success",
+                "message": "Docking físico concluído com SUCESSO no TurtleBot 4!",
+                "nav2_lifecycle": lifecycle,
+            }
         else:
             raise HTTPException(status_code=500, detail=f"Ação /dock não reportou sucesso: {full_output}")
     except subprocess.TimeoutExpired:
@@ -975,6 +1046,7 @@ def trigger_dock():
                 return {
                     "status": "success",
                     "message": "Docking físico confirmado por /dock_status após timeout do cliente.",
+                    "nav2_lifecycle": _manage_nav2_lifecycle(1, "PAUSE"),
                 }
             time.sleep(0.25)
         raise HTTPException(
@@ -1002,7 +1074,12 @@ def trigger_undock():
         is_success, full_output = _run_create3_undock_action()
 
         if is_success or not get_turtlebot_node().is_docked:
-            return {"status": "success", "message": "Undock físico concluído com SUCESSO no TurtleBot 4!"}
+            lifecycle = _manage_nav2_lifecycle(2, "RESUME")
+            return {
+                "status": "success",
+                "message": "Undock físico concluído com SUCESSO no TurtleBot 4!",
+                "nav2_lifecycle": lifecycle,
+            }
         else:
             raise HTTPException(status_code=500, detail=f"Ação /undock não reportou sucesso: {full_output}")
     except subprocess.TimeoutExpired:

@@ -76,6 +76,9 @@ def fake_undock_node(docked, client):
         ),
         dock_status_max_age_s=3.0,
         undock_client=client,
+        # O caminho nominal mantém a mesma geração Nav2 ativa; portanto o
+        # undock confirmado não deve exigir um RESUME lifecycle adicional.
+        nav_client=FakeActionClient(),
         post_undock_stabilize_s=8.0,
         _nav_not_before_monotonic=0.0,
         clear_count=0,
@@ -88,6 +91,9 @@ def fake_undock_node(docked, client):
         return True
 
     node.clear_costmaps = clear_costmaps
+    node._resume_nav2_after_undock = lambda done_cb: (
+        mission_module.MissionBase._resume_nav2_after_undock(node, done_cb)
+    )
     return node
 
 

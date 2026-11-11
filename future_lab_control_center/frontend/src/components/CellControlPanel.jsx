@@ -22,7 +22,7 @@ export default function CellControlPanel({
   tbProcesses,
   tbStatus
 }) {
-  const { t } = useLanguage();
+  const { t, tb } = useLanguage();
   const [mode, setMode] = useState(cellState?.mode || 'auto');
   const [cooldown, setCooldown] = useState(cellState?.cooldown_sec || 5.0);
   const [conf, setConf] = useState((cellState?.yolo_conf || 0.60) * 100);
@@ -69,20 +69,20 @@ export default function CellControlPanel({
   const handshake = cellState?.handshake || {};
   const integratedReal = cellState?.integrated_real || {};
   const handshakePhaseLabels = {
-    idle: 'Aguardando teste',
-    preflight_passed: 'Pré-validação concluída',
-    moving_scan: 'Cobot indo para SCAN',
-    yolo_detected: 'YOLO sintético detectou a lata',
-    starting_turtlebot: 'Enviando classe e missão ao TurtleBot',
-    cobot_picking: 'TurtleBot em rota; cobot executando PICK',
-    cobot_placing: 'Cobot transportando até PLACE',
-    waiting_turtlebot_pickup: 'Aguardando TurtleBot confirmar pickup',
-    releasing_item: 'Liberando lata e confirmando sinal',
-    cobot_returning_home: 'Cobot voltando HOME; TurtleBot entregando',
-    waiting_delivery_and_dock: 'Aguardando entrega e docking',
-    rollback: 'Executando retorno seguro',
-    completed: 'Fluxo completo confirmado',
-    failed: 'Teste falhou'
+    idle: t('hsIdle'),
+    preflight_passed: t('hsPreflightPassed'),
+    moving_scan: t('hsMovingScan'),
+    yolo_detected: t('hsYoloDetected'),
+    starting_turtlebot: t('hsStartingTb'),
+    cobot_picking: t('hsCobotPicking'),
+    cobot_placing: t('hsCobotPlacing'),
+    waiting_turtlebot_pickup: t('hsWaitingTbPickup'),
+    releasing_item: t('hsReleasingItem'),
+    cobot_returning_home: t('hsCobotReturningHome'),
+    waiting_delivery_and_dock: t('hsWaitingDeliveryDock'),
+    rollback: t('hsRollback'),
+    completed: t('hsCompleted'),
+    failed: t('hsFailed')
   };
   const managerReady = tbProcesses?.mission_manager?.running === true
     && tbProcesses?.mission_manager?.instances === 1
@@ -229,7 +229,7 @@ export default function CellControlPanel({
             {t('integratedRealBlockedCandidate')}: {integratedReal.candidate.class} · {(Number(integratedReal.candidate.confidence || 0) * 100).toFixed(1)}%
           </p>
         )}
-        {integratedReal.error && <p className="text-xs text-red-300 font-bold">{integratedReal.error}</p>}
+        {integratedReal.error && <p className="text-xs text-red-300 font-bold">{tb(integratedReal.error)}</p>}
       </div>
 
       {/* Botões Mestre de Operação (3 Botões) */}
@@ -299,7 +299,7 @@ export default function CellControlPanel({
                 className={`w-full py-2.5 px-3 text-xs font-bold rounded-lg flex items-center justify-center gap-2 transition-all ${status === 'idle' ? 'bg-amber-500 hover:bg-amber-400 text-slate-950 btn-hover shadow-md' : 'bg-slate-700/50 text-slate-500 cursor-not-allowed'}`}
               >
                 <RefreshCw className={`w-3.5 h-3.5 ${status === 'moving_scan' ? 'animate-spin' : ''}`} />
-                {status === 'moving_scan' ? 'INDO PARA SCAN...' : t('step1Scan')}
+                {status === 'moving_scan' ? t('movingToScan') : t('step1Scan')}
               </button>
             </div>
 
@@ -320,7 +320,7 @@ export default function CellControlPanel({
                   className="w-full py-2.5 px-3 text-xs font-bold rounded-lg flex items-center justify-center gap-2 bg-slate-800 text-slate-500 border border-slate-700 cursor-not-allowed"
                 >
                   {status === 'at_scan_inspecting' ? <Loader2 className="w-3.5 h-3.5 animate-spin text-amber-400" /> : <X className="w-3.5 h-3.5" />}
-                  {status === 'at_scan_inspecting' ? 'Aguardando detecção YOLO...' : t('step2Pick')}
+                  {status === 'at_scan_inspecting' ? t('waitingYoloDetection') : t('step2Pick')}
                 </button>
               )}
             </div>
@@ -401,23 +401,23 @@ export default function CellControlPanel({
         }`}>
           <div className="flex items-center justify-between gap-2">
             <span className="font-bold text-slate-200">
-              {handshakePhaseLabels[handshake.phase] || handshake.phase || 'Aguardando teste'}
+              {handshakePhaseLabels[handshake.phase] || handshake.phase || t('hsIdle')}
             </span>
             {handshake.active && <Loader2 className="w-4 h-4 animate-spin text-purple-400" />}
           </div>
           <p className="text-slate-400">
-            Turtle pronto: <strong className={turtleReady ? 'text-emerald-400' : 'text-amber-400'}>{turtleReady ? 'SIM' : 'NÃO'}</strong>
-            {' · '}Manager único: <strong className={managerReady ? 'text-emerald-400' : 'text-amber-400'}>{managerReady ? 'SIM' : 'NÃO'}</strong>
-            {' · '}Dock: <strong className="text-slate-200">{tbStatus?.is_docked ? 'SIM' : 'NÃO'}</strong>
+            {t('turtleReadyLabel')} <strong className={turtleReady ? 'text-emerald-400' : 'text-amber-400'}>{turtleReady ? t('yesWord') : t('noWord')}</strong>
+            {' · '}{t('singleManagerLabel')} <strong className={managerReady ? 'text-emerald-400' : 'text-amber-400'}>{managerReady ? t('yesWord') : t('noWord')}</strong>
+            {' · '}{t('dockLabel')} <strong className="text-slate-200">{tbStatus?.is_docked ? t('yesWord') : t('noWord')}</strong>
           </p>
           {handshake.run_id && (
             <p className="text-slate-400">
-              Execução <span className="font-mono text-slate-300">{handshake.run_id}</span>
+              {t('executionWord')} <span className="font-mono text-slate-300">{handshake.run_id}</span>
               {handshake.canonical_class ? ` · ${handshake.canonical_class}` : ''}
               {handshake.target ? ` → ${handshake.target}` : ''}
             </p>
           )}
-          {handshake.error && <p className="text-red-300 font-semibold">{handshake.error}</p>}
+          {handshake.error && <p className="text-red-300 font-semibold">{tb(handshake.error)}</p>}
         </div>
       </div>
 

@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { translations } from '../utils/translations';
+import { translations, translateBackendText } from '../utils/translations';
 
 const LanguageContext = createContext();
 
@@ -23,8 +23,12 @@ export const LanguageProvider = ({ children }) => {
     return translations[lang]?.[key] || translations['pt']?.[key] || key;
   };
 
+  const tb = (text) => {
+    return translateBackendText(text, lang);
+  };
+
   return (
-    <LanguageContext.Provider value={{ lang, toggleLanguage, t }}>
+    <LanguageContext.Provider value={{ lang, toggleLanguage, t, tb }}>
       {children}
     </LanguageContext.Provider>
   );
@@ -36,7 +40,8 @@ export const useLanguage = () => {
     return {
       lang: 'pt',
       toggleLanguage: () => {},
-      t: (key) => translations['pt']?.[key] || key
+      t: (key) => translations['pt']?.[key] || key,
+      tb: (text) => text
     };
   }
   return context;

@@ -22,7 +22,7 @@ export default function NetworkStatusHeader({ healthData }) {
         {/* Seletor de Idioma */}
         <button
           onClick={() => toggleLanguage()}
-          title="Alternar Idioma / Switch Language"
+          title={t('switchLanguageTooltip')}
           className="flex items-center gap-2 px-3 py-1.5 bg-blue-950/60 hover:bg-blue-900/80 transition-colors rounded-lg border border-blue-600/50 text-blue-300 font-bold cursor-pointer"
         >
           <Globe className="w-4 h-4 text-blue-400" />
@@ -32,7 +32,7 @@ export default function NetworkStatusHeader({ healthData }) {
         {/* PC Host */}
         <div className="flex items-center gap-2 px-3 py-1.5 bg-slate-800/80 rounded-lg border border-slate-700">
           <Wifi className={`w-4 h-4 ${devices.host_pc?.online ? 'text-emerald-400' : 'text-red-400'}`} />
-          <span className="text-slate-300 font-medium">PC Host:</span>
+          <span className="text-slate-300 font-medium">{t('pcHostLabel')}</span>
           <span className={`text-xs px-2 py-0.5 rounded-full font-bold ${devices.host_pc?.online ? 'bg-emerald-500/20 text-emerald-300' : 'bg-red-500/20 text-red-300'}`}>
             {devices.host_pc?.online ? 'ONLINE' : 'OFFLINE'}
           </span>
@@ -41,7 +41,7 @@ export default function NetworkStatusHeader({ healthData }) {
         {/* Jetson Nano */}
         <div className="flex items-center gap-2 px-3 py-1.5 bg-slate-800/80 rounded-lg border border-slate-700">
           <Bot className={`w-4 h-4 ${devices.jetson_nano?.online ? 'text-emerald-400' : 'text-red-400'}`} />
-          <span className="text-slate-300 font-medium">Nano (Cobot):</span>
+          <span className="text-slate-300 font-medium">{t('nanoCobotLabel')}</span>
           <span className={`text-xs px-2 py-0.5 rounded-full font-bold ${devices.jetson_nano?.online ? 'bg-emerald-500/20 text-emerald-300' : 'bg-red-500/20 text-red-300'}`}>
             {devices.jetson_nano?.online ? 'ONLINE' : 'OFFLINE'}
           </span>
@@ -50,7 +50,7 @@ export default function NetworkStatusHeader({ healthData }) {
         {/* Stream Câmera */}
         <div className="flex items-center gap-2 px-3 py-1.5 bg-slate-800/80 rounded-lg border border-slate-700">
           <Camera className={`w-4 h-4 ${devices.jetson_nano?.camera_stream_online ? 'text-emerald-400' : 'text-amber-400'}`} />
-          <span className="text-slate-300 font-medium">Câmera MJPEG:</span>
+          <span className="text-slate-300 font-medium">{t('cameraMjpeg')}</span>
           <span className={`text-xs px-2 py-0.5 rounded-full font-bold ${devices.jetson_nano?.camera_stream_online ? 'bg-emerald-500/20 text-emerald-300' : 'bg-amber-500/20 text-amber-300'}`}>
             {devices.jetson_nano?.camera_stream_online ? 'STREAM' : 'OFFLINE'}
           </span>
@@ -59,9 +59,9 @@ export default function NetworkStatusHeader({ healthData }) {
         {/* TurtleBot 4 */}
         <div className="flex items-center gap-2 px-3 py-1.5 bg-slate-800/80 rounded-lg border border-slate-700">
           <Bot className={`w-4 h-4 ${devices.turtlebot4?.online ? 'text-emerald-400' : 'text-slate-500'}`} />
-          <span className="text-slate-300 font-medium">TurtleBot 4:</span>
+          <span className="text-slate-300 font-medium">{t('turtlebot4')}</span>
           <span className={`text-xs px-2 py-0.5 rounded-full font-bold ${devices.turtlebot4?.online ? 'bg-emerald-500/20 text-emerald-300' : 'bg-slate-700 text-slate-400'}`}>
-            {devices.turtlebot4?.online ? 'ONLINE' : 'DESCONECTADO'}
+            {devices.turtlebot4?.online ? 'ONLINE' : t('disconnected')}
           </span>
         </div>
       </div>

@@ -1,0 +1,93 @@
+site_name: B002 Future Lab Bots
+site_description: Documentation for the B002 Future Lab robotic cell (TurtleBot 4 + MyCobot 280).
+repo_url: https://github.com/MHC-CodeSmith/B002_Future_Lab_Bots
+repo_name: B002_Future_Lab_Bots
+edit_uri: edit/main/docs/
+docs_dir: docs
+strict: true
+
+# The trial protocol is still in Portuguese; it is excluded from the public
+# site until it is translated (tracked in the documentation plan, Phase 4).
+exclude_docs: |
+  PROTOCOLO_60_ENSAIOS.md
+
+theme:
+  name: material
+  language: en
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.top
+    - navigation.footer
+    - search.suggest
+    - search.highlight
+    - content.code.copy
+    - content.action.edit
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/weather-night
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/weather-sunny
+        name: Switch to light mode
+
+plugins:
+  - search
+
+markdown_extensions:
+  - admonition
+  - attr_list
+  - tables
+  - toc:
+      permalink: true
+  - pymdownx.details
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+
+nav:
+  - Home: index.md
+  - Getting started:
+      - Hardware and network: getting-started/hardware-and-network.md
+      - Install and first run: getting-started/install-and-first-run.md
+  - Guides:
+      - Start and stop the lab: guides/start-and-stop-the-lab.md
+      - Emergency stop: guides/emergency-stop.md
+      - Recover TurtleBot telemetry: guides/recover-turtlebot-telemetry.md
+      - Recover the Discovery Server: guides/recover-discovery-server.md
+      - Restart the Create 3 application: guides/restart-the-create3-app.md
+  - Reference:
+      - REST API: reference/rest-api.md
+      - ROS interfaces: reference/ros-interfaces.md
+      - Host agent: reference/host-agent.md
+      - Configuration: reference/configuration.md
+      - Ports and addresses: reference/ports-and-addresses.md
+      - Repository map: reference/repository-map.md
+  - Architecture:
+      - System overview: architecture/system-overview.md
+      - Mission handshake: architecture/mission-handshake.md
+      - Safety model: architecture/safety-model.md
+      - Decision records:
+          - architecture/decisions/index.md
+          - "0001 Run uvicorn without reload": architecture/decisions/0001-uvicorn-no-reload.md
+          - "0002 Single locked ROS node per process": architecture/decisions/0002-singleton-ros-nodes.md
+          - "0003 Cancel goals through CancelGoal": architecture/decisions/0003-cancel-goal-service.md
+          - "0004 Trigger helper needs a measured reply": architecture/decisions/0004-trigger-helper-measured-reply.md
+          - "0005 Cancel timers, never destroy them in callbacks": architecture/decisions/0005-no-destroy-in-callbacks.md
+          - "0006 Documentation toolchain": architecture/decisions/0006-documentation-toolchain.md
+  - Troubleshooting: troubleshooting.md
+  - Contributing:
+      - Edit these docs: contributing/how-to-edit-these-docs.md
+      - Style guide: contributing/style-guide.md

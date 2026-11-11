@@ -1,39 +1,39 @@
-# INSTALL.md — Instruções de Instalação e Operação (Fase 13)
+# INSTALL.md — Installation and Operation Instructions
 
-## 1. Instalação dos Serviços Systemd de Usuário
+## 1. Installing User Systemd Services
 
-No terminal do host (usuário `future-lab`):
+In a host terminal (as user `future-lab`):
 
 ```bash
-# Copiar unidades para a pasta de serviços de usuário
+# Copy unit files to the user systemd directory
 mkdir -p ~/.config/systemd/user
 cp ~/B002_Future_Lab_Bots/future_lab_control_center/host_agent/systemd/*.service ~/.config/systemd/user/
 systemctl --user daemon-reload
 
-# Habilitar e iniciar os serviços
+# Enable and start the services
 systemctl --user enable --now future-lab-agent future-lab-cobot-discovery
 
-# Habilitar Linger para que os serviços rodem sem sessão ativa
+# Enable linger so services stay running without an active login session
 sudo loginctl enable-linger future-lab
 ```
 
-## 2. Teste de Funcionamento do Agente
+## 2. Testing the Host Agent
 
 ```bash
 curl -s http://127.0.0.1:8100/health | jq .
 ```
 
-## 3. Atalho na Área de Trabalho
+## 3. Desktop Shortcut
 
 ```bash
 cp ~/B002_Future_Lab_Bots/future_lab_control_center/FutureLab.desktop ~/Desktop/
 cp ~/B002_Future_Lab_Bots/future_lab_control_center/FutureLab.desktop ~/.local/share/applications/
 chmod +x ~/Desktop/FutureLab.desktop ~/.local/share/applications/FutureLab.desktop
 ```
-*No ambiente GNOME, clique com botão direito no ícone da Área de Trabalho e selecione **Permitir Execução** (Allow Launching).*
+*In GNOME, right-click the Desktop icon and select **Allow Launching**.*
 
-## 4. Recuperação Manual da Create 3 (Se necessário)
+## 4. Manual Create 3 Recovery (If Needed)
 
-- Interface web da base Create 3: `http://192.168.186.2` (via navegador ou proxy)
-- Botão físico na sub-base para reset elétrico se houver travamento.
-- **Aviso:** Nunca utilizar `ros2 service call /robot_power` para reinício automatizado pois desliga a sub-base.
+- Create 3 base web interface: `http://192.168.186.2` (reachable from the TurtleBot 4 RPi over `usb0`).
+- Physical button on the Create 3 base for electrical reset if unresponsive.
+- **Warning:** Never call `ros2 service call /robot_power` for automated restarts, as it powers down the Create 3 base completely.

@@ -379,7 +379,7 @@ class ProcessManager:
                     self._owned.pop(target, None)
                     tail = ""
                     try:
-                        tail = "\n".join(spec.log_path.read_text(errors="replace").splitlines()[-20:])
+                        tail = "\n".join(read_log_tail(spec.log_path, 20))
                     except OSError:
                         pass
                     raise RuntimeError(
@@ -633,6 +633,27 @@ def check_port_open(host: str, port: int, timeout: float = 1.5) -> bool:
         return False
 
 
+def read_log_tail(log_path: Path, lines_count: int, max_bytes: int = 512 * 1024) -> list[str]:
+    """Lê somente o fim do arquivo e nunca materializa um log inteiro na RAM."""
+    lines_count = max(1, min(1000, int(lines_count)))
+    # Uma linha ROS normal é pequena. O teto protege o agente quando o Nav2
+    # repete um erro por horas e o dashboard pede apenas as últimas linhas.
+    byte_budget = min(max_bytes, max(16 * 1024, lines_count * 1024))
+    with log_path.open("rb") as log_file:
+        log_file.seek(0, os.SEEK_END)
+        end = log_file.tell()
+        start = max(0, end - byte_budget)
+        log_file.seek(start)
+        text = log_file.read(end - start).decode("utf-8", errors="replace")
+
+    lines = text.splitlines()
+    # Descartar a linha que começou antes do recorte: ela não é evidência
+    # completa e pode estar corrompida no meio de caracteres UTF-8.
+    if start > 0 and lines:
+        lines = lines[1:]
+    return lines[-lines_count:]
+
+
 class ThreadedHTTPServer(ThreadingMixIn, HTTPServer):
     daemon_threads = True
 
@@ -700,7 +721,7 @@ class AgentRequestHandler(BaseHTTPRequestHandler):
                 self._send_json({"status": "success", "source": target, "logs": [f"Arquivo {log_path} ainda nao existe."]})
                 return
             try:
-                lines = log_path.read_text(errors="replace").splitlines()[-lines_count:]
+                lines = read_log_tail(log_path, lines_count)
                 self._send_json({"status": "success", "source": target, "logs": lines})
             except OSError as exc:
                 self._send_json({"detail": f"Falha ao ler {log_path}: {exc}"}, 500)

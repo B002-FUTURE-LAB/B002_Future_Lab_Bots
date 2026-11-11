@@ -12,7 +12,7 @@ import { Bot, Cpu } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 
 export default function Dashboard() {
-  const { lang, t } = useLanguage();
+  const { lang, t, tb } = useLanguage();
   const [activeTab, setActiveTab] = useState('cobot'); // 'cobot' | 'turtlebot'
   const [health, setHealth] = useState(null);
   const [cellStatus, setCellStatus] = useState(null);
@@ -41,7 +41,7 @@ export default function Dashboard() {
       const res = await fetch(url, options);
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {
-        const msg = data.detail || data.message || `HTTP Error ${res.status}`;
+        const msg = tb(data.detail || data.message) || `HTTP Error ${res.status}`;
         setNotification({
           type: 'warning',
           title: warningTitle,
@@ -156,7 +156,7 @@ export default function Dashboard() {
       setNotification({
         type: 'success',
         title: t('integratedRealStartedTitle'),
-        message: data.message
+        message: tb(data.message)
       });
     }
     refreshStatus();
@@ -173,7 +173,7 @@ export default function Dashboard() {
       setNotification({
         type: 'warning',
         title: t('integratedRealStopTitle'),
-        message: data.message
+        message: tb(data.message)
       });
     }
     refreshStatus();
@@ -190,7 +190,7 @@ export default function Dashboard() {
       setNotification({
         type: 'warning',
         title: t('integratedRealConfirmationTitle'),
-        message: data.message
+        message: tb(data.message)
       });
     }
     refreshStatus();
@@ -326,7 +326,7 @@ export default function Dashboard() {
       setNotification({
         type: 'success',
         title: t('calibrationSavedTitle'),
-        message: data.message || t('calibrationSavedMsg')
+        message: lang === 'en' ? t('calibrationSavedMsg') : (data.message || t('calibrationSavedMsg'))
       });
     }
     refreshStatus();
@@ -362,7 +362,7 @@ export default function Dashboard() {
       setNotification({
         type: 'success',
         title: t('backupRestoredTitle'),
-        message: data?.message || t('backupRestoredMsg')
+        message: lang === 'en' ? t('backupRestoredMsg') : (data?.message || t('backupRestoredMsg'))
       });
     }
     await refreshStatus();
@@ -387,7 +387,7 @@ export default function Dashboard() {
       setNotification({
         type: 'info',
         title: t('rviz3DStartedTitle'),
-        message: data.message || t('rviz3DStartedMsg')
+        message: lang === 'en' ? t('rviz3DStartedMsg') : (data.message || t('rviz3DStartedMsg'))
       });
     }
   };
@@ -397,15 +397,15 @@ export default function Dashboard() {
     const apiBase = getApiBase();
     setNotification({
       type: 'info',
-      title: '📡 Enviando Comando de Docking...',
-      message: 'Comando de Dock enviado ao TurtleBot 4. Processando manobra física no robô...'
+      title: t('tbSendingDockTitle'),
+      message: t('tbSendingDockMsg')
     });
     const { ok, data } = await safeApiCall(`${apiBase}/turtlebot/dock`, { method: 'POST' }, t('tbDockTitle'));
     if (ok) {
       setNotification({
         type: 'success',
-        title: '✅ Docking Concluído!',
-        message: data.message || t('tbDockSentMsg')
+        title: t('tbDockDoneTitle'),
+        message: (lang === 'en' ? t('tbDockSentMsg') : (data.message || t('tbDockSentMsg')))
       });
     }
     refreshStatus();
@@ -415,15 +415,15 @@ export default function Dashboard() {
     const apiBase = getApiBase();
     setNotification({
       type: 'info',
-      title: '📡 Enviando Comando de Undocking...',
-      message: 'Comando de Undock enviado ao TurtleBot 4. Processando desengate físico no robô...'
+      title: t('tbSendingUndockTitle'),
+      message: t('tbSendingUndockMsg')
     });
     const { ok, data } = await safeApiCall(`${apiBase}/turtlebot/undock`, { method: 'POST' }, t('tbUndockTitle'));
     if (ok) {
       setNotification({
         type: 'success',
-        title: '✅ Undocking Concluído!',
-        message: data.message || t('tbUndockSentMsg')
+        title: t('tbUndockDoneTitle'),
+        message: (lang === 'en' ? t('tbUndockSentMsg') : (data.message || t('tbUndockSentMsg')))
       });
     }
     refreshStatus();
@@ -436,7 +436,7 @@ export default function Dashboard() {
       setNotification({
         type: 'success',
         title: t('tbLocStartedTitle'),
-        message: data.message || t('tbLocStartedMsg')
+        message: lang === 'en' ? t('tbLocStartedMsg') : (data.message || t('tbLocStartedMsg'))
       });
     }
     refreshStatus();
@@ -449,7 +449,7 @@ export default function Dashboard() {
       setNotification({
         type: 'success',
         title: t('tbNav2StartedTitle'),
-        message: data.message || t('tbNav2StartedMsg')
+        message: lang === 'en' ? t('tbNav2StartedMsg') : (data.message || t('tbNav2StartedMsg'))
       });
     }
     refreshStatus();
@@ -462,7 +462,7 @@ export default function Dashboard() {
       setNotification({
         type: 'success',
         title: t('tbRvizNav2StartedTitle'),
-        message: data.message || t('tbRvizNav2StartedMsg')
+        message: lang === 'en' ? t('tbRvizNav2StartedMsg') : (data.message || t('tbRvizNav2StartedMsg'))
       });
     }
   };
@@ -474,7 +474,7 @@ export default function Dashboard() {
       setNotification({
         type: 'success',
         title: t('tbRestartDaemonStartedTitle'),
-        message: data.message || t('tbRestartDaemonStartedMsg')
+        message: lang === 'en' ? t('tbRestartDaemonStartedMsg') : (data.message || t('tbRestartDaemonStartedMsg'))
       });
     }
     refreshStatus();
@@ -487,7 +487,7 @@ export default function Dashboard() {
       setNotification({
         type: 'info',
         title: t('tbStopLocStartedTitle'),
-        message: data.message || t('tbStopLocStartedMsg')
+        message: lang === 'en' ? t('tbStopLocStartedMsg') : (data.message || t('tbStopLocStartedMsg'))
       });
     }
     refreshStatus();
@@ -500,7 +500,7 @@ export default function Dashboard() {
       setNotification({
         type: 'info',
         title: t('tbStopNav2StartedTitle'),
-        message: data.message || t('tbStopNav2StartedMsg')
+        message: lang === 'en' ? t('tbStopNav2StartedMsg') : (data.message || t('tbStopNav2StartedMsg'))
       });
     }
     refreshStatus();
@@ -513,7 +513,7 @@ export default function Dashboard() {
       setNotification({
         type: 'info',
         title: t('tbStopRvizStartedTitle'),
-        message: data.message || t('tbStopRvizStartedMsg')
+        message: lang === 'en' ? t('tbStopRvizStartedMsg') : (data.message || t('tbStopRvizStartedMsg'))
       });
     }
     refreshStatus();
@@ -526,7 +526,7 @@ export default function Dashboard() {
       setNotification({
         type: 'info',
         title: t('tbStopMMStartedTitle'),
-        message: data.message || t('tbStopMMStartedMsg')
+        message: lang === 'en' ? t('tbStopMMStartedMsg') : (data.message || t('tbStopMMStartedMsg'))
       });
     }
     refreshStatus();
@@ -539,7 +539,7 @@ export default function Dashboard() {
       setNotification({
         type: 'success',
         title: t('tbMMStartedTitle'),
-        message: data.message || t('tbMMStartedMsg')
+        message: lang === 'en' ? t('tbMMStartedMsg') : (data.message || t('tbMMStartedMsg'))
       });
     }
     refreshStatus();
@@ -556,7 +556,7 @@ export default function Dashboard() {
       setNotification({
         type: 'success',
         title: t('tbDeliveryStartedTitle'),
-        message: data.message
+        message: tb(data.message)
       });
     }
     refreshStatus();
@@ -572,7 +572,7 @@ export default function Dashboard() {
       setNotification({
         type: 'info',
         title: t('tbMissionSignalPublishedTitle'),
-        message: data.message
+        message: tb(data.message)
       });
     }
     refreshStatus();
@@ -586,7 +586,7 @@ export default function Dashboard() {
       setNotification({
         type: 'success',
         title: t('tbRestockStartedTitle'),
-        message: data.message || t('tbRestockStartedMsg')
+        message: lang === 'en' ? t('tbRestockStartedMsg') : (data.message || t('tbRestockStartedMsg'))
       });
     }
     refreshStatus();
@@ -601,7 +601,7 @@ export default function Dashboard() {
       setNotification({
         type: 'success',
         title: t('tbFailureStartedTitle'),
-        message: data.message || t('tbFailureStartedMsg')
+        message: lang === 'en' ? t('tbFailureStartedMsg') : (data.message || t('tbFailureStartedMsg'))
       });
     }
     refreshStatus();
@@ -615,8 +615,8 @@ export default function Dashboard() {
       const firstAviso = (data?.avisos && data.avisos.length > 0) ? data.avisos[0] : '';
       setNotification({
         type: isPartial ? 'error' : 'warning',
-        title: isPartial ? '⚠️ CANCELAMENTO NÃO CONFIRMADO' : t('tbCancelMissionStartedTitle'),
-        message: isPartial ? (data?.message || firstAviso || 'Falha ao confirmar cancelamento da meta do Nav2.') : (data?.message || t('tbCancelMissionStartedMsg'))
+        title: isPartial ? t('tbCancelUnconfirmedTitle') : t('tbCancelMissionStartedTitle'),
+        message: isPartial ? (tb(data?.message || firstAviso) || t('tbCancelUnconfirmedMsg')) : (lang === 'en' ? t('tbCancelMissionStartedMsg') : (data?.message || t('tbCancelMissionStartedMsg')))
       });
     }
     refreshStatus();
@@ -644,7 +644,7 @@ export default function Dashboard() {
       setNotification({
         type: 'success',
         title: t('tbPatrolStartedTitle'),
-        message: data.message || t('tbPatrolStartedMsg')
+        message: lang === 'en' ? t('tbPatrolStartedMsg') : (data.message || t('tbPatrolStartedMsg'))
       });
     }
     refreshStatus();
@@ -657,7 +657,7 @@ export default function Dashboard() {
       setNotification({
         type: 'success',
         title: t('tbViz3DStartedTitle'),
-        message: data.message || t('tbViz3DStartedMsg')
+        message: lang === 'en' ? t('tbViz3DStartedMsg') : (data.message || t('tbViz3DStartedMsg'))
       });
     }
   };
@@ -678,7 +678,7 @@ export default function Dashboard() {
       setNotification({
         type: 'success',
         title: t('tbOakdCameraStartedTitle'),
-        message: data.message || t('tbOakdCameraStartedMsg')
+        message: lang === 'en' ? t('tbOakdCameraStartedMsg') : (data.message || t('tbOakdCameraStartedMsg'))
       });
     }
   };
@@ -778,7 +778,7 @@ export default function Dashboard() {
               setNotification({
                 type: 'success',
                 title: t('tbHandshakeTestStartedTitle'),
-                message: data.message || t('tbHandshakeTestStartedMsg')
+                message: lang === 'en' ? t('tbHandshakeTestStartedMsg') : (data.message || t('tbHandshakeTestStartedMsg'))
               });
             }
             refreshStatus();
