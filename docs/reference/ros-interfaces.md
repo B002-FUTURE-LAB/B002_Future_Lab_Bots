@@ -46,7 +46,28 @@ Both nodes run inside the backend process.
 | `/stop_mission` | `std_srvs/Trigger` | service | Stop the Mission Manager's mission. |
 
 The four mission services are provided by the Mission Manager in the
-`turtlebot4_jazzy` repository.
+`turtlebot4_jazzy` repository (`turtlebot4_jazzy/scripts/mission_manager.py`).
+
+## Mission Manager & Routine Nodes (`turtlebot4_jazzy/scripts/`)
+
+| Interface | Type | Kind | Used for |
+|---|---|---|---|
+| `/undock` | `irobot_create_msgs/action/Undock` | action client | Undocks the Create 3 base from the charging station (`MissionBase.undock`). |
+| `/dock` | `irobot_create_msgs/action/Dock` | action client | Docks the Create 3 base after navigating to `predock_point` (`MissionBase.return_to_dock`). |
+| `/navigate_to_pose` | `nav2_msgs/action/NavigateToPose` | action client | Executes waypoint navigation (`MissionBase.navigate_to`). |
+| `/save_dock_pose` | `std_srvs/srv/Trigger` | service server | Saves current `map -> base_link` TF as `dock_station` and `predock_point` in `waypoints.yaml`. |
+| `/turtlebot_at_pickup` | `std_msgs/msg/Bool` | publisher | Published every `0.5 s` by `DeliveryRoutine` while waiting at `pickup_point`. |
+| `/product_class` | `std_msgs/msg/String` | subscription | Fresh item class (`<= 5.0 s`) consumed by `DeliveryRoutine`. |
+| `/item_released_on_tb4` | `std_msgs/msg/Bool` | subscription | Vacuum release confirmation consumed by `DeliveryRoutine`. |
+
+## Cross-Domain 3D Visualization Bridge (`integration_cobot_tb4`)
+
+| Topic / Port | Type | Domain | Used for |
+|---|---|---|---|
+| `UDP 127.0.0.1:38527` | JSON datagram | Galactic (`42`) → Jazzy (`0`) | Forwards MyCobot `/joint_states` from `tools_mycobot_joint_udp_exporter.py` to the host receiver. |
+| `/mycobot/joint_states` | `sensor_msgs/msg/JointState` | `ROS_DOMAIN_ID=0` (Jazzy) | Published by `tools_mycobot_joint_udp_receiver.py` for the namespaced `mycobot_state_publisher` in 3D RViz. |
+| `/mycobot/robot_description` | `std_msgs/msg/String` | `ROS_DOMAIN_ID=0` (Jazzy) | URDF description with `mycobot_` frame prefix anchored to `map` via `anchor.yaml`. |
+| `/b002/scene_markers` | `visualization_msgs/msg/MarkerArray` | `ROS_DOMAIN_ID=0` (Jazzy) | Semantic 3D arena markers (`b002_scene_marker_publisher.py`). |
 
 ## Cobot node — `future_lab_cobot_node`
 

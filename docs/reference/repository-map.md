@@ -32,19 +32,15 @@ B002_Future_Lab_Bots/
 
 ## Submodules
 
-| Submodule | Repository | Branch |
-|---|---|---|
-| `turtlebot4_jazzy` | `MHC-CodeSmith/Bot_HOF` | `main` |
-| `cobot` | `MHC-CodeSmith/Cobot` | `master` in `.gitmodules`; `featnew-yolo` is the branch in use |
-| `integration_cobot_tb4` | `MHC-CodeSmith/integration_cobot_tb4` | `main` |
+| Submodule | Repository | Branch | Detailed Reference |
+|---|---|---|---|
+| `turtlebot4_jazzy` | `B002-FUTURE-LAB/Bot_HOF` | `main` | [Submodule: turtlebot4_jazzy](submodules/turtlebot4-jazzy.md) |
+| `cobot` | `B002-FUTURE-LAB/Cobot` | `featnew-yolo` (`master` in `.gitmodules`) | [Submodule: cobot](submodules/cobot.md) |
+| `integration_cobot_tb4` | `B002-FUTURE-LAB/integration_cobot_tb4` | `main` | [Submodule: integration_cobot_tb4](submodules/integration-cobot-tb4.md) |
 
 !!! warning "Submodules"
-    After cloning, run `git submodule update --init`. The documentation build
+    After cloning, run `git submodule update --init --recursive`. The documentation build
     does **not** need the submodules.
-
-!!! note "Not yet documented"
-    The internals of the three submodules (their launch files, nodes and
-    configuration) are not documented here yet. Add a page per submodule.
 
 ## Tests
 

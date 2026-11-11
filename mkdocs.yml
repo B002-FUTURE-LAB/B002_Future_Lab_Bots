@@ -1,13 +1,13 @@
 site_name: B002 Future Lab Bots
 site_description: Documentation for the B002 Future Lab robotic cell (TurtleBot 4 + MyCobot 280).
-repo_url: https://github.com/MHC-CodeSmith/B002_Future_Lab_Bots
-repo_name: B002_Future_Lab_Bots
+repo_url: https://github.com/B002-FUTURE-LAB/B002_Future_Lab_Bots
+repo_name: B002-FUTURE-LAB/B002_Future_Lab_Bots
 edit_uri: edit/main/docs/
 docs_dir: docs
 strict: true
 
-# The trial protocol is still in Portuguese; it is excluded from the public
-# site until it is translated (tracked in the documentation plan, Phase 4).
+# Legacy Portuguese protocol is kept in the repository for archival reference;
+# its full English translation is published at research/trial-protocol.md.
 exclude_docs: |
   PROTOCOLO_60_ENSAIOS.md
 
@@ -60,11 +60,18 @@ markdown_extensions:
 nav:
   - Home: index.md
   - Getting started:
+      - Cell overview: getting-started/overview.md
       - Hardware and network: getting-started/hardware-and-network.md
       - Install and first run: getting-started/install-and-first-run.md
+      - First delivery mission: getting-started/first-delivery-mission.md
   - Guides:
       - Start and stop the lab: guides/start-and-stop-the-lab.md
       - Emergency stop: guides/emergency-stop.md
+      - Set initial and dock pose: guides/set-initial-pose-and-dock-pose.md
+      - Calibrate Cobot poses: guides/calibrate-cobot-poses.md
+      - Run Gazebo simulation: guides/run-gazebo-simulation.md
+      - Remote lab access: guides/remote-lab-access.md
+      - Run experiment trials: guides/run-experiment-trials.md
       - Recover TurtleBot telemetry: guides/recover-turtlebot-telemetry.md
       - Recover the Discovery Server: guides/recover-discovery-server.md
       - Restart the Create 3 application: guides/restart-the-create3-app.md
@@ -72,11 +79,19 @@ nav:
       - REST API: reference/rest-api.md
       - ROS interfaces: reference/ros-interfaces.md
       - Host agent: reference/host-agent.md
+      - Frontend dashboard: reference/frontend.md
+      - Operational scripts: reference/scripts.md
       - Configuration: reference/configuration.md
       - Ports and addresses: reference/ports-and-addresses.md
       - Repository map: reference/repository-map.md
+      - Submodules:
+          - "turtlebot4_jazzy (Bot_HOF)": reference/submodules/turtlebot4-jazzy.md
+          - "cobot (MyCobot 280)": reference/submodules/cobot.md
+          - "integration_cobot_tb4 (3D Twin)": reference/submodules/integration-cobot-tb4.md
   - Architecture:
       - System overview: architecture/system-overview.md
+      - Networking and DDS: architecture/networking-and-dds.md
+      - Telemetry pipeline: architecture/telemetry-pipeline.md
       - Mission handshake: architecture/mission-handshake.md
       - Safety model: architecture/safety-model.md
       - Decision records:
@@ -87,7 +102,16 @@ nav:
           - "0004 Trigger helper needs a measured reply": architecture/decisions/0004-trigger-helper-measured-reply.md
           - "0005 Cancel timers, never destroy them in callbacks": architecture/decisions/0005-no-destroy-in-callbacks.md
           - "0006 Documentation toolchain": architecture/decisions/0006-documentation-toolchain.md
-  - Troubleshooting: troubleshooting.md
+          - "0007 Host-native FastAPI backend": architecture/decisions/0007-ipc-host-backend.md
+          - "0008 Host Agent and Mission Signal Agent daemons": architecture/decisions/0008-host-agent-outside-docker.md
+          - "0009 Lightweight UDP joint mirroring": architecture/decisions/0009-udp-joint-mirroring-no-ros-bridge.md
+  - Research:
+      - 60-trial protocol: research/trial-protocol.md
+      - Audit logging and events: research/audit-logging.md
+  - Troubleshooting:
+      - Symptom matrix and fixes: troubleshooting.md
+      - Known issues and tech debt: known-issues.md
+      - Glossary: glossary.md
   - Contributing:
       - Edit these docs: contributing/how-to-edit-these-docs.md
       - Style guide: contributing/style-guide.md

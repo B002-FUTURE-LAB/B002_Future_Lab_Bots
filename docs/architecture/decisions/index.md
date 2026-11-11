@@ -12,6 +12,9 @@ might otherwise undo by mistake.
 | [0004](0004-trigger-helper-measured-reply.md) | Trigger helper needs a measured reply |
 | [0005](0005-no-destroy-in-callbacks.md) | Cancel timers, never destroy them in callbacks |
 | [0006](0006-documentation-toolchain.md) | Documentation toolchain |
+| [0007](0007-ipc-host-backend.md) | Host-native FastAPI backend instead of containerized backend |
+| [0008](0008-host-agent-outside-docker.md) | Privileged Host Agent (`:18080`) & Mission Signal Agent (`:18081`) as local micro-daemons |
+| [0009](0009-udp-joint-mirroring-no-ros-bridge.md) | Lightweight UDP joint mirroring instead of cross-distro DDS |
 
 ## Template
 

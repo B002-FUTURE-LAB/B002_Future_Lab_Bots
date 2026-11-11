@@ -14,6 +14,7 @@ on:
       - "mkdocs.yml"
       - "tools/docs/**"
       - "future_lab_control_center/backend/api/**"
+      - "future_lab_control_center/.env.example"
       - ".github/workflows/docs.yml"
   workflow_dispatch:
 
@@ -45,6 +46,9 @@ jobs:
 
       - name: Check that every REST route is documented
         run: python tools/docs/check_route_coverage.py
+
+      - name: Check that every .env.example variable is documented
+        run: python tools/docs/check_env_coverage.py
 
       - name: Build (strict, warnings fail the build)
         run: mkdocs build --strict
