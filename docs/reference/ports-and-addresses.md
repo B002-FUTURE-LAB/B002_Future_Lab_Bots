@@ -1,35 +1,40 @@
-# Ports and addresses
+# Ports and Addresses
 
-## Ports
+All network addresses and ports below are represented with placeholders; define your laboratory's actual values in your local `.env` (see [`future_lab_control_center/.env.example`](https://github.com/B002-FUTURE-LAB/B002_Future_Lab_Bots/blob/main/future_lab_control_center/.env.example) on GitHub) and ROS 2 Discovery configuration.
 
-| Port | Where | Service |
+## Service Ports
+
+| Placeholder | Where | Service |
 |---|---|---|
-| `3000` | Host PC | Dashboard (Next.js) |
-| `8000` | Host PC | Backend API (FastAPI) |
-| `8100` | Host PC, loopback only | [Host agent](host-agent.md) |
-| `8101` | Host PC, loopback only | Mission signal agent |
-| `11888` | Host PC | Cobot Fast DDS Discovery Server |
-| `11811` | Raspberry Pi `192.168.0.129` | TurtleBot Fast DDS Discovery Server |
-| `8080` | Jetson Nano | Cobot camera MJPEG stream (`/stream.mjpg`) |
-| `8088` | Jetson Nano | HTTP micro-bridge for the arm and pump |
-| `80` | Create 3 `192.168.186.2` | Create 3 web interface |
+| `<FRONTEND_PORT>` | Host PC | Dashboard (Next.js) |
+| `<BACKEND_PORT>` | Host PC | Backend API (FastAPI) |
+| `<HOST_AGENT_PORT>` | Host PC, loopback only | [Host agent](host-agent.md) |
+| `<MISSION_SIGNAL_PORT>` | Host PC, loopback only | Mission signal agent |
+| `<COBOT_DISCOVERY_PORT>` | Host PC | Cobot Fast DDS Discovery Server |
+| `<TB4_DISCOVERY_PORT>` | Raspberry Pi (`<TURTLEBOT_IP>`) | TurtleBot Fast DDS Discovery Server |
+| `<CAMERA_STREAM_PORT>` | Jetson Nano | Cobot camera MJPEG stream (`/stream.mjpg`) |
+| `<NANO_BRIDGE_PORT>` | Jetson Nano | HTTP micro-bridge for the arm and pump |
+| `<CREATE3_HTTP_PORT>` | Create 3 (`<CREATE3_BASE_IP>`) | Create 3 web interface |
+| `<UDP_JOINT_PORT>` | Host PC (localhost UDP) | Cross-distro 3D RViz joint-state mirror |
+| `<REMOTE_DESKTOP_PORT>` / `<SSH_PORT>` | Host PC | Optional remote desktop / SSH access |
 
-## Addresses
+## Device Address Placeholders
 
-| Address | Device |
+| Placeholder | Device |
 |---|---|
-| `192.168.0.204` | Host PC |
-| `192.168.0.129` | Raspberry Pi 4 (TurtleBot 4) |
-| `192.168.186.2` | Create 3 base (seen from the Raspberry Pi) |
-| `192.168.0.250`, `192.168.0.62` | Jetson Nano (it may take either) |
+| `<HOST_PC_IP>` | Host Control PC |
+| `<TURTLEBOT_IP>` | Raspberry Pi 4 (TurtleBot 4) |
+| `<CREATE3_BASE_IP>` | Create 3 base (reachable via `usb0` from the Raspberry Pi) |
+| `<JETSON_NANO_IP>` (`<NANO_WIFI_IP>`, `<NANO_ETH_IP>`) | Jetson Nano (Wi-Fi or wired interface) |
+| `<TAILSCALE_HOST_IP>` | Optional Tailscale VPN address of the Host PC |
 
-All addresses are private (LAN) addresses on the lab network.
+All device addresses live on private local subnets configured in your lab router and `.env`.
 
-## ROS settings
+## ROS Settings
 
 | Setting | TurtleBot side | Cobot side |
 |---|---|---|
 | ROS distribution | Jazzy | Galactic |
 | `ROS_DOMAIN_ID` | `0` | `42` |
 | RMW | `rmw_fastrtps_cpp` | `rmw_cyclonedds_cpp` |
-| Discovery | Discovery Server `192.168.0.129:11811` | Discovery Server on the host, port `11888` |
+| Discovery | Discovery Server `<TURTLEBOT_IP>:<TB4_DISCOVERY_PORT>` | Discovery Server on the host, port `<COBOT_DISCOVERY_PORT>` |

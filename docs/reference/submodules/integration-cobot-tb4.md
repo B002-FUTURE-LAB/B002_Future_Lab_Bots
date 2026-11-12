@@ -31,8 +31,8 @@ integration_cobot_tb4/
 │   ├── calibrate_cobot_anchor.sh         # Updates map -> mycobot_base_link coordinates in anchor.yaml
 │   └── generate_b002_dual_views.sh       # Rebuilds generated PNG previews and SDF world from YAML
 └── tools/
-    ├── tools_mycobot_joint_udp_exporter.py  # Runs in mycobot_ros2 (Galactic) -> UDP 127.0.0.1:38527
-    ├── tools_mycobot_joint_udp_receiver.py  # Runs on Host (Jazzy) <- UDP :38527 -> /mycobot/joint_states
+    ├── tools_mycobot_joint_udp_exporter.py  # Runs in mycobot_ros2 (Galactic) -> UDP 127.0.0.1:<UDP_JOINT_PORT>
+    ├── tools_mycobot_joint_udp_receiver.py  # Runs on Host (Jazzy) <- UDP :<UDP_JOINT_PORT> -> /mycobot/joint_states
     ├── b002_scene_marker_publisher.py       # Publishes /b002/scene_markers (visualization_msgs/MarkerArray)
     └── generate_b002_dual_assets.py         # Asset generator for 2D/3D previews and SDF
 ```
@@ -76,12 +76,12 @@ Because the MyCobot URDF links share common names like `base_link` with the Turt
 
 ### Launch from Control Center Dashboard
 
-In the **TurtleBot 4** tab (`http://localhost:3000`), click **Launch 3D View** (`POST /api/v1/turtlebot/launch/integrated_3d`). It is also started automatically as step 2 of **Integrated Real Mode** (`POST /api/v1/cell/integrated_real/start`).
+In the **TurtleBot 4** tab (`http://localhost:<FRONTEND_PORT>`), click **Launch 3D View** (`POST /api/v1/turtlebot/launch/integrated_3d`). It is also started automatically as step 2 of **Integrated Real Mode** (`POST /api/v1/cell/integrated_real/start`).
 
 ### Launch from CLI
 
 ```bash
-cd /home/future-lab/B002_Future_Lab_Bots/integration_cobot_tb4
+cd ~/B002_Future_Lab_Bots/integration_cobot_tb4
 ./scripts/start_3d_monitoring.sh
 ```
 
@@ -90,7 +90,7 @@ cd /home/future-lab/B002_Future_Lab_Bots/integration_cobot_tb4
 If the MyCobot table is moved relative to the laboratory walls:
 
 ```bash
-cd /home/future-lab/B002_Future_Lab_Bots/integration_cobot_tb4
+cd ~/B002_Future_Lab_Bots/integration_cobot_tb4
 ./scripts/calibrate_cobot_anchor.sh <new_x> <new_y> <new_z> <new_yaw>
 ./scripts/generate_b002_dual_views.sh
 ```

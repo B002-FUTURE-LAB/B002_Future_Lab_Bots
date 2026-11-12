@@ -14,11 +14,11 @@ cd ~/B002_Future_Lab_Bots/future_lab_control_center
 1. Checks the user and the repository.
 2. Checks that the Docker daemon is running.
 3. Checks the `.env` file (creates it from `.env.example` if missing, except in `--check`).
-4. Starts the cobot Discovery Server (port 11888).
+4. Starts the cobot Discovery Server (port `<COBOT_DISCOVERY_PORT>`).
 5. Starts the Docker containers and cleans up host processes.
-6. Starts the host agent (port 8100).
-7. Waits for the backend (port 8000).
-8. Waits for the frontend (port 3000).
+6. Starts the host agent (port `<HOST_AGENT_PORT>`).
+7. Waits for the backend (port `<BACKEND_PORT>`).
+8. Waits for the frontend (port `<FRONTEND_PORT>`).
 9. Checks the TurtleBot 4 (Raspberry Pi).
 10. Checks the Jetson Nano.
 11. Checks robot telemetry.

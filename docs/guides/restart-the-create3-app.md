@@ -7,7 +7,7 @@ that conclusion.
 
 ## Open the base's web interface
 
-The base serves a web interface at `http://192.168.186.2`. It is reachable from
+The base serves a web interface at `http://<CREATE3_BASE_IP>`. It is reachable from
 the Raspberry Pi (use `curl` over SSH), and from other machines only if you
 route to that subnet. The menu has **Application > Restart application** and
 **Application > Reboot robot**.
@@ -22,8 +22,8 @@ route to that subnet. The menu has **Application > Restart application** and
 Both are taken from the base's own web page. From the Raspberry Pi:
 
 ```bash
-curl -s -X POST --connect-timeout 5 http://192.168.186.2/api/restart-app
-curl -s -X POST --connect-timeout 5 http://192.168.186.2/api/reboot
+curl -s -X POST --connect-timeout 5 http://<CREATE3_BASE_IP>/api/restart-app
+curl -s -X POST --connect-timeout 5 http://<CREATE3_BASE_IP>/api/reboot
 ```
 
 !!! note "What was verified"

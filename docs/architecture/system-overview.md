@@ -1,27 +1,27 @@
 # System overview
 
-At a high level, **B002 Future Lab Bots** combines three independent ROS 2 hardware/visualization submodules (`turtlebot4_jazzy`, `cobot`, `integration_cobot_tb4`) under a single supervisory web platform (`future_lab_control_center`). The web **Dashboard (`Next.js :3000`)** gives operators real-time visibility and safe control over every subsystem through the **FastAPI + rclpy Backend (`:8000`)** and the local **Host Agent (`:8100`)**. See [Using the Web Dashboard](../guides/using-the-dashboard.md) for the operator UI guide and [Frontend Dashboard (Internals & Dev)](../reference/frontend.md) to extend the dashboard source code.
+At a high level, **B002 Future Lab Bots** combines three independent ROS 2 hardware/visualization submodules (`turtlebot4_jazzy`, `cobot`, `integration_cobot_tb4`) under a single supervisory web platform (`future_lab_control_center`). The web **Dashboard (`Next.js :<FRONTEND_PORT>`)** gives operators real-time visibility and safe control over every subsystem through the **FastAPI + rclpy Backend (`:<BACKEND_PORT>`)** and the local **Host Agent (`:<HOST_AGENT_PORT>`)**. See [Using the Web Dashboard](../guides/using-the-dashboard.md) for the operator UI guide and [Frontend Dashboard (Internals & Dev)](../reference/frontend.md) to extend the dashboard source code.
 
 ## Components
 
 ```mermaid
 flowchart LR
-    subgraph HOST["Host PC (192.168.0.204)"]
-        FE["Dashboard<br/>Next.js :3000"]
-        BE["Backend<br/>FastAPI + rclpy :8000"]
-        AG["Host agent<br/>:8100"]
-        SIG["Mission signal agent<br/>:8101"]
+    subgraph HOST["Host PC (<HOST_PC_IP>)"]
+        FE["Dashboard<br/>Next.js :<FRONTEND_PORT>"]
+        BE["Backend<br/>FastAPI + rclpy :<BACKEND_PORT>"]
+        AG["Host agent<br/>:<HOST_AGENT_PORT>"]
+        SIG["Mission signal agent<br/>:<MISSION_SIGNAL_PORT>"]
         NAV["Nav2, localization, RViz<br/>ROS 2 Jazzy"]
-        CDS["Cobot Discovery Server<br/>:11888"]
+        CDS["Cobot Discovery Server<br/>:<COBOT_DISCOVERY_PORT>"]
     end
-    subgraph RPI["Raspberry Pi 4 (192.168.0.129)"]
-        TDS["TurtleBot Discovery Server<br/>:11811"]
+    subgraph RPI["Raspberry Pi 4 (<TURTLEBOT_IP>)"]
+        TDS["TurtleBot Discovery Server<br/>:<TB4_DISCOVERY_PORT>"]
         BRG["turtlebot4 bringup<br/>+ create3_republisher"]
         OAK["OAK-D camera"]
     end
-    C3["Create 3 base<br/>192.168.186.2"]
+    C3["Create 3 base<br/><CREATE3_BASE_IP>"]
     subgraph NANO["Jetson Nano"]
-        BR["Hardware bridge<br/>:8088, stream :8080"]
+        BR["Hardware bridge<br/>:<NANO_BRIDGE_PORT>, stream :<CAMERA_STREAM_PORT>"]
         ARM["MyCobot 280"]
     end
 

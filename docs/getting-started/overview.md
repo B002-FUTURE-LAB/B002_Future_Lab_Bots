@@ -6,7 +6,7 @@ The **B002 Future Lab Bots** robotic cell is an Industry 4.0 cooperative multi-r
 
 1. **Automated Inspection & Sorting**: Cans placed on the supply workbench are inspected overhead by a wrist camera running YOLOv8 (`best.pt`), separating valid blue cans, valid red cans, and defective/invalid items.
 2. **Closed-Loop Robot-to-Robot Transfer**: Instead of blind open-loop delays, the manipulator holds the picked can above the loading point until the mobile robot confirms physical arrival at `pickup_point` (`/turtlebot_at_pickup`), and the mobile robot waits for verified vacuum release (`/item_released_on_tb4`) before driving away.
-3. **Browser-First Laboratory Orchestration**: Operators do not need to manually open half a dozen SSH terminals and ROS 2 launch files. From `http://localhost:3000`, the **Control Center Dashboard** brings up Nav2/AMCL, MoveIt 2, 3D RViz visualization, live camera feeds, Teach Mode pose calibration, manual D-Pad driving, safety/panic stops, and real-time terminal logs.
+3. **Browser-First Laboratory Orchestration**: Operators do not need to manually open half a dozen SSH terminals and ROS 2 launch files. From `http://localhost:<FRONTEND_PORT>`, the **Control Center Dashboard** brings up Nav2/AMCL, MoveIt 2, 3D RViz visualization, live camera feeds, Teach Mode pose calibration, manual D-Pad driving, safety/panic stops, and real-time terminal logs.
 4. **Reproducible Research Telemetry**: Every run can be captured alongside Zstd MCAP rosbags, `1 Hz` dashboard snapshots, and `future_lab.event.v1` audit trails for obstacle-avoidance benchmarking (`60-trial protocol`).
 
 ---
@@ -34,10 +34,10 @@ The laboratory floor map (`turtlebot4_jazzy/maps/Mapa_Lab.yaml`) serves as the g
 
 | Node | Hardware & OS | ROS Distribution & RMW | Primary Role |
 | :--- | :--- | :--- | :--- |
-| **Host Control PC** (`192.168.0.129`) | Ubuntu 24.04 LTS (`x86_64`) | ROS 2 Jazzy (`Domain 0`, FastDDS) + Dockerized ROS 2 Galactic (`Domain 42`) | Runs the FastDDS Discovery Server (`:11811`), Control Center stack (`:8000` / `:3000`), Host Agent (`:18080`), Mission Signal Agent (`:18081`), Nav2/RViz, and MoveIt 2. |
-| **MyCobot 280** (`192.168.0.62` Wi-Fi / `.250` ETH) | Jetson Nano (`aarch64`), Ubuntu 20.04 | ROS 2 Galactic (`Domain 42`) + HTTP Micro-Bridge (`:8088`) | Drives the 6 servo joints over `/dev/ttyTHS1` (`1000000` baud), controls the GPIO suction pump (BCM pins `20` and `21`), and streams wrist-camera MJPEG video (`:8080/stream.mjpg`). |
-| **TurtleBot 4 Companion** (`192.168.0.21`) | Raspberry Pi 4B (`aarch64`), Ubuntu 24.04 | ROS 2 Jazzy (`Domain 0`, FastDDS) | Interfaces with the RPLIDAR and OAK-D Pro camera, runs `create3_republisher` to bridge telemetry across subnet namespaces, and forwards topics to the Discovery Server. |
-| **iRobot Create 3 Base** (`192.168.186.2` USB) | Embedded mobile base (`usb0`) | ROS 2 Jazzy internal firmware (`rmw_fastrtps_cpp`) | Executes low-level wheel odometry, safety cliff/bumper reflexes, and autonomous IR docking (`/dock` and `/undock` actions). |
+| **Host Control PC** (`<TURTLEBOT_IP>`) | Ubuntu 24.04 LTS (`x86_64`) | ROS 2 Jazzy (`Domain 0`, FastDDS) + Dockerized ROS 2 Galactic (`Domain 42`) | Runs the FastDDS Discovery Server (`:<TB4_DISCOVERY_PORT>`), Control Center stack (`:<BACKEND_PORT>` / `:<FRONTEND_PORT>`), Host Agent (`:<HOST_AGENT_PORT>`), Mission Signal Agent (`:<MISSION_SIGNAL_PORT>`), Nav2/RViz, and MoveIt 2. |
+| **MyCobot 280** (`<JETSON_NANO_IP>` Wi-Fi / `.250` ETH) | Jetson Nano (`aarch64`), Ubuntu 20.04 | ROS 2 Galactic (`Domain 42`) + HTTP Micro-Bridge (`:<NANO_BRIDGE_PORT>`) | Drives the 6 servo joints over `/dev/ttyTHS1` (`1000000` baud), controls the GPIO suction pump (BCM pins `20` and `21`), and streams wrist-camera MJPEG video (`:<CAMERA_STREAM_PORT>/stream.mjpg`). |
+| **TurtleBot 4 Companion** (`<TURTLEBOT_IP>`) | Raspberry Pi 4B (`aarch64`), Ubuntu 24.04 | ROS 2 Jazzy (`Domain 0`, FastDDS) | Interfaces with the RPLIDAR and OAK-D Pro camera, runs `create3_republisher` to bridge telemetry across subnet namespaces, and forwards topics to the Discovery Server. |
+| **iRobot Create 3 Base** (`<CREATE3_BASE_IP>` USB) | Embedded mobile base (`usb0`) | ROS 2 Jazzy internal firmware (`rmw_fastrtps_cpp`) | Executes low-level wheel odometry, safety cliff/bumper reflexes, and autonomous IR docking (`/dock` and `/undock` actions). |
 
 ---
 

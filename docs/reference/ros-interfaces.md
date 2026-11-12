@@ -64,7 +64,7 @@ The four mission services are provided by the Mission Manager in the
 
 | Topic / Port | Type | Domain | Used for |
 |---|---|---|---|
-| `UDP 127.0.0.1:38527` | JSON datagram | Galactic (`42`) → Jazzy (`0`) | Forwards MyCobot `/joint_states` from `tools_mycobot_joint_udp_exporter.py` to the host receiver. |
+| `UDP 127.0.0.1:<UDP_JOINT_PORT>` | JSON datagram | Galactic (`42`) → Jazzy (`0`) | Forwards MyCobot `/joint_states` from `tools_mycobot_joint_udp_exporter.py` to the host receiver. |
 | `/mycobot/joint_states` | `sensor_msgs/msg/JointState` | `ROS_DOMAIN_ID=0` (Jazzy) | Published by `tools_mycobot_joint_udp_receiver.py` for the namespaced `mycobot_state_publisher` in 3D RViz. |
 | `/mycobot/robot_description` | `std_msgs/msg/String` | `ROS_DOMAIN_ID=0` (Jazzy) | URDF description with `mycobot_` frame prefix anchored to `map` via `anchor.yaml`. |
 | `/b002/scene_markers` | `visualization_msgs/msg/MarkerArray` | `ROS_DOMAIN_ID=0` (Jazzy) | Semantic 3D arena markers (`b002_scene_marker_publisher.py`). |
@@ -100,11 +100,11 @@ The four mission services are provided by the Mission Manager in the
 | `/release_servos`, `/lock_servos` | `std_srvs/Trigger` | service |
 
 If the ROS service is not ready, the node falls back to an HTTP micro-bridge on
-the Jetson Nano (port `8088`), and then to SSH. See
+the Jetson Nano (port `<NANO_BRIDGE_PORT>`), and then to SSH. See
 [Ports and addresses](ports-and-addresses.md).
 
 ## Environment set by the backend
 
 `backend/main.py` and `docker-compose.yml` set `ROS_DOMAIN_ID=0`,
 `RMW_IMPLEMENTATION=rmw_fastrtps_cpp`, `ROS_SUPER_CLIENT=True` and
-`ROS_DISCOVERY_SERVER=192.168.0.129:11811;`.
+`ROS_DISCOVERY_SERVER=<TURTLEBOT_IP>:<TB4_DISCOVERY_PORT>;`.

@@ -5,15 +5,13 @@ Docker. The backend runs in a container but must start ROS 2 Jazzy processes
 (Nav2, localization, RViz) and restart services on the host, so it asks the
 agent to do it.
 
-- **Address:** `http://127.0.0.1:8100` (loopback only).
+- **Address:** `http://127.0.0.1:<HOST_AGENT_PORT>` (loopback only).
 - **Source:** `future_lab_control_center/host_agent/agent.py`.
 - **Service:** the user unit `future-lab-agent`.
 
 ## Authentication
 
-Every route except `GET /health` requires the header `X-Agent-Token`. The
-token is read from the file `future_lab_control_center/.agent_token`. Keep that
-file private. It is not tracked by Git.
+Every route except `GET /health` requires the header `X-Agent-Token`. The private token is configured locally via `.env` (see `future_lab_control_center/.env.example` in the GitHub repository).
 
 ## Routes
 
@@ -59,7 +57,7 @@ uses it.
 ## Mission signal agent
 
 A second loopback service, `mission_signal_agent.py`, listens on
-`http://127.0.0.1:8101` with the same token. It backs the dashboard's simulated
+`http://127.0.0.1:<MISSION_SIGNAL_PORT>` with the same token. It backs the dashboard's simulated
 cobot signals.
 
 | Route | Purpose |

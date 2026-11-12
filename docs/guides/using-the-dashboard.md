@@ -1,6 +1,6 @@
 # Using the Web Control Center Dashboard
 
-The **Future Lab Control Center Dashboard** (`http://localhost:3000`) lets anyone operate both the **MyCobot 280** robotic arm and the **TurtleBot 4** mobile robot from a web browser—without needing to memorize ROS 2 commands or open multiple terminals.
+The **Future Lab Control Center Dashboard** (`http://localhost:<FRONTEND_PORT>`) lets anyone operate both the **MyCobot 280** robotic arm and the **TurtleBot 4** mobile robot from a web browser—without needing to memorize ROS 2 commands or open multiple terminals.
 
 This guide uses annotated screenshots of the live interface so you can locate every button, indicator, and workflow at a glance.
 
@@ -10,8 +10,8 @@ For internal React/Next.js architecture and instructions on modifying the source
 
 ## 1. Opening the Dashboard
 
-- **On the Lab Control PC**: Open Chrome or Firefox at `http://localhost:3000` after starting the lab (`./START_CONTROL_CENTER.sh` or `./future_lab_control_center/START_LAB.sh`).
-- **From Another Computer (Lab Wi-Fi or Tailscale VPN)**: Open `http://<HOST_PC_IP>:3000` (for example, `http://192.168.0.129:3000` inside the lab or `http://100.86.49.29:3000` over Tailscale). The dashboard automatically connects to the backend on port `:8000` at that same address.
+- **On the Lab Control PC**: Open Chrome or Firefox at `http://localhost:<FRONTEND_PORT>` after starting the lab (`./START_CONTROL_CENTER.sh` or `./future_lab_control_center/START_LAB.sh`).
+- **From Another Computer (Lab Wi-Fi or Tailscale VPN)**: Open `http://<HOST_PC_IP>:<FRONTEND_PORT>` (for example, `http://<TURTLEBOT_IP>:<FRONTEND_PORT>` inside the lab or `http://<TAILSCALE_HOST_IP>:<FRONTEND_PORT>` over Tailscale). The dashboard automatically connects to the backend on port `:<BACKEND_PORT>` at that same address.
 
 ---
 
@@ -24,7 +24,7 @@ Use the numbered callouts in the screenshot above as your quick map:
 | # | Area / Button | What It Does & How to Use It |
 | :-: | :--- | :--- |
 | **1** | **EN / PT Language Toggle** | Switches all labels, alerts, and backend status messages instantaneously between **English** and **Portuguese** (saved in browser `localStorage`). |
-| **2** | **Live Device Status Badges** | Shows live health every `2 s`: **`PC Host`** (FastAPI backend `:8000`), **`Nano (Cobot)`** (Jetson Nano bridge `:8088`), **`MJPEG Camera`** (`:8080/stream.mjpg`), and **`TurtleBot 4`** (RPi4 telemetry / Discovery Server). |
+| **2** | **Live Device Status Badges** | Shows live health every `2 s`: **`PC Host`** (FastAPI backend `:<BACKEND_PORT>`), **`Nano (Cobot)`** (Jetson Nano bridge `:<NANO_BRIDGE_PORT>`), **`MJPEG Camera`** (`:<CAMERA_STREAM_PORT>/stream.mjpg`), and **`TurtleBot 4`** (RPi4 telemetry / Discovery Server). |
 | **3** | **Workspace Tab Switcher** | Switches between **Robotic Cell (`MyCobot 280 & Vision`)** and **TurtleBot 4 (`AMR & 3D Integrated Vision`)** without interrupting background monitoring. |
 | **4** | **Hardware Recovery (`RESTART NANO HW`)** | Emergency hardware reset for the manipulator: locks servos safely, frees `/dev/ttyTHS1`, restarts the Nano bridge + camera, and relaunches MoveIt 2 while displaying the 5-step progress modal. |
 | **5** | **Real Integrated Operation** | **Recommended one-click full mission.** Starts MoveIt + RViz, unified 3D view, and headless YOLOv8 inspection (`MoveIt + RViz`, `Joint RViz`, `Real YOLO` pills turn green). Once a valid can is confirmed (`5` consistent samples), an amber banner asks you to click **Confirm & Execute** before the robot moves. Enabled only when `Turtle ready: YES` and `Single manager: YES`. |
@@ -48,9 +48,9 @@ When you click **`MANUAL MODE`** (`#6`), a 3-step approval strip opens directly 
 
 | # | Area / Button | What It Does & How to Use It |
 | :-: | :--- | :--- |
-| **1** | **Camera Controls** | **`START / RESTART CAMERA`** launches or restarts `nano_camera_server.py` on `:8080` and automatically retries frames (`7–16 s`). **`TURN OFF CAMERA`** stops the video stream cleanly. |
+| **1** | **Camera Controls** | **`START / RESTART CAMERA`** launches or restarts `nano_camera_server.py` on `:<CAMERA_STREAM_PORT>` and automatically retries frames (`7–16 s`). **`TURN OFF CAMERA`** stops the video stream cleanly. |
 | **2** | **YOLO Test Toggle** | Runs live standalone YOLOv8 object classification on the wrist-camera feed and displays the detected class (`Blue Tin`, `Red Tin`, etc.) and confidence `%` in the classification bar below the video. |
-| **3** | **Pump & Raw Stream** | **`TURN ON / OFF PUMP`** directly toggles the pneumatic suction cup with instant optimistic feedback. **`RAW STREAM (:8080)`** opens the direct MJPEG feed in a new browser tab. |
+| **3** | **Pump & Raw Stream** | **`TURN ON / OFF PUMP`** directly toggles the pneumatic suction cup with instant optimistic feedback. **`RAW STREAM (:<CAMERA_STREAM_PORT>)`** opens the direct MJPEG feed in a new browser tab. |
 | **4** | **Open 3D RViz2** | Opens the manipulator's MoveIt 2 + RViz2 3D window on the Host Control PC desktop. |
 | **5** | **Torque Release / Lock** | Used for hand-guiding calibration: hold the arm with one hand, click **`RELEASE MOTORS (1)`**, move the arm physically to the target spot, then click **`LOCK MOTORS (2)`** to hold it in place. |
 | **6** | **6 Required Poses Table** | Displays `home`, `scan`, `pick_approach`, `pick`, `place_approach`, and `place` with **`RECORDED / PENDING`** badges and joint angles (rad). Click **`RECORD (3)`** to capture the current arm posture, or **`GO TO`** to test moving safely to a saved pose. |
@@ -71,10 +71,10 @@ Switch to the **`TurtleBot 4 (AMR & 3D Integrated Vision)`** tab (`#3` in the to
 | :-: | :--- | :--- |
 | **1** | **Navigation Readiness & ROS 2 Gates** | Instant green/red checklist showing whether `create3_alive`, `odom`, `scan`, `map`, `amcl_pose`, `amcl_converged`, `navigate_to_pose`, `global_costmap`, and the 4 Mission Manager services (`/start_delivery`, `/start_failure`, `/start_restock`, `/stop_mission`) are active. Explains why readiness is blocked (for instance, when LIDAR power-saver is active while docked). |
 | **2** | **Battery, Dock & Live Pose Cards** | Displays live Create 3 **`Battery %` & charging current (`A`)**, **`Charging Station`** (`Docked` vs. `Undocked`), **`Coordinates (Odom)`** `(X, Y)`, and **`Nav2 Status`**. |
-| **3** | **10-Service Health & Inventory** | Monitors all 10 laboratory services (`Docker Daemon`, `Backend`, `Frontend`, `Cobot Discovery`, `Host Agent :8100`, `X11 Session`, `TurtleBot 4 Service RPi4`, `TB4 Discovery :11811`, `Create 3 Base`, `Jetson Nano Stream`) with one-click **`Restart`** buttons where supported. |
+| **3** | **10-Service Health & Inventory** | Monitors all 10 laboratory services (`Docker Daemon`, `Backend`, `Frontend`, `Cobot Discovery`, `Host Agent :<HOST_AGENT_PORT>`, `X11 Session`, `TurtleBot 4 Service RPi4`, `TB4 Discovery :<TB4_DISCOVERY_PORT>`, `Create 3 Base`, `Jetson Nano Stream`) with one-click **`Restart`** buttons where supported. |
 | **4** | **OAK-D Live Vision Feed** | Streams the TurtleBot 4 front OAK-D Lite camera (`GET /api/v1/turtlebot/camera_feed`). Use **`TURN ON OAK-D CAMERA`** or **`RESTART CONNECTION`** if the feed is offline. |
 | **5** | **Quick Undock/Dock & Manual D-Pad** | **`UNDOCK`** / **`DOCK`** quick actions plus directional arrow buttons for manual driving (`+0.25 m/s` forward/back, `±0.6 rad/s` turn left/right) and the red center **Stop** button (`0, 0`). *Note: Create 3 ignores drive commands while docked—click `UNDOCK` first.* |
-| **6** | **Network Diagnosis (`AUDIT CONN & TOPICS`)** | Pings `192.168.0.129` and counts live ROS 2 topics visible on the FastDDS Discovery Server. |
+| **6** | **Network Diagnosis (`AUDIT CONN & TOPICS`)** | Pings `<TURTLEBOT_IP>` and counts live ROS 2 topics visible on the FastDDS Discovery Server. |
 
 ---
 

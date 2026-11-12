@@ -8,13 +8,13 @@ This page catalogs every operational shell and Python script across the root rep
 
 | Script Path | Runs On | Purpose |
 | :--- | :--- | :--- |
-| `START_CONTROL_CENTER.sh` | Host PC | Starts the Host Agent (`:18080`), Mission Signal Agent (`:18081`), FastAPI backend (`:8000`), and Next.js frontend (`:3000`). Supports `--status`. |
+| `START_CONTROL_CENTER.sh` | Host PC | Starts the Host Agent (`:<HOST_AGENT_PORT>`), Mission Signal Agent (`:<MISSION_SIGNAL_PORT>`), FastAPI backend (`:<BACKEND_PORT>`), and Next.js frontend (`:<FRONTEND_PORT>`). Supports `--status`. |
 | `STOP_CONTROL_CENTER.sh` | Host PC | Gracefully stops the frontend, backend, Mission Signal Agent, and Host Agent processes. |
 | `future_lab_control_center/START_LAB.sh` | Host PC | Full one-command lab bringup: checks VPN/network, starts Discovery Servers, brings up `mycobot_ros2` container, verifies Jetson Nano bridge and TurtleBot telemetry, and launches the Control Center. Supports `--status` and `--reset`. |
 | `future_lab_control_center/STOP_LAB.sh` | Host PC | Stops the Control Center stack and auxiliary lab processes. |
-| `future_lab_control_center/host_agent/host_agent.py` | Host PC (`127.0.0.1:18080`) | Privileged local daemon managing Discovery Server, GUI launchers, and SSH recovery actions. |
-| `future_lab_control_center/host_agent/mission_signal_agent.py` | Host PC (`127.0.0.1:18081`) | Persistent ROS 2 Jazzy `SUPER_CLIENT` daemon publishing `/product_class` and `/item_released_on_tb4`, calling `/start_delivery`, and monitoring `/turtlebot_at_pickup`. |
-| `future_lab_control_center/scripts/yolo_test_vision.py` | Host PC / Nano | YOLOv8 vision classifier (`best.pt`) reading from `http://192.168.0.62:8080/stream.mjpg` and publishing detections to `/yolo_detections` / `/product_class`. Supports `--headless` and `--conf`. |
+| `future_lab_control_center/host_agent/host_agent.py` | Host PC (`127.0.0.1:<HOST_AGENT_PORT>`) | Privileged local daemon managing Discovery Server, GUI launchers, and SSH recovery actions. |
+| `future_lab_control_center/host_agent/mission_signal_agent.py` | Host PC (`127.0.0.1:<MISSION_SIGNAL_PORT>`) | Persistent ROS 2 Jazzy `SUPER_CLIENT` daemon publishing `/product_class` and `/item_released_on_tb4`, calling `/start_delivery`, and monitoring `/turtlebot_at_pickup`. |
+| `future_lab_control_center/scripts/yolo_test_vision.py` | Host PC / Nano | YOLOv8 vision classifier (`best.pt`) reading from `http://<JETSON_NANO_IP>:<CAMERA_STREAM_PORT>/stream.mjpg` and publishing detections to `/yolo_detections` / `/product_class`. Supports `--headless` and `--conf`. |
 
 ---
 
@@ -22,7 +22,7 @@ This page catalogs every operational shell and Python script across the root rep
 
 | Script Path | Runs On | Purpose |
 | :--- | :--- | :--- |
-| `turtlebot4_jazzy/start_discovery_server.sh` | Host PC | Starts the FastDDS Discovery Server (`server_id=0`) on `192.168.0.129:11811`. |
+| `turtlebot4_jazzy/start_discovery_server.sh` | Host PC | Starts the FastDDS Discovery Server (`server_id=0`) on `<TURTLEBOT_IP>:<TB4_DISCOVERY_PORT>`. |
 | `turtlebot4_jazzy/START_NAV_DISCOVERY.sh` | Host PC | Launches Nav2 localization (`Mapa_Lab.yaml`), `navigation.launch.py`, and `wait_for_map_tf.py` configured as a FastDDS `SUPER_CLIENT`. |
 | `turtlebot4_jazzy/START_SLAM_DISCOVERY.sh` | Host PC | Launches online `slam_toolbox` mapping with FastDDS Discovery Server configuration. |
 | `turtlebot4_jazzy/START_RVIZ_DISCOVERY.sh` | Host PC | Launches RViz2 preconfigured for TurtleBot 4 navigation on `ROS_DOMAIN_ID=0`. |
@@ -42,10 +42,10 @@ This page catalogs every operational shell and Python script across the root rep
 
 | Script Path | Runs On | Purpose |
 | :--- | :--- | :--- |
-| `cobot/nano_micro_bridge.py` | Jetson Nano (`:8088`) | Lightweight HTTP hardware server interfacing with `pymycobot` (`/dev/ttyTHS1` @ `1000000` baud) and RPi.GPIO (BCM pins `20`, `21`). |
-| `cobot/START_COBOT_DISCOVERY_HOST.sh` | Host PC | Starts the optional FastDDS Discovery Server for `ROS_DOMAIN_ID=42` on port `11888`. |
+| `cobot/nano_micro_bridge.py` | Jetson Nano (`:<NANO_BRIDGE_PORT>`) | Lightweight HTTP hardware server interfacing with `pymycobot` (`/dev/ttyTHS1` @ `1000000` baud) and RPi.GPIO (BCM pins `20`, `21`). |
+| `cobot/START_COBOT_DISCOVERY_HOST.sh` | Host PC | Starts the optional FastDDS Discovery Server for `ROS_DOMAIN_ID=42` on port `<COBOT_DISCOVERY_PORT>`. |
 | `cobot/mycobot_docker/RUN_PLANNING_PC.sh` | Host PC (`mycobot_ros2`) | Launches MoveIt 2 (`move_group`), `robot_state_publisher`, RViz2, and restarts the physical bridge inside `mycobot_ros2`. |
-| `cobot/mycobot_docker/START_NANO_BRIDGE.sh` | Host PC → Nano (SSH) | Deploys and starts `nano_micro_bridge.py` (`:8088`) on the Jetson Nano (`192.168.0.62`). |
+| `cobot/mycobot_docker/START_NANO_BRIDGE.sh` | Host PC → Nano (SSH) | Deploys and starts `nano_micro_bridge.py` (`:<NANO_BRIDGE_PORT>`) on the Jetson Nano (`<JETSON_NANO_IP>`). |
 | `cobot/mycobot_docker/RUN_TEACH.sh` | Host PC → Nano | Interactive CLI Teach Mode: releases servos for hand-guiding and locks them on `Enter`. |
 | `cobot/mycobot_docker/SAVE_POSE.sh` | Host PC (`mycobot_ros2`) | Saves the current `/joint_states` angles into `cobot_poses.yaml` under `<pose_name>`. |
 | `cobot/mycobot_docker/GO_POSE.sh` | Host PC (`mycobot_ros2`) | Moves the MyCobot arm to a named pose from `cobot_poses.yaml`. |
@@ -61,8 +61,8 @@ This page catalogs every operational shell and Python script across the root rep
 | `integration_cobot_tb4/scripts/start_3d_rviz_only.sh` | Host PC | Launches the 3D RViz scene (`config/cobot_tb4_3d.rviz`) without restarting the robot stacks. |
 | `integration_cobot_tb4/scripts/calibrate_cobot_anchor.sh` | Host PC | Helper to update the `x, y, z, yaw` anchor of `mycobot_base_link` in `config/anchor.yaml`. |
 | `integration_cobot_tb4/scripts/generate_b002_Dual_views.sh` | Host PC | Generates `generated/b002_scene_2d_overview.png`, `b002_semantic_preview.png`, and `b002_dual_lab.sdf`. |
-| `integration_cobot_tb4/tools/tools_mycobot_joint_udp_exporter.py` | `mycobot_ros2` (Domain 42) | Subscribes to `/joint_states` in ROS 2 Galactic and sends JSON UDP packets to `127.0.0.1:38527`. |
-| `integration_cobot_tb4/tools/tools_mycobot_joint_udp_receiver.py` | Host PC (Domain 0) | Receives UDP joint angles on `:38527` and republishes `/mycobot/joint_states` in ROS 2 Jazzy. |
+| `integration_cobot_tb4/tools/tools_mycobot_joint_udp_exporter.py` | `mycobot_ros2` (Domain 42) | Subscribes to `/joint_states` in ROS 2 Galactic and sends JSON UDP packets to `127.0.0.1:<UDP_JOINT_PORT>`. |
+| `integration_cobot_tb4/tools/tools_mycobot_joint_udp_receiver.py` | Host PC (Domain 0) | Receives UDP joint angles on `:<UDP_JOINT_PORT>` and republishes `/mycobot/joint_states` in ROS 2 Jazzy. |
 | `integration_cobot_tb4/tools/b002_scene_marker_publisher.py` | Host PC (Domain 0) | Publishes 3D `MarkerArray` visualization of tables, zones, and labels from `config/b002_scene.yaml`. |
 
 ---

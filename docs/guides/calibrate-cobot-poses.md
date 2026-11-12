@@ -26,15 +26,15 @@ All cell workflows (`auto`, `manual`, `handshake_test`, and `integrated_real`) r
 
 The **Teach Mode Panel** (`TeachModePanel.jsx`) in the Control Center dashboard lets you calibrate poses by hand-guiding the physical robot arm or jogging individual joints:
 
-1. Open `http://localhost:3000` and locate the **Teach Mode & Calibration** panel.
+1. Open `http://localhost:<FRONTEND_PORT>` and locate the **Teach Mode & Calibration** panel.
 2. **Release Servos (Hand-Guiding)**:
    - Hold the manipulator arm firmly with one hand so it does not drop under gravity.
-   - Click **Release Servos** (`POST /api/v1/cobot/release_servos` → calls `POST http://192.168.0.62:8088/servos/release`).
+   - Click **Release Servos** (`POST /api/v1/cobot/release_servos` → calls `POST http://<JETSON_NANO_IP>:<NANO_BRIDGE_PORT>/servos/release`).
    - Move the arm smoothly by hand to the desired posture (e.g., pressing the suction cup onto the can at `pick`, or hovering over the docked/staged TurtleBot tray at `place`).
 3. **Lock Servos**:
-   - Click **Lock Servos** (`POST /api/v1/cobot/lock_servos` → calls `POST http://192.168.0.62:8088/servos/lock`) to re-engage holding torque at the current posture.
+   - Click **Lock Servos** (`POST /api/v1/cobot/lock_servos` → calls `POST http://<JETSON_NANO_IP>:<NANO_BRIDGE_PORT>/servos/lock`) to re-engage holding torque at the current posture.
 4. **Verify Live Joint Angles**:
-   - Check the live joint readout in the panel (`GET /api/v1/cobot/status`, polled from `http://192.168.0.62:8088/get_angles`).
+   - Check the live joint readout in the panel (`GET /api/v1/cobot/status`, polled from `http://<JETSON_NANO_IP>:<NANO_BRIDGE_PORT>/get_angles`).
 5. **Save Pose**:
    - Select or type the pose name (`home`, `scan`, `pick_approach`, `pick`, `place_approach`, or `place`).
    - Click **Save Current Pose** (`POST /api/v1/cobot/poses/<name>`).
@@ -50,18 +50,18 @@ You can also calibrate poses directly from a terminal on the Host PC while the `
 ### Step 1: Enter Interactive Teach Mode
 
 ```bash
-cd /home/future-lab/B002_Future_Lab_Bots/cobot/mycobot_docker
+cd ~/B002_Future_Lab_Bots/cobot/mycobot_docker
 ./RUN_TEACH.sh
 ```
 
-`RUN_TEACH.sh` connects to the Jetson Nano (`192.168.0.62`), releases the servo motors so you can guide the arm by hand, and prints the live joint angles in radians. Press `Enter` when positioned to lock the servos back in place.
+`RUN_TEACH.sh` connects to the Jetson Nano (`<JETSON_NANO_IP>`), releases the servo motors so you can guide the arm by hand, and prints the live joint angles in radians. Press `Enter` when positioned to lock the servos back in place.
 
 ### Step 2: Save the Current Joint State as a Named Pose
 
 In another terminal on the Host PC, run `SAVE_POSE.sh <pose_name>`:
 
 ```bash
-cd /home/future-lab/B002_Future_Lab_Bots/cobot/mycobot_docker
+cd ~/B002_Future_Lab_Bots/cobot/mycobot_docker
 ./SAVE_POSE.sh pick
 ```
 
@@ -70,7 +70,7 @@ cd /home/future-lab/B002_Future_Lab_Bots/cobot/mycobot_docker
 ### Step 3: Test Saved Poses from CLI
 
 ```bash
-cd /home/future-lab/B002_Future_Lab_Bots/cobot/mycobot_docker
+cd ~/B002_Future_Lab_Bots/cobot/mycobot_docker
 ./GO_POSE.sh pick_approach
 ./GO_POSE.sh pick
 ./GO_POSE.sh home
@@ -86,7 +86,7 @@ Every time you save or delete a pose through the Control Center API (`cobot_node
 - To revert to the previous calibration, click **Restore Pose Backup** in the Teach Mode Panel or call:
 
 ```bash
-curl -s -X POST http://localhost:8000/api/v1/cobot/poses_restore_backup | jq
+curl -s -X POST http://localhost:<BACKEND_PORT>/api/v1/cobot/poses_restore_backup | jq
 ```
 
 ---
@@ -96,4 +96,4 @@ curl -s -X POST http://localhost:8000/api/v1/cobot/poses_restore_backup | jq
 During handshake tests and `Integrated Real Mode`, the backend does not rely on open-loop sleep timers. Instead, `CobotNode.goto_pose_verified(pose_name, speed)` (`backend/ros2_nodes/cobot_node.py`):
 
 1. Sends the target joint angles to the Jetson Nano HTTP bridge (`GET /move_joints?j=d1,d2,d3,d4,d5,d6&speed=S`) and publishes the trajectory on `/arm_controller/follow_joint_trajectory` for RViz/MoveIt synchronization.
-2. Polls `GET http://192.168.0.62:8088/get_angles` until the maximum per-joint error between measured physical encoder angles and the target pose is within tolerance (default `0.15 rad` / `~8.6°`), or raises an error on timeout.
+2. Polls `GET http://<JETSON_NANO_IP>:<NANO_BRIDGE_PORT>/get_angles` until the maximum per-joint error between measured physical encoder angles and the target pose is within tolerance (default `0.15 rad` / `~8.6°`), or raises an error on timeout.

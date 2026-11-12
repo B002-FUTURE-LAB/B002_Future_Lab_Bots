@@ -8,7 +8,7 @@ This tutorial walks you through running your first end-to-end cooperative missio
 
 Before starting a mission, verify that:
 
-1. The Control Center stack is running (`./START_CONTROL_CENTER.sh`) and open at `http://localhost:3000`.
+1. The Control Center stack is running (`./START_CONTROL_CENTER.sh`) and open at `http://localhost:<FRONTEND_PORT>`.
 2. In the top **Network Status Header**, the indicators for **Host API**, **MyCobot (Nano)**, **TurtleBot 4**, and **Discovery Server** are green.
 3. The MyCobot workspace and the TurtleBot 4 navigation corridors are clear of obstacles.
 4. All 6 required manipulator poses (`home`, `scan`, `pick_approach`, `pick`, `place_approach`, `place`) exist in `cobot/mycobot_docker/cobot_poses.yaml` (see [Calibrate Cobot Poses](../guides/calibrate-cobot-poses.md)).
@@ -27,7 +27,7 @@ Switch to the **TurtleBot 4** tab in the Control Center dashboard (or run the co
 4. **Check Readiness Gate**: Verify that the readiness badge reports `mission_ready: true`:
 
 ```bash
-curl -s http://localhost:8000/api/v1/turtlebot/nav_readiness | jq
+curl -s http://localhost:<BACKEND_PORT>/api/v1/turtlebot/nav_readiness | jq
 ```
 
 Expected key fields:
@@ -47,7 +47,7 @@ Before relying on live YOLO classification, validate the physical pick-and-place
 3. Trigger the standalone handshake test via the **Cell Control Panel** or via `curl`:
 
 ```bash
-curl -s -X POST http://localhost:8000/api/v1/cell/handshake_test \
+curl -s -X POST http://localhost:<BACKEND_PORT>/api/v1/cell/handshake_test \
   -H "Content-Type: application/json" \
   -d '{"item_class": "blue"}' | jq
 ```
@@ -55,7 +55,7 @@ curl -s -X POST http://localhost:8000/api/v1/cell/handshake_test \
 4. Monitor progress in real time:
 
 ```bash
-curl -s http://localhost:8000/api/v1/cell/status | jq '.handshake'
+curl -s http://localhost:<BACKEND_PORT>/api/v1/cell/status | jq '.handshake'
 ```
 
 The handshake engine steps through 8 verified phases:
@@ -67,7 +67,7 @@ The handshake engine steps through 8 verified phases:
 | `3/8 cobot_picking` | While TurtleBot undocks and navigates to `pickup_point`, MyCobot moves `pick_approach → pick` and confirms `pump_active == true`. |
 | `4/8 cobot_placing` | MyCobot moves `pick_approach → place_approach → place` holding the can. |
 | `5/8 waiting_turtlebot_pickup` | Waits up to `100 s` for `True` on `/turtlebot_at_pickup`. If it times out, the Cobot rolls back the can to `pick` instead of dropping it. |
-| `6/8 releasing_item` | Turns suction pump OFF (`set_pump_verified(False)`) and publishes `/item_released_on_tb4` via the Host Mission Signal Agent (`:18081`). |
+| `6/8 releasing_item` | Turns suction pump OFF (`set_pump_verified(False)`) and publishes `/item_released_on_tb4` via the Host Mission Signal Agent (`:<MISSION_SIGNAL_PORT>`). |
 | `7/8 cobot_returning_home` | MyCobot returns `place_approach → home`. |
 | `8/8 waiting_delivery_and_dock` | TurtleBot 4 navigates to `delivery_blue`, returns to `predock_point`, and completes physical docking (`/dock_status == true`). |
 
@@ -81,14 +81,14 @@ Once the physical handshake succeeds, run the full autonomous pipeline with live
 2. In the **Cell Control Panel**, start **Integrated Real Mode** (or call `POST /api/v1/cell/integrated_real/start`):
 
 ```bash
-curl -s -X POST http://localhost:8000/api/v1/cell/integrated_real/start | jq
+curl -s -X POST http://localhost:<BACKEND_PORT>/api/v1/cell/integrated_real/start | jq
 ```
 
 3. The orchestrator automatically:
    - Launches MoveIt 2 + RViz for the manipulator (`RUN_PLANNING_PC.sh`) and verifies `move_group` is alive.
-   - Re-verifies the Jetson Nano HTTP bridge (`:8088`) after the Planning PC startup.
+   - Re-verifies the Jetson Nano HTTP bridge (`:<NANO_BRIDGE_PORT>`) after the Planning PC startup.
    - Launches the unified 3D cell RViz (`rviz2_cobot_tb4_3d`).
-   - Checks/restarts the wrist-camera MJPEG stream (`http://192.168.0.62:8080/stream.mjpg`) and starts the headless YOLOv8 detector.
+   - Checks/restarts the wrist-camera MJPEG stream (`http://<JETSON_NANO_IP>:<CAMERA_STREAM_PORT>/stream.mjpg`) and starts the headless YOLOv8 detector.
    - Moves the MyCobot to `scan` and collects **5 distinct, recent YOLO samples** within a `0.8 s – 3.0 s` window agreeing on the canonical class (`tin_valid_blue` or `tin_valid_red`).
 4. Depending on the mode selected:
    - If **Operator Confirmation** is requested (`awaiting_confirm`), click **Confirm & Execute** (`POST /api/v1/cell/integrated_real/confirm`) once the candidate class is displayed.

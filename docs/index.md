@@ -8,7 +8,7 @@ Welcome to the technical documentation and maintainer handbook for the **B002 Fu
 
 - **Vision Inspection & Pick-and-Place (`MyCobot 280` + `Jetson Nano`)**: Moves to an overhead `scan` posture, classifies cans using a YOLOv8 vision model (`tin_valid_blue` vs. `tin_valid_red`), picks the item with a pneumatic suction cup, and stages it at the handoff pose (`place`).
 - **Autonomous Mobile Transport (`TurtleBot 4` + `Nav2`)**: Undocks from its infrared charging station, navigates to `pickup_point`, performs a closed-loop ROS 2 handoff (`/turtlebot_at_pickup` ↔ `/item_released_on_tb4`), delivers the can to `delivery_blue` or `delivery_red`, and returns to its dock.
-- **Unified Web Control Center (`Next.js 14` + `FastAPI` + `Host Agent`)**: Provides the complete browser-based operator console (`http://localhost:3000`) for starting/stopping ROS 2 stacks, running calibration (Teach Mode & AMCL dock poses), viewing live wrist and OAK-D cameras, triggering cooperative sorting missions, enforcing safety/panic locks, and recording auditable 60-trial experimental campaigns.
+- **Unified Web Control Center (`Next.js 14` + `FastAPI` + `Host Agent`)**: Provides the complete browser-based operator console (`http://localhost:<FRONTEND_PORT>`) for starting/stopping ROS 2 stacks, running calibration (Teach Mode & AMCL dock poses), viewing live wrist and OAK-D cameras, triggering cooperative sorting missions, enforcing safety/panic locks, and recording auditable 60-trial experimental campaigns.
 
 ![Annotated Control Center Dashboard Overview](assets/dashboard_header_and_cell_control.png)
 

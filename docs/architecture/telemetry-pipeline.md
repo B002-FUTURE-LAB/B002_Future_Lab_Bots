@@ -9,25 +9,25 @@ The B002 Control Center enforces strict **telemetry freshness TTLs** and **QoS c
 ```mermaid
 flowchart TD
   subgraph TB4_HW["TurtleBot 4 Hardware"]
-    C3["Create 3 Base (usb0: 192.168.186.2)\n/odom, /battery_state, /dock_status,\n/hazard_detection, /cmd_vel"]
+    C3["Create 3 Base (usb0: <CREATE3_BASE_IP>)\n/odom, /battery_state, /dock_status,\n/hazard_detection, /cmd_vel"]
     RPL["RPLIDAR A1M8\n/scan (LaserScan)"]
     OAKD["OAK-D Pro Camera\n/oakd/rgb/preview/image_raw"]
   end
 
-  subgraph RPi4["Raspberry Pi 4 (192.168.0.21)"]
+  subgraph RPi4["Raspberry Pi 4 (<TURTLEBOT_IP>)"]
     REPUB["create3_republisher\nBridges usb0 <-> wlan0 FastDDS"]
   end
 
-  subgraph HostPC["Host Control PC (192.168.0.129)"]
-    DS["FastDDS Discovery Server :11811"]
+  subgraph HostPC["Host Control PC (<TURTLEBOT_IP>)"]
+    DS["FastDDS Discovery Server :<TB4_DISCOVERY_PORT>"]
     AMCL["Nav2 AMCL Node\n/amcl_pose (TRANSIENT_LOCAL)"]
     TBN["Backend TurtleBotNode\n(QoS Dual Subscriptions + TTLs)"]
-    CBN["Backend CobotNode\n(HTTP :8088 + ROS /yolo_detections)"]
+    CBN["Backend CobotNode\n(HTTP :<NANO_BRIDGE_PORT> + ROS /yolo_detections)"]
   end
 
-  subgraph Nano["MyCobot Jetson Nano (192.168.0.62)"]
-    NMB["nano_micro_bridge.py (:8088)\n/get_angles, /status, /move_joints"]
-    MJPEG["Camera Server (:8080)\n/stream.mjpg"]
+  subgraph Nano["MyCobot Jetson Nano (<JETSON_NANO_IP>)"]
+    NMB["nano_micro_bridge.py (:<NANO_BRIDGE_PORT>)\n/get_angles, /status, /move_joints"]
+    MJPEG["Camera Server (:<CAMERA_STREAM_PORT>)\n/stream.mjpg"]
   end
 
   C3 --> REPUB
@@ -45,9 +45,9 @@ flowchart TD
 
 ## 1. Create 3 Internal Subnet Bridge (`create3_republisher`)
 
-The iRobot Create 3 mobile base communicates with the Raspberry Pi 4 over an internal USB-C RNDIS Ethernet interface (`usb0`, `192.168.186.0/24`). Because standard FastDDS unicast peers on the `192.168.0.0/24` Wi-Fi network cannot route directly into `192.168.186.2`:
+The iRobot Create 3 mobile base communicates with the Raspberry Pi 4 over an internal USB-C RNDIS Ethernet interface (`usb0`, `<CREATE3_SUBNET_CIDR>`). Because standard FastDDS unicast peers on the `<LAB_SUBNET_CIDR>` Wi-Fi network cannot route directly into `<CREATE3_BASE_IP>`:
 
-- The Raspberry Pi runs `create3_republisher` (`turtlebot4_base`), which subscribes to Create 3 topics on `usb0` and republishes them to the FastDDS Discovery Server (`192.168.0.129:11811`) on `wlan0`.
+- The Raspberry Pi runs `create3_republisher` (`turtlebot4_base`), which subscribes to Create 3 topics on `usb0` and republishes them to the FastDDS Discovery Server (`<TURTLEBOT_IP>:<TB4_DISCOVERY_PORT>`) on `wlan0`.
 - **Failure Symptom**: If `create3_republisher` crashes or the Create 3 application enters Deep Sleep, `/scan` and `/oakd/*` remain visible on the Host PC, while `/odom`, `/battery_state`, and `/dock_status` stop updating.
 - **Automated Detection**: `TurtleBotNode` (`backend/ros2_nodes/turtlebot_node.py`) tracks the monotonic timestamp of the last received message for each topic (`last_odom_time`, `last_battery_time`, `last_dock_time`, `last_scan_time`) and exposes `telemetry_fresh()` (requiring messages within the last `5.0 s`).
 
@@ -88,5 +88,5 @@ Because `/amcl_pose` is event-driven when the robot is stationary:
 
 ## 5. MyCobot Telemetry & Hardware Verification Loop
 
-- **Joint Angles (`GET /get_angles`)**: Polled from `http://192.168.0.62:8088/get_angles`, converted from degrees to radians, and published by `CobotNode` onto `/joint_states` at `10 Hz` alongside hardware status (`mock`, `gpio_ready`, `pump_active`, `servos_released`).
+- **Joint Angles (`GET /get_angles`)**: Polled from `http://<JETSON_NANO_IP>:<NANO_BRIDGE_PORT>/get_angles`, converted from degrees to radians, and published by `CobotNode` onto `/joint_states` at `10 Hz` alongside hardware status (`mock`, `gpio_ready`, `pump_active`, `servos_released`).
 - **Closed-Loop Verification**: Both `goto_pose_verified` (joint angle convergence within `0.15 rad`) and `set_pump_verified` (verifying `pump_active` in `GET /status`) ensure that physical hardware state matches software commands before advancing any mission phase.

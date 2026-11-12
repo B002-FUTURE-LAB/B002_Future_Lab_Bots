@@ -18,15 +18,15 @@ link first.
 
 ## Diagnose, from the Raspberry Pi side
 
-Run these over SSH on the Raspberry Pi (`ubuntu@192.168.0.129`) with the
+Run these over SSH on the Raspberry Pi (`<TB4_USER>@<TURTLEBOT_IP>`) with the
 TurtleBot environment loaded (`source /etc/turtlebot4/setup.bash`).
 
 | Check | Command | Healthy result |
 |---|---|---|
-| Base answers | `ping -c 2 192.168.186.2` | replies in under 1 ms |
+| Base answers | `ping -c 2 <CREATE3_BASE_IP>` | replies in under 1 ms |
 | Topics are published | `ros2 topic hz /battery_state` | a rate, not "does not appear to be published yet" |
 | Base nodes registered | `ros2 node list` | includes `/create3_repub` and the `/_do_not_use/...` nodes |
-| Base web app alive | `curl -s http://192.168.186.2/` | a normal page, **not** "Oops, something went wrong" |
+| Base web app alive | `curl -s http://<CREATE3_BASE_IP>/` | a normal page, **not** "Oops, something went wrong" |
 
 !!! warning "Ping is not proof"
     In one incident the base answered ping in 0.4 ms and its web server
@@ -53,7 +53,7 @@ Work from the cheapest step to the most disruptive, and re-check after each.
 ## Verify
 
 ```bash
-curl -s http://localhost:8000/api/v1/turtlebot/status
+curl -s http://localhost:<BACKEND_PORT>/api/v1/turtlebot/status
 ```
 
 Expect `telemetry_ok: true` and `telemetry_age_s` close to `0`.

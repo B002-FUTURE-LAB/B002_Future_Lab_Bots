@@ -1,6 +1,6 @@
 # Frontend Dashboard: Internal Architecture & Source Code Developer Guide
 
-The **Control Center Web Dashboard** (`future_lab_control_center/frontend/`) is a **Next.js 14** (Pages Router, React 18, Tailwind CSS 3) web application served on port `3000`. It acts as the unified graphical layer over the FastAPI + ROS 2 backend (`:8000`).
+The **Control Center Web Dashboard** (`future_lab_control_center/frontend/`) is a **Next.js 14** (Pages Router, React 18, Tailwind CSS 3) web application served on port `<FRONTEND_PORT>`. It acts as the unified graphical layer over the FastAPI + ROS 2 backend (`:<BACKEND_PORT>`).
 
 For an operator walkthrough of every screen, button, and modal, see [Using the Web Control Center Dashboard](../guides/using-the-dashboard.md).
 
@@ -10,7 +10,7 @@ For an operator walkthrough of every screen, button, and modal, see [Using the W
 
 ```text
 future_lab_control_center/frontend/
-├── Dockerfile                       # node:18-slim image running `npm run dev` on :3000
+├── Dockerfile                       # node:18-slim image running `npm run dev` on :<FRONTEND_PORT>
 ├── package.json                     # Next.js 14, React 18, lucide-react, Tailwind CSS 3
 └── src/
     ├── pages/
@@ -47,13 +47,13 @@ In `future_lab_control_center/frontend/src/pages/index.js` (and directly in `Tur
 const getApiBase = () => {
   if (typeof window !== 'undefined') {
     const host = window.location.hostname || 'localhost';
-    return `http://${host}:8000/api/v1`;
+    return `http://${host}:<BACKEND_PORT>/api/v1`;
   }
-  return 'http://localhost:8000/api/v1';
+  return 'http://localhost:<BACKEND_PORT>/api/v1';
 };
 ```
 
-Because it avoids hardcoding `localhost`, accessing the dashboard over Lab Wi-Fi (`192.168.0.129:3000`) or Tailscale VPN (`100.86.49.29:3000`) automatically targets the backend on `:8000` at that same IP address.
+Because it avoids hardcoding `localhost`, accessing the dashboard over Lab Wi-Fi (`<TURTLEBOT_IP>:<FRONTEND_PORT>`) or Tailscale VPN (`<TAILSCALE_HOST_IP>:<FRONTEND_PORT>`) automatically targets the backend on `:<BACKEND_PORT>` at that same IP address.
 
 ### 2.2 Dual-Frequency Polling Architecture
 
@@ -95,7 +95,7 @@ The `LanguageProvider` in `_app.js` manages `lang` (`'en'` default, persisted in
 | :--- | :--- | :--- |
 | **`NetworkStatusHeader`** | `healthData` | `GET /api/v1/health/` |
 | **`CellControlPanel`** | `cellState`, `tbNavReadiness`, `tbProcesses`, `tbStatus` | `POST /cell/mode`, `/cell/auto/{start,stop}`, `/cell/integrated_real/{start,stop,confirm_detection}`, `/cell/manual/{start_scan,authorize_pick,authorize_place}`, `/cell/interrupt`, `/cell/interrupt/confirm`, `/cell/stop`, `/cell/panic`, `/cell/test_handshake` |
-| **`CameraVisionPanel`** | `streamUrl`, `cameraOnline`, `lastYolo`, `pumpActive`, `yoloTestActive` | `GET <nano>:8080/stream.mjpg`, `POST /cobot/pump`, `/cobot/yolo_test`, `/health/restart_camera`, `/health/stop_camera` |
+| **`CameraVisionPanel`** | `streamUrl`, `cameraOnline`, `lastYolo`, `pumpActive`, `yoloTestActive` | `GET <nano>:<CAMERA_STREAM_PORT>/stream.mjpg`, `POST /cobot/pump`, `/cobot/yolo_test`, `/health/restart_camera`, `/health/stop_camera` |
 | **`TeachModePanel`** | `cellState`, `posesData` | `GET /cobot/poses`, `POST /cobot/teach/{release,lock,record/<name>,save,playback,restore}`, `DELETE /cobot/teach/clear`, `POST /cobot/move/<name>`, `POST /health/launch_rviz` |
 | **`TurtleBotDashboardTab`** | `tbStatus`, `tbDiag`, `tbNavReadiness`, `tbProcesses` | `GET /turtlebot/{diagnose,amcl_status,nav_poses,logs,camera_feed,system/inventory}`, `POST /turtlebot/{dock,undock,teleop,set_initial_pose,save_dock_pose,clear_costmaps,launch_*,stop_*,trigger_*,mission_test/*}` |
 
@@ -105,10 +105,10 @@ The `LanguageProvider` in `_app.js` manages `lang` (`'en'` default, persisted in
 
 ### 4.1 Running in Hot-Reload Development Mode
 
-You can run the Next.js dev server directly on the Host Control PC for instant hot-reload while editing `.jsx` files (make sure the FastAPI backend is running on `:8000` and stop any conflicting containerized `:3000` instance first):
+You can run the Next.js dev server directly on the Host Control PC for instant hot-reload while editing `.jsx` files (make sure the FastAPI backend is running on `:<BACKEND_PORT>` and stop any conflicting containerized `:<FRONTEND_PORT>` instance first):
 
 ```bash
-cd /home/future-lab/B002_Future_Lab_Bots/future_lab_control_center/frontend
+cd ~/B002_Future_Lab_Bots/future_lab_control_center/frontend
 npm install
 npm run dev
 ```
@@ -123,7 +123,7 @@ npm run build
 If running via Docker Compose (`future_lab_frontend`), `./frontend/src:/app/src` is bind-mounted in `docker-compose.yml`, so edits in `src/` hot-reload automatically inside the container. Only changes to `package.json` require rebuilding the image:
 
 ```bash
-cd /home/future-lab/B002_Future_Lab_Bots/future_lab_control_center
+cd ~/B002_Future_Lab_Bots/future_lab_control_center
 docker compose up -d --build frontend
 ```
 
@@ -166,7 +166,7 @@ Follow these 6 steps whenever you add a new robot action to the dashboard:
 
 ### 4.3 Common Pitfalls When Editing Frontend Code
 
-- **Hardcoding `localhost` in `fetch()`**: Always call `getApiBase()` (`window.location.hostname:8000`) so remote operators on LAN or Tailscale can trigger actions.
+- **Hardcoding `localhost` in `fetch()`**: Always call `getApiBase()` (`window.location.hostname:<BACKEND_PORT>`) so remote operators on LAN or Tailscale can trigger actions.
 - **Unwrapping raw `data.detail` without `tb()`**: Always wrap backend messages in `tb(...)` so English-mode users do not see raw Portuguese exceptions.
 - **Leaving a modal unguarded**: Global overlays (`PanicOverlayModal`, `InterruptOverlayModal`) must always take priority over normal tabs; render them at the top of `<main>` inside `src/pages/index.js`.
 - **Adding large dependencies without checking `Dockerfile`**: If you add a new npm package, update `package.json` and rebuild the frontend Docker image if using Compose.

@@ -3,7 +3,7 @@
 - **Repository URL**: `git@github.com:B002-FUTURE-LAB/Bot_HOF.git`
 - **Mount Path**: `turtlebot4_jazzy/`
 - **ROS Distribution**: ROS 2 **Jazzy Jalisco** (`Ubuntu 24.04 LTS`)
-- **DDS Configuration**: `ROS_DOMAIN_ID=0`, `RMW_IMPLEMENTATION=rmw_fastrtps_cpp`, Unicast Discovery Server (`192.168.0.129:11811`)
+- **DDS Configuration**: `ROS_DOMAIN_ID=0`, `RMW_IMPLEMENTATION=rmw_fastrtps_cpp`, Unicast Discovery Server (`<TURTLEBOT_IP>:<TB4_DISCOVERY_PORT>`)
 
 ---
 
@@ -13,7 +13,7 @@
 turtlebot4_jazzy/
 ├── config/
 │   ├── lab.yaml                          # Procedural laboratory geometry definition
-│   └── super_client_configuration.xml    # FastDDS XML profile for SUPER_CLIENT connection to :11811
+│   └── super_client_configuration.xml    # FastDDS XML profile for SUPER_CLIENT connection to :<TB4_DISCOVERY_PORT>
 ├── maps/
 │   ├── Mapa_Lab.pgm                      # 2D occupancy grid raster map of Lab B002
 │   └── Mapa_Lab.yaml                     # Map metadata (resolution, origin, thresholds)
@@ -37,7 +37,7 @@ turtlebot4_jazzy/
 │   ├── run_lab_world.sh                  # Launches Gazebo simulation with GPU auto-detection
 │   ├── run_docker.sh                     # Interactive container shell launcher
 │   └── worlds/my_lab.sdf                 # Generated SDF world matching Lab B002
-├── start_discovery_server.sh             # Starts FastDDS Discovery Server (ID 0 on :11811)
+├── start_discovery_server.sh             # Starts FastDDS Discovery Server (ID 0 on :<TB4_DISCOVERY_PORT>)
 ├── START_NAV_DISCOVERY.sh                # Launches Localization + Nav2 + wait_for_map_tf.py
 ├── START_SLAM_DISCOVERY.sh               # Launches SLAM Toolbox with Discovery Server
 ├── START_RVIZ_DISCOVERY.sh               # Launches RViz2 with Discovery Server

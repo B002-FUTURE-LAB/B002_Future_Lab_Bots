@@ -16,8 +16,8 @@ Attempting to connect ROS 2 Galactic and ROS 2 Jazzy on the same `ROS_DOMAIN_ID`
 
 Bridge the manipulator's joint states from ROS 2 Galactic (`Domain 42`) to ROS 2 Jazzy (`Domain 0`) using a dependency-free **localhost UDP JSON relay** (`integration_cobot_tb4/tools/`):
 
-1. `tools_mycobot_joint_udp_exporter.py` runs inside `mycobot_ros2` (Galactic, Domain 42), subscribes to `/joint_states`, and sends compact JSON datagrams (`{"names": [...], "positions": [...]}`) to `127.0.0.1:38527` at up to `30 Hz`.
-2. `tools_mycobot_joint_udp_receiver.py` runs on the Host PC (Jazzy, Domain 0), listens on UDP `127.0.0.1:38527`, stamps a native ROS 2 Jazzy `sensor_msgs/msg/JointState` message with the host clock, and publishes `/mycobot/joint_states` consumed by a namespaced `robot_state_publisher` (`frame_prefix: mycobot_`).
+1. `tools_mycobot_joint_udp_exporter.py` runs inside `mycobot_ros2` (Galactic, Domain 42), subscribes to `/joint_states`, and sends compact JSON datagrams (`{"names": [...], "positions": [...]}`) to `127.0.0.1:<UDP_JOINT_PORT>` at up to `30 Hz`.
+2. `tools_mycobot_joint_udp_receiver.py` runs on the Host PC (Jazzy, Domain 0), listens on UDP `127.0.0.1:<UDP_JOINT_PORT>`, stamps a native ROS 2 Jazzy `sensor_msgs/msg/JointState` message with the host clock, and publishes `/mycobot/joint_states` consumed by a namespaced `robot_state_publisher` (`frame_prefix: mycobot_`).
 
 ## Consequences
 
@@ -25,4 +25,4 @@ Bridge the manipulator's joint states from ROS 2 Galactic (`Domain 42`) to ROS 2
   - Zero DDS cross-version coupling between Galactic (`Domain 42`) and Jazzy (`Domain 0`).
   - Sub-millisecond localhost UDP overhead and automatic timestamp synchronization with the host's Jazzy TF tree (`map -> mycobot_base_link -> ...`).
 - **Negative / Trade-offs**:
-  - One-way telemetry mirroring (for visualization and rosbag recording on Domain 0); actuation commands still flow through the backend's HTTP `:8088` / `docker exec` pipeline.
+  - One-way telemetry mirroring (for visualization and rosbag recording on Domain 0); actuation commands still flow through the backend's HTTP `:<NANO_BRIDGE_PORT>` / `docker exec` pipeline.

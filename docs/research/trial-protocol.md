@@ -18,7 +18,7 @@ The experiment evaluates the end-to-end reliability, cycle time, localization pr
 
 ### Randomization & Reproducibility
 
-To prevent battery drain or thermal drift from biasing a single condition, run order is randomized within balanced blocks using `experiments/generate_campaign_plan.py` with a fixed PRNG seed (`--seed 20260815`), stored in `/home/future-lab/B002_experiment_data/<campaign>/plan.csv`.
+To prevent battery drain or thermal drift from biasing a single condition, run order is randomized within balanced blocks using `experiments/generate_campaign_plan.py` with a fixed PRNG seed (`--seed 20260815`), stored in `~/B002_experiment_data/<campaign>/plan.csv`.
 
 ---
 
@@ -36,7 +36,7 @@ Every trial folder (`trials/<timestamp>_<condition>_runXX_<color>/`) captures fo
 3. **Structured Event Log (`backend_events_before.jsonl` & `backend_events_after.jsonl`)**:
    - Every state transition (`handshake_transition`, `integrated_real_transition`, and mutating HTTP calls) emitted by `backend/experiment_audit.py` with UTC timestamps and `monotonic_ns`.
 4. **Wrist-Camera Video (`cobot_camera.mp4`)**:
-   - Recorded at `10 fps` (`libx264`, `ultrafast`, `crf 28`) from `http://192.168.0.62:8080/stream.mjpg`.
+   - Recorded at `10 fps` (`libx264`, `ultrafast`, `crf 28`) from `http://<JETSON_NANO_IP>:<CAMERA_STREAM_PORT>/stream.mjpg`.
 
 ---
 

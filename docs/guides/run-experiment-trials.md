@@ -14,7 +14,7 @@ A complete campaign consists of **60 physical runs** divided across **3 obstacle
 2. `static_obstacle`: A static cylindrical box/obstacle (`0.30 × 0.30 × 0.40 m`) placed at a fixed coordinate on the primary path, forcing Nav2 global/local replanning.
 3. `dynamic_obstacle`: Controlled dynamic interference crossing the corridor when the TurtleBot 4 passes a reference mark (`1.0 m` after leaving `pickup_point`).
 
-All raw data is stored outside the Git repository at `/home/future-lab/B002_experiment_data/<campaign_id>/` (overrideable via `B002_EXPERIMENT_ROOT`).
+All raw data is stored outside the Git repository at `~/B002_experiment_data/<campaign_id>/` (overrideable via `B002_EXPERIMENT_ROOT`).
 
 ---
 
@@ -23,13 +23,13 @@ All raw data is stored outside the Git repository at `/home/future-lab/B002_expe
 Before starting a new campaign, generate a balanced, seed-reproducible run schedule (`plan.csv`):
 
 ```bash
-cd /home/future-lab/B002_Future_Lab_Bots
+cd ~/B002_Future_Lab_Bots
 python3 experiments/generate_campaign_plan.py \
   --campaign campaign_20260815 \
   --seed 20260815
 ```
 
-This creates `/home/future-lab/B002_experiment_data/campaign_20260815/plan.csv` containing 60 rows (`trial_number`, `condition`, `run_in_condition`, `can_color`), with balanced 10 `blue` + 10 `red` allocations per condition.
+This creates `~/B002_experiment_data/campaign_20260815/plan.csv` containing 60 rows (`trial_number`, `condition`, `run_in_condition`, `can_color`), with balanced 10 `blue` + 10 `red` allocations per condition.
 
 ---
 
@@ -38,7 +38,7 @@ This creates `/home/future-lab/B002_experiment_data/campaign_20260815/plan.csv` 
 Before running physical trials in a session, always execute a 10-second smoke recording to verify that ROS 2 Discovery, MCAP bag recording, dashboard state polling, and event relaying work cleanly:
 
 ```bash
-cd /home/future-lab/B002_Future_Lab_Bots
+cd ~/B002_Future_Lab_Bots
 ./experiments/record_trial.sh --smoke --duration 10 --campaign campaign_20260815
 ```
 
@@ -62,7 +62,7 @@ For each row in `plan.csv`:
 3. **Start the Trial Recorder**:
 
 ```bash
-cd /home/future-lab/B002_Future_Lab_Bots
+cd ~/B002_Future_Lab_Bots
 ./experiments/record_trial.sh \
   --condition no_obstacle \
   --run 1 \
@@ -83,7 +83,7 @@ cd /home/future-lab/B002_Future_Lab_Bots
 
 When you press `Ctrl+C`, `record_trial.sh` gracefully stops `ros2 bag record`, `ffmpeg`, `sample_dashboard_state.py`, and `event_relay.py`, captures a final snapshot (`post_snapshot.json`), and runs `validate_trial.py --mode real`.
 
-Each trial directory (`/home/future-lab/B002_experiment_data/<campaign>/trials/<trial_id>/`) contains:
+Each trial directory (`~/B002_experiment_data/<campaign>/trials/<trial_id>/`) contains:
 
 | File / Folder | Description |
 | :--- | :--- |

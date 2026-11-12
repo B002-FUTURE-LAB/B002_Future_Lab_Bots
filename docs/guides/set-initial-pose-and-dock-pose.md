@@ -20,14 +20,14 @@ When the TurtleBot 4 is resting on its charging station (`/dock_status` reports 
 
 ### Via Control Center Dashboard
 
-1. Open the **TurtleBot 4** tab in `http://localhost:3000`.
+1. Open the **TurtleBot 4** tab in `http://localhost:<FRONTEND_PORT>`.
 2. Ensure **Launch Navigation (Nav2)** is active.
 3. Click **Set Docked Pose** in the localization panel.
 
 ### Via REST API
 
 ```bash
-curl -s -X POST http://localhost:8000/api/v1/turtlebot/dock_pose | jq
+curl -s -X POST http://localhost:<BACKEND_PORT>/api/v1/turtlebot/dock_pose | jq
 ```
 
 This publishes a `geometry_msgs/msg/PoseWithCovarianceStamped` message on `/initialpose` with the calibrated dock coordinates (`x = 0.068`, `y = -0.004`, `yaw = 3.133 rad`, covariance `0.05` on X/Y and `0.03` on yaw) and waits until `/amcl_pose` converges within:
@@ -50,7 +50,7 @@ If the TurtleBot 4 starts away from the dock:
 ### Via REST API
 
 ```bash
-curl -s -X POST http://localhost:8000/api/v1/turtlebot/initial_pose \
+curl -s -X POST http://localhost:<BACKEND_PORT>/api/v1/turtlebot/initial_pose \
   -H "Content-Type: application/json" \
   -d '{"x": -0.608, "y": -0.022, "yaw": 3.133}' | jq
 ```

@@ -3,7 +3,7 @@
 - **Repository URL**: `git@github.com:B002-FUTURE-LAB/Cobot.git`
 - **Mount Path**: `cobot/`
 - **Active Branch**: `featnew-yolo`
-- **Architecture**: Hybrid Host Container (**ROS 2 Galactic** in `mycobot_ros2` on `ROS_DOMAIN_ID=42`) + Physical **Jetson Nano** HTTP Micro-Bridge (`192.168.0.62:8088`)
+- **Architecture**: Hybrid Host Container (**ROS 2 Galactic** in `mycobot_ros2` on `ROS_DOMAIN_ID=42`) + Physical **Jetson Nano** HTTP Micro-Bridge (`<JETSON_NANO_IP>:<NANO_BRIDGE_PORT>`)
 
 ---
 
@@ -11,11 +11,11 @@
 
 ```text
 cobot/
-├── nano_micro_bridge.py                  # HTTP :8088 server running on the Jetson Nano (serial + GPIO)
-├── START_COBOT_DISCOVERY_HOST.sh         # Starts optional FastDDS Discovery Server on :11888 (Domain 42)
+├── nano_micro_bridge.py                  # HTTP :<NANO_BRIDGE_PORT> server running on the Jetson Nano (serial + GPIO)
+├── START_COBOT_DISCOVERY_HOST.sh         # Starts optional FastDDS Discovery Server on :<COBOT_DISCOVERY_PORT> (Domain 42)
 ├── cobot_shadow_bridge/
-│   ├── cobot_exporter_galactic.py        # Legacy UDP :9090 joint state exporter
-│   └── cobot_importer_jazzy.py           # Legacy UDP :9090 joint state importer (/mycobot_shadow/joint_states)
+│   ├── cobot_exporter_galactic.py        # Legacy UDP :<LEGACY_UDP_PORT> joint state exporter
+│   └── cobot_importer_jazzy.py           # Legacy UDP :<LEGACY_UDP_PORT> joint state importer (/mycobot_shadow/joint_states)
 └── mycobot_docker/
     ├── Dockerfile                        # Ubuntu 20.04 + ROS 2 Galactic + MoveIt 2 + pymycobot image
     ├── docker-compose.yml                # Defines mycobot_ros2 container (network_mode: host, Domain 42)
@@ -35,7 +35,7 @@ cobot/
 
 ## Jetson Nano HTTP Hardware Micro-Bridge (`nano_micro_bridge.py`)
 
-Running directly on the MyCobot's internal **Jetson Nano** (`192.168.0.62:8088` / `192.168.0.250:8088`), `nano_micro_bridge.py` provides deterministic, zero-DDS-overhead hardware access over HTTP:
+Running directly on the MyCobot's internal **Jetson Nano** (`<JETSON_NANO_IP>:<NANO_BRIDGE_PORT>` / `<JETSON_NANO_IP>:<NANO_BRIDGE_PORT>`), `nano_micro_bridge.py` provides deterministic, zero-DDS-overhead hardware access over HTTP:
 
 ### Hardware Connections on the Jetson Nano
 
@@ -45,7 +45,7 @@ Running directly on the MyCobot's internal **Jetson Nano** (`192.168.0.62:8088` 
   - `PIN_PUMP_VALVE = 21` (Active-LOW vent valve: `GPIO.LOW` = sealed/suction, `GPIO.HIGH` = release/vent)
   - When turning the pump **OFF**, `nano_micro_bridge.py` sets pin `20` `HIGH`, pulses pin `21` `LOW` for `50 ms` to vent residual vacuum immediately, and sets pin `21` `HIGH`.
 
-### HTTP Endpoints (`:8088`)
+### HTTP Endpoints (`:<NANO_BRIDGE_PORT>`)
 
 | Method & Path | Query / Parameters | Response & Behavior |
 | :--- | :--- | :--- |

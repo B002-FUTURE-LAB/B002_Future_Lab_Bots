@@ -1,6 +1,6 @@
 # REST API
 
-The backend is a FastAPI application served on port **8000**. Interactive
+The backend is a FastAPI application served on port **`<BACKEND_PORT>`**. Interactive
 OpenAPI documentation is available at `/docs` while the backend is running.
 
 This page lists every route. A CI check (`tools/docs/check_route_coverage.py`)
@@ -168,6 +168,6 @@ confirms each stop with "OK", with no changes made to the Nano.
 | Route | Purpose |
 |---|---|
 | `POST /api/v1/turtlebot/system/restart_backend` | Restart the backend container. |
-| `POST /api/v1/turtlebot/system/restart_cobot_discovery` | Restart the myCobot Discovery Server (port 11888). |
+| `POST /api/v1/turtlebot/system/restart_cobot_discovery` | Restart the myCobot Discovery Server (port `<COBOT_DISCOVERY_PORT>`). |
 | `POST /api/v1/turtlebot/robot/restart_bringup` | Restart `turtlebot4.service` on the Raspberry Pi 4 over SSH. |
 | `POST /api/v1/turtlebot/robot/start_oakd` | Wake the OAK-D camera on the Raspberry Pi 4 over SSH. |

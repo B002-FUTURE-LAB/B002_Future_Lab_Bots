@@ -1,11 +1,11 @@
 # Install and first run
 
-Run everything on the host PC as the user `future-lab`. The repository is
+Run everything on the host PC as the user `<HOST_USER>`. The repository is
 expected at `~/B002_Future_Lab_Bots`.
 
 !!! warning "Fixed paths"
     `docker-compose.yml` and the systemd units contain absolute paths to
-    `/home/future-lab/B002_Future_Lab_Bots`. Installing anywhere else needs
+    `~/B002_Future_Lab_Bots`. Installing anywhere else needs
     those paths changed.
 
 ## 1. Configure the environment
@@ -28,7 +28,7 @@ systemctl --user daemon-reload
 systemctl --user enable --now future-lab-agent future-lab-cobot-discovery
 
 # Let the services run without an open login session
-sudo loginctl enable-linger future-lab
+sudo loginctl enable-linger <HOST_USER>
 ```
 
 This installs the [host agent](../reference/host-agent.md) and the cobot
@@ -37,7 +37,7 @@ Discovery Server.
 ## 3. Check the host agent
 
 ```bash
-curl -s http://127.0.0.1:8100/health
+curl -s http://127.0.0.1:<HOST_AGENT_PORT>/health
 ```
 
 A healthy agent answers with `"ok": true`.
@@ -61,8 +61,8 @@ cd ~/B002_Future_Lab_Bots/future_lab_control_center
 
 The script starts the stack and opens the dashboard. Its steps are listed in
 [Start and stop the lab](../guides/start-and-stop-the-lab.md). When it
-finishes, the dashboard is at `http://localhost:3000` and the API documentation
-at `http://localhost:8000/docs`.
+finishes, the dashboard is at `http://localhost:<FRONTEND_PORT>` and the API documentation
+at `http://localhost:<BACKEND_PORT>/docs`.
 
 !!! tip "Dry run"
     `./START_LAB.sh --check` only verifies the environment and does not start

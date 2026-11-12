@@ -26,8 +26,8 @@ The MyCobot 280 and the TurtleBot 4 coordinate item sorting and autonomous trans
 sequenceDiagram
   autonumber
   participant CC as Control Center Backend<br/>(cell_routes.py)
-  participant MSA as Mission Signal Agent<br/>(:18081, Domain 0)
-  participant Nano as MyCobot Jetson Nano<br/>(:8088 HTTP Bridge)
+  participant MSA as Mission Signal Agent<br/>(:<MISSION_SIGNAL_PORT>, Domain 0)
+  participant Nano as MyCobot Jetson Nano<br/>(:<NANO_BRIDGE_PORT> HTTP Bridge)
   participant MM as TB4 Mission Manager<br/>(DeliveryRoutine)
   participant Nav2 as TB4 Nav2 + Create 3<br/>(/undock, /navigate_to_pose, /dock)
 
