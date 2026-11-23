@@ -10,6 +10,7 @@ B002_Future_Lab_Bots/
 ├── turtlebot4_jazzy/            # submodule: TurtleBot 4, Nav2, mission routines
 ├── cobot/                       # submodule: MyCobot 280, Docker, MoveIt, Nano bridge
 ├── integration_cobot_tb4/       # submodule: 3D visualization and joint bridge
+├── drawer_picking/              # MyCobot drawer picking cell (reuses cobot packages)
 ├── experiments/                 # scripts for the trial campaign
 ├── docs/                        # this documentation
 ├── tools/docs/                  # checks that run on the docs in CI
@@ -29,6 +30,17 @@ B002_Future_Lab_Bots/
 | `host_agent/` | The [host agent](host-agent.md), its helpers and the systemd units. |
 | `tests/` | Unit tests for the backend and host agent. |
 | `START_LAB.sh` | One-click startup. See [Start and stop the lab](../guides/start-and-stop-the-lab.md). |
+
+## Drawer picking module
+
+| Path | Contents |
+|---|---|
+| `drawer_picking/scripts/` | `RUN_SIM.sh`, `RUN_REAL.sh`, `TEACH.sh`, `RUN_STATE_MACHINE.sh`. See [Operational scripts](scripts.md). |
+| `drawer_picking/ros2_ws/src/drawer_picking/` | ROS 2 Galactic package: state machine, teach wizard, example poses, cabinet marker. |
+| `drawer_picking/config/` | `drawer_poses_real.yaml` (taught poses, real robot) and `drawer_poses_sim.yaml`. |
+| `drawer_picking/docker-compose.yml` | Container `drawer_picking_ros2`, built from `cobot/mycobot_docker/Dockerfile`, with `cobot` packages mounted. |
+
+See [Pick items from the drawer cabinet](../guides/run-drawer-picking.md).
 
 ## Submodules
 

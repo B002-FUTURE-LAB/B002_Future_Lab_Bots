@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<package format="3">
+  <name>drawer_picking</name>
+  <version>0.2.0</version>
+  <description>MyCobot 280 JN: taught-pose state machine that fetches an item from one of 4 drawers with the suction pump</description>
+  <maintainer email="b002-future-lab@todo.todo">B002 Future Lab</maintainer>
+  <license>Apache-2.0</license>
+
+  <depend>rclpy</depend>
+  <depend>std_srvs</depend>
+  <depend>sensor_msgs</depend>
+  <depend>visualization_msgs</depend>
+  <depend>moveit_msgs</depend>
+  <exec_depend>python3-yaml</exec_depend>
+  <!-- From the cobot submodule, mounted into the workspace by docker-compose.yml -->
+  <exec_depend>mycobot_280_jn_moveit_config</exec_depend>
+  <exec_depend>mycobot_hw_interface</exec_depend>
+  <test_depend>python3-pytest</test_depend>
+
+  <export>
+    <build_type>ament_python</build_type>
+  </export>
+</package>

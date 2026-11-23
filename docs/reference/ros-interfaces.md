@@ -103,6 +103,21 @@ If the ROS service is not ready, the node falls back to an HTTP micro-bridge on
 the Jetson Nano (port `<NANO_BRIDGE_PORT>`), and then to SSH. See
 [Ports and addresses](ports-and-addresses.md).
 
+## Drawer picking nodes (`drawer_picking/`, package `drawer_picking`)
+
+All run inside the `drawer_picking_ros2` container on `ROS_DOMAIN_ID=42`. See
+[Pick items from the drawer cabinet](../guides/run-drawer-picking.md).
+
+| Name | Type | Kind | Node | Used for |
+|---|---|---|---|---|
+| `/drawer_picking/cabinet` | `visualization_msgs/msg/Marker` | publication (transient local) | `cabinet_marker` | Example cabinet mesh in RViz. |
+| `/move_action` | `moveit_msgs/action/MoveGroup` | client | `drawer_state_machine`, `drawer_teach` | Free joint-space moves (home, safe, approach poses). |
+| `/compute_cartesian_path` | `moveit_msgs/srv/GetCartesianPath` | client | `drawer_state_machine`, `drawer_teach` | Straight-line cup (`pump_tcp`) paths in/out of drawers; approach generation. |
+| `/execute_trajectory` | `moveit_msgs/action/ExecuteTrajectory` | client | `drawer_state_machine`, `drawer_teach` | Runs the straight-line paths. |
+| `/compute_fk` | `moveit_msgs/srv/GetPositionFK` | client | `drawer_state_machine`, `drawer_teach` | Cup pose of a joint pose (path checks). |
+| `/pump_on`, `/pump_off` | `std_srvs/srv/Trigger` | client | `drawer_state_machine`, `drawer_teach` | Suction on and release. |
+| `/release_servos`, `/lock_servos` | `std_srvs/srv/Trigger` | client | `drawer_teach` | Hand-guiding during the configuration stage. |
+
 ## Environment set by the backend
 
 `backend/main.py` and `docker-compose.yml` set `ROS_DOMAIN_ID=0`,
