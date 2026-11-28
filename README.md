@@ -10,6 +10,7 @@ B002_Future_Lab_Bots/
   turtlebot4_jazzy/          # TurtleBot 4 (ROS 2 Jazzy), B002 map, Nav2 & mission routines
   cobot/                     # MyCobot 280, Docker, MoveIt 2 & Jetson Nano hardware bridge
   integration_cobot_tb4/     # 3D visualization, static TF overlay & UDP joint-state bridge
+  drawer_picking/            # MyCobot drawer picking cell: keyboard state machine (reuses cobot packages)
   future_lab_control_center/ # Unified Web Control Center (Next.js frontend + FastAPI/ROS 2 backend)
   docs/                      # Technical & operational documentation (MkDocs)
 ```
@@ -187,6 +188,16 @@ To test TurtleBot 4 in Gazebo Harmonic using the project Docker environment:
 cd ~/B002_Future_Lab_Bots/turtlebot4_jazzy
 ./sim/run_lab_world.sh false false 0.0 0.0 0.0
 ```
+
+To test the MyCobot drawer picking cell without the robot (mock bridge + MoveIt 2 + RViz):
+
+```bash
+cd ~/B002_Future_Lab_Bots/drawer_picking
+./scripts/RUN_SIM.sh                 # terminal 1
+./scripts/RUN_STATE_MACHINE.sh sim   # terminal 2: keys 1-4
+```
+
+See [`drawer_picking/README.md`](drawer_picking/README.md).
 
 Simulation is useful for development, though physical hardware behavior in B002 (dock/undock, RPLidar, OAK-D, Wi-Fi, and post-undock sensor recovery) should always be validated on the real robot.
 

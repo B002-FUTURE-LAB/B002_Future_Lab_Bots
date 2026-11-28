@@ -1,0 +1,32 @@
+# drawer_picking container (drawer_picking_ros2).
+# Same image as cobot (cobot/mycobot_docker/Dockerfile: ROS 2 Galactic + MoveIt 2).
+# Nothing is copied from cobot: its packages are mounted into this workspace.
+# On ARM64 the scripts set BASE_IMAGE=ros:galactic automatically.
+services:
+  drawer_picking:
+    build:
+      context: ../cobot/mycobot_docker
+      network: host
+      args:
+        BASE_IMAGE: ${BASE_IMAGE:-osrf/ros:galactic-desktop}
+    image: drawer_picking:galactic
+    container_name: drawer_picking_ros2
+    network_mode: "host"
+    privileged: true
+    shm_size: '2gb'
+    environment:
+      - DISPLAY=${DISPLAY}
+      - QT_X11_NO_MITSHM=1
+      - XDG_RUNTIME_DIR=/tmp/runtime-root
+      - LIBGL_ALWAYS_SOFTWARE=1
+    devices:
+      - /dev/dri:/dev/dri
+    volumes:
+      - /tmp/.X11-unix:/tmp/.X11-unix:rw
+      - ./ros2_ws:/root/drawer_ws:rw
+      - ./config:/root/drawer_config:rw
+      - ../cobot/mycobot_docker/custom_ws/src/mycobot_description:/root/drawer_ws/src/cobot/mycobot_description:rw
+      - ../cobot/mycobot_docker/custom_ws/src/mycobot_280_jn_moveit_config:/root/drawer_ws/src/cobot/mycobot_280_jn_moveit_config:rw
+      - ../cobot/mycobot_docker/custom_ws/src/mycobot_hw_interface:/root/drawer_ws/src/cobot/mycobot_hw_interface:rw
+    tty: true
+    stdin_open: true

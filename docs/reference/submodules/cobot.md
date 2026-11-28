@@ -70,3 +70,25 @@ Running directly on the MyCobot's internal **Jetson Nano** (`<JETSON_NANO_IP>:<N
   - `./cobot_poses.yaml:/root/cobot_poses.yaml`
   - `./ws_overlay/src:/root/ros2_ws/src/overlay`
   - `/tmp/.X11-unix:/tmp/.X11-unix:rw`
+
+---
+
+## Extension Points Used by Other Modules
+
+The `drawer_picking/` module at the repository root reuses this submodule
+without copying it. It needs these small, backward-compatible changes (branch
+`feat/drawer-picking`):
+
+| File | Change |
+| :--- | :--- |
+| `mycobot_280_jn_moveit_config/launch/galactic_demo.launch.py` | Optional argument `rviz_config` (default `config/moveit.rviz`). |
+| `mycobot_docker/Dockerfile`, `docker-compose.yml` | Optional build argument `BASE_IMAGE` for ARM64 hosts (`ros:galactic`); installs `ros-galactic-rmw-fastrtps-cpp`, which `ros:galactic` lacks. |
+| `mycobot_description/urdf/mycobot_280_jn/mycobot_280_jn.urdf.xacro` | `pump_tcp` (tip of the MoveIt group) moved to the suction cup face: `xyz="0 0.008 0.0962"` in `pump_head`, `+z` out of the cup, coaxial with joint 6 (about 106 mm from `link6`). It was on the side mounting plate with `+z` along `link6` `+y`, so straight-line moves went sideways. |
+
+Existing scripts keep their default behavior. The `pump_tcp` fix changes only
+Cartesian targets on that frame; the existing pick-and-place uses joint poses.
+
+!!! note "Not verified"
+    The 106 mm cup offset comes from the `pump_head.dae` mesh. It was not
+    measured on the real robot. See
+[Pick items from the drawer cabinet](../../guides/run-drawer-picking.md).

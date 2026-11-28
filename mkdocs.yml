@@ -70,6 +70,7 @@ nav:
       - Emergency stop: guides/emergency-stop.md
       - Set initial and dock pose: guides/set-initial-pose-and-dock-pose.md
       - Calibrate Cobot poses: guides/calibrate-cobot-poses.md
+      - Pick items from the drawer cabinet: guides/run-drawer-picking.md
       - Run Gazebo simulation: guides/run-gazebo-simulation.md
       - Remote lab access: guides/remote-lab-access.md
       - Run experiment trials: guides/run-experiment-trials.md

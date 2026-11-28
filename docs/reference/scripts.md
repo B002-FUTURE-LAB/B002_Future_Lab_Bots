@@ -53,7 +53,20 @@ This page catalogs every operational shell and Python script across the root rep
 
 ---
 
-## 4. Submodule 3: 3D Integration Scripts (`integration_cobot_tb4/`)
+## 4. Drawer Picking Module (`drawer_picking/`)
+
+The first argument of `TEACH.sh` and `RUN_STATE_MACHINE.sh` is `sim` or `real`.
+
+| Script Path | Runs On | Purpose |
+| :--- | :--- | :--- |
+| `drawer_picking/scripts/RUN_SIM.sh` | Host PC (`drawer_picking_ros2`) | Creates and builds the container if needed (ARM64 aware), then starts the mock bridge, MoveIt 2, RViz and the example cabinet. |
+| `drawer_picking/scripts/RUN_REAL.sh` | Host PC → Nano (SSH) | Restarts `mycobot_bridge` on the Jetson Nano, then starts MoveIt 2, RViz and the cabinet. |
+| `drawer_picking/scripts/TEACH.sh` | Host PC (`drawer_picking_ros2`) | Configuration stage, saves poses only (never moves the arm): `home`, `safe`, the 4 picks, the dropoff (`Enter` save, `r` release servos on the real robot). Drawer approach poses are generated 8 cm back along the cup axis. Writes `config/drawer_poses_<mode>.yaml`. |
+| `drawer_picking/scripts/RUN_STATE_MACHINE.sh` | Host PC (`drawer_picking_ros2`) | State machine: keys `1`-`4` fetch from a drawer (through `safe`, straight in/out of the drawer), `h` home, `q` quit. Real mode uses only taught poses. |
+
+---
+
+## 5. Submodule 3: 3D Integration Scripts (`integration_cobot_tb4/`)
 
 | Script Path | Runs On | Purpose |
 | :--- | :--- | :--- |
@@ -67,7 +80,7 @@ This page catalogs every operational shell and Python script across the root rep
 
 ---
 
-## 5. Experimental Campaign & Documentation CI Scripts
+## 6. Experimental Campaign & Documentation CI Scripts
 
 | Script Path | Runs On | Purpose |
 | :--- | :--- | :--- |

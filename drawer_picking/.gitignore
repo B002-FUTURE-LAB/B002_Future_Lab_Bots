@@ -1,0 +1,8 @@
+ros2_ws/build/
+ros2_ws/install/
+ros2_ws/log/
+# pontos de montagem dos pacotes do cobot (criados pelo docker)
+ros2_ws/src/cobot/
+__pycache__/
+*.pyc
+config/*.bak
