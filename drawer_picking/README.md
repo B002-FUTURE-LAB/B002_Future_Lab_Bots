@@ -5,7 +5,7 @@ at a **dropoff point**, and returns home. Press `1`-`4` to choose the drawer,
 as many times as you want.
 
 To avoid hitting the cabinet (the planner does not know it), every trip to a
-drawer goes through a taught **safe** pose, and the arm goes **in and out of
+drawer starts and ends at **home** (the initial and safe pose), and the arm goes **in and out of
 the drawer in a straight line along the suction cup axis**, slowly, and back
 out the same way. The dropoff is reached with a normal (free) move.
 
@@ -45,8 +45,8 @@ machine moves through them. In simulation, example poses are preselected.
 ## Teach (configuration stage)
 
 `TEACH.sh` **only saves poses; it never moves the arm**. Order: `home`,
-`safe`, `drawer_1_pick` .. `drawer_4_pick`, `dropoff`. For each one, put the
-arm in the pose and press `Enter`:
+`drawer_1_approach` .. `drawer_4_approach`, `dropoff`. For each one, put the
+arm in the pose and press `Enter` (it always saves):
 
 - Simulation: drag the gimbal in RViz, **Plan & Execute**, `Enter`.
 - Real robot: `r` (servos go limp, **hold the arm**), move it by hand, `Enter`
@@ -54,33 +54,31 @@ arm in the pose and press `Enter`:
 
 | Pose | Where |
 | :--- | :--- |
-| `home` | Initial / rest pose |
-| `safe` | In front of the cabinet, well clear of it, wrist about as at the drawers |
-| `drawer_N_pick` | Cup on the item, **cup axis pointing the way the arm must go in** |
+| `home` | Initial and safe pose: in front of the cabinet, well clear of it, wrist about as at the drawers |
+| `drawer_N_approach` | Cup **8 cm in front of the item**, **cup axis pointing at it** (the way the arm must go in) |
 | `dropoff` | Cup where the item is released |
 
-For each drawer pick, `Enter` also stores the approach pose 8 cm
-straight back along the cup axis (`--retreat` to change), or as far as
-reachable down to 3 cm (`--min-retreat`). If not even that is reachable the
-pose is not saved and the reason is shown. Usual causes: the arm is
-stretched out (`home` is straight up, a singular pose: no straight line is
-possible from there), a joint is at its limit, or the pose is in collision.
-Bend the elbow and wrist more. If you press `Enter` while the arm is still
-exactly at another saved pose (it has not moved), the wizard asks again. Everything else
-(straight in, suction, straight out, dropoff, release) is done by the state machine.
+Each drawer has a single pose. The state machine goes 8 cm straight forward
+along the cup axis from it (`--reach` to change), turns the suction on and
+comes back to the same pose along the same line. After saving a drawer pose
+the wizard checks that line and, if it is not possible, says why (pose in
+collision, joint flip near a singularity, arm stretched / joint at its limit)
+and stays on that pose: move the arm and `Enter` again, or `n` to keep it.
+If you press `Enter` while the arm is still
+exactly at another saved pose (it has not moved), the wizard asks again.
 
 Keys: `Enter` save, `r` release servos (real only), `n` skip, `b` back, `q` quit.
-Re-teach part of the cell: `TEACH.sh real 2` (drawer 2), `TEACH.sh real dropoff`, `TEACH.sh real safe`.
+Re-teach part of the cell: `TEACH.sh real 2` (drawer 2), `TEACH.sh real dropoff`, `TEACH.sh real home`.
 Poses go to `config/drawer_poses_real.yaml` (or `_sim.yaml`). The previous file
 is kept as `.bak`.
 
 ## State machine
 
 ```
-IDLE -> GO_SAFE -> GO_DRAWER_APPROACH -> ENTER_DRAWER* -> SUCTION_ON -> EXIT_DRAWER*
-     -> BACK_TO_SAFE -> GO_DROPOFF -> RELEASE -> RETURN_HOME -> IDLE
+IDLE -> GO_HOME -> GO_DRAWER -> APPROACH* (8 cm forward) -> SUCTION_ON -> RETRACT* (back to the drawer pose)
+     -> BACK_TO_HOME -> GO_DROPOFF -> RELEASE -> RETURN_HOME -> IDLE
 * straight line along the cup axis (--linear-speed, default 2 cm/s); the rest are free moves
-any error -> ERROR -> straight back out (if inside) -> safe (if near the cabinet)
+any error -> ERROR -> straight back out (if inside) -> home (if near the cabinet)
           -> release at the dropoff (if held) -> home -> IDLE
 ```
 
@@ -123,7 +121,7 @@ The KKS5 wall cabinet is shown 0.30 m in front of the robot. It is a visual
 reference only, not a planning obstacle. The four example drawers are the
 central bins of its two upper rows. The example poses use different wrist
 configurations per drawer, so the wizard and the state machine warn about
-big joint swings between `safe` and the drawers; teach the real cell with a
+big joint swings between `home` and the drawers; teach the real cell with a
 similar wrist to avoid that. Seen from the robot: `1` upper-left,
 `2` upper-right, `3` lower-left, `4` lower-right.
 

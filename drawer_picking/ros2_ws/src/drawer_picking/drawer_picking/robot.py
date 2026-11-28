@@ -12,10 +12,12 @@ the real robot (bridge on the Jetson Nano).
 
 Two kinds of motion:
   move()    free move (planner chooses the path). Only between poses that are
-            clear of the cabinet: home, safe, the approach poses, dropoff.
+            clear of the cabinet: home, the approach poses, dropoff.
   linear()  the cup tip goes in a straight line along its own axis, the axis
             keeps pointing the same way (only roll about it may change), at
-            low speed. Used to go in and out of a drawer.
+            low speed. Used to come back out of a drawer to its taught pose.
+  forward() same kind of straight line, a given distance along the cup axis
+            from where the cup is. Used to go into the drawer to the item.
             The path is checked before moving; if it
             is not a straight line along the cup axis, nothing moves.
 """
@@ -203,11 +205,12 @@ class Robot:
         return ((p.position.x, p.position.y, p.position.z),
                 (p.orientation.x, p.orientation.y, p.orientation.z, p.orientation.w))
 
-    def straight_path(self, start_joints, position, quaternion, min_fraction=0.999):
+    def straight_path(self, start_joints, position, quaternion, min_fraction=0.999,
+                      jump=MAX_JOINT_STEP, avoid_collisions=True):
         """Straight cup path from start_joints to a cup pose.
 
         Returns (solution, end joints, reachable fraction). Raises if less than
-        min_fraction of the line is reachable or if it needs a joint flip.
+        min_fraction of the line is reachable or (jump > 0) if it needs a joint flip.
         """
         req = GetCartesianPath.Request()
         req.header.frame_id = BASE
@@ -222,8 +225,8 @@ class Robot:
         req.waypoints = [target]
         req.max_step = 0.005                  # one IK point every 5 mm
         req.jump_threshold = 0.0
-        req.revolute_jump_threshold = MAX_JOINT_STEP
-        req.avoid_collisions = True
+        req.revolute_jump_threshold = jump    # 0 = no jump check
+        req.avoid_collisions = avoid_collisions
         res = wait(self.cartesian.call_async(req), 10.0)
         if res is None or res.error_code.val != 1:
             raise RuntimeError('straight-line planning failed (/compute_cartesian_path)')
@@ -234,10 +237,23 @@ class Robot:
         prev = list(start_joints)
         for point in traj.points:
             now = [point.positions[i] for i in order]
-            if max(abs(a - b) for a, b in zip(now, prev)) > MAX_JOINT_STEP:
+            if jump and max(abs(a - b) for a, b in zip(now, prev)) > MAX_JOINT_STEP:
                 raise RuntimeError('straight line needs a joint flip (near a singularity)')
             prev = now
         return res.solution, prev, res.fraction
+
+    def _run_line(self, name, solution, end, dist, timeout):
+        retime(solution.joint_trajectory, dist / self.linear_speed)
+        goal = ExecuteTrajectory.Goal(trajectory=solution)
+        handle = wait(self.exec_client.send_goal_async(goal), 10.0)
+        if handle is None or not handle.accepted:
+            raise RuntimeError(f'MoveIt rejected the straight line to {name}')
+        result = wait(handle.get_result_async(), timeout)
+        if result is None:
+            raise RuntimeError(f'timeout on the straight line to {name}')
+        if result.result.error_code.val != 1:
+            raise RuntimeError(f'straight line to {name} failed (MoveIt error {result.result.error_code.val})')
+        self.wait_arrival(name, end)
 
     def linear(self, name, joints, timeout=60.0):
         """Straight-line cup move from the current position to a joint pose.
@@ -252,39 +268,60 @@ class Robot:
             return                            # already there
         self.node.get_logger().info(f'-> {name} (straight line, {dist * 100:.1f} cm)')
         solution, end, _ = self.straight_path(start, position, quaternion)
-        retime(solution.joint_trajectory, dist / self.linear_speed)
+        self._run_line(name, solution, end, dist, timeout)
 
-        goal = ExecuteTrajectory.Goal(trajectory=solution)
-        handle = wait(self.exec_client.send_goal_async(goal), 10.0)
-        if handle is None or not handle.accepted:
-            raise RuntimeError(f'MoveIt rejected the straight line to {name}')
-        result = wait(handle.get_result_async(), timeout)
-        if result is None:
-            raise RuntimeError(f'timeout on the straight line to {name}')
-        if result.result.error_code.val != 1:
-            raise RuntimeError(f'straight line to {name} failed (MoveIt error {result.result.error_code.val})')
-        self.wait_arrival(name, end)      # end of the line (same cup pose as `joints`)
-
-    def retreat(self, joints, distance, minimum=0.0):
-        """Joint pose straight back from `joints` along the cup axis.
-
-        Used by the teach wizard: the approach pose of a drawer pick.
-        Goes back `distance` m, or as far as reachable if that is at least
-        `minimum` m. Returns (joints, distance used). Raises RuntimeError if
-        less than `minimum` (or, with minimum=0, less than all of it) is reachable.
-        """
+    def ahead(self, joints, distance):
+        """Cup pose `distance` m forward along the cup axis from a joint pose."""
         position, quaternion = self.fk(joints)
         axis = cup_axis(quaternion)
-        back = tuple(p - distance * a for p, a in zip(position, axis))
-        need = minimum / distance if minimum else 0.999
+        return tuple(p + distance * a for p, a in zip(position, axis)), quaternion
+
+    def forward(self, name, distance, timeout=60.0):
+        """Straight line `distance` m forward along the cup axis, from the current pose.
+
+        The cup keeps its orientation. Speed: self.linear_speed m/s. Raises RuntimeError.
+        """
+        start = list(self.joints)
+        position, quaternion = self.ahead(start, distance)
+        self.node.get_logger().info(f'-> {name} (straight line, {distance * 100:.1f} cm forward)')
         try:
-            _, end, fraction = self.straight_path(joints, back, quaternion, min_fraction=need)
+            solution, end, _ = self.straight_path(start, position, quaternion)
         except RuntimeError as err:
-            contact = self.collision(joints)
-            why = f'the pose is in collision: {contact}' if contact else str(err)
-            raise RuntimeError(f'cannot back out {minimum * 100 if minimum else distance * 100:.0f} cm in a '
-                               f'straight line along the cup axis ({why})') from None
-        return end, distance * min(1.0, fraction)
+            raise RuntimeError(f'cannot go {distance * 100:.0f} cm forward: {self.why_not(start, distance, err)}') from None
+        self._run_line(name, solution, end, distance, timeout)
+
+    def check_forward(self, joints, distance):
+        """None if the `distance` m line forward along the cup axis is possible, else why not.
+
+        Used by the teach wizard to warn right away (the pose is saved anyway).
+        """
+        position, quaternion = self.ahead(joints, distance)
+        try:
+            self.straight_path(joints, position, quaternion)
+            return None
+        except RuntimeError as err:
+            return self.why_not(joints, distance, err)
+
+    def why_not(self, joints, distance, err):
+        """Explain a failed forward line: collision, joint flip, or out of reach / joint limit."""
+        contact = self.collision(joints)
+        if contact:
+            return f'the pose is in collision ({contact})'
+        position, quaternion = self.ahead(joints, distance)
+        try:
+            self.straight_path(joints, position, quaternion, jump=0.0)
+            return 'the line passes near a singularity: a joint would have to flip'
+        except RuntimeError:
+            pass
+        try:
+            _, _, fraction = self.straight_path(joints, position, quaternion, min_fraction=0.0,
+                                                jump=0.0, avoid_collisions=False)
+        except RuntimeError:
+            return str(err)
+        if fraction >= 0.999:
+            return 'the arm would touch itself on the way'
+        return (f'only {fraction * distance * 100:.1f} cm of it is reachable '
+                '(arm fully stretched or a joint at its limit)')
 
     def collision(self, joints):
         """'link_a touches link_b' if the joint pose is in collision, else None."""

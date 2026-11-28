@@ -2,50 +2,56 @@
 
 Cycle for drawer N. "free" = planner chooses the path, only between poses
 clear of the cabinet; "line" = cup in a straight line along its own axis.
+Each drawer has ONE taught pose (drawer_N_approach), in front of the item.
 
-  IDLE -> GO_SAFE (free) -> GO_DRAWER_APPROACH (free)
-       -> ENTER_DRAWER (line) -> SUCTION_ON -> EXIT_DRAWER (line, back the same way)
-       -> BACK_TO_SAFE (free) -> GO_DROPOFF (free) -> RELEASE
+home is the initial and the safe pose: every trip to a drawer starts and ends there.
+
+  IDLE -> GO_HOME (free) -> GO_DRAWER (free, to the taught pose)
+       -> APPROACH (line, `reach` m forward along the cup axis) -> SUCTION_ON
+       -> RETRACT (line, back to the taught pose the same way)
+       -> BACK_TO_HOME (free) -> GO_DROPOFF (free) -> RELEASE
        -> RETURN_HOME (free) -> IDLE
 
 On any error, only known-safe paths are used:
   ERROR -> if inside a drawer: straight line back out
-        -> if near the cabinet: safe
+        -> if near the cabinet: home
         -> if the item is held: release it at the dropoff
         -> home -> IDLE
 
 `robot` is any object with:
     move(pose_name, joints)     free move, raises an exception on failure
     linear(pose_name, joints)   straight-line move, raises an exception on failure
+    forward(label, distance)    straight line `distance` m along the cup axis, from where it is
     pump(on)
 """
 import time
 
 # (state, action, pose or pump value). "{d}" becomes the drawer number.
 CYCLE = [
-    ('GO_SAFE', 'move', 'safe'),
-    ('GO_DRAWER_APPROACH', 'move', 'drawer_{d}_approach'),
-    ('ENTER_DRAWER', 'linear', 'drawer_{d}_pick'),
+    ('GO_HOME', 'move', 'home'),
+    ('GO_DRAWER', 'move', 'drawer_{d}_approach'),
+    ('APPROACH', 'forward', 'drawer_{d}_item'),
     ('SUCTION_ON', 'pump', True),
-    ('EXIT_DRAWER', 'linear', 'drawer_{d}_approach'),
-    ('BACK_TO_SAFE', 'move', 'safe'),
+    ('RETRACT', 'linear', 'drawer_{d}_approach'),
+    ('BACK_TO_HOME', 'move', 'home'),
     ('GO_DROPOFF', 'move', 'dropoff'),
     ('RELEASE', 'pump', False),
     ('RETURN_HOME', 'move', 'home'),
 ]
 
 # Where the arm is, for error recovery. Set when a state starts / cleared when it ends.
-NEAR_CABINET_FROM, NEAR_CABINET_UNTIL = 'GO_DRAWER_APPROACH', 'BACK_TO_SAFE'
+NEAR_CABINET_FROM, NEAR_CABINET_UNTIL = 'GO_DRAWER', 'BACK_TO_HOME'
 INSIDE = {   # state that goes in -> (state that comes out, pose to back out to)
-    'ENTER_DRAWER': ('EXIT_DRAWER', 'drawer_{d}_approach'),
+    'APPROACH': ('RETRACT', 'drawer_{d}_approach'),
 }
 OUT_STATES = {out for out, _ in INSIDE.values()}
 
 
 class DrawerStateMachine:
     def __init__(self, robot, poses, drawers=(1, 2, 3, 4), settle=1.0,
-                 on_state=print, sleep=time.sleep):
+                 on_state=print, sleep=time.sleep, reach=0.08):
         self.robot = robot
+        self.reach = reach            # m forward from the drawer pose to the item
         self.poses = poses
         self.drawers = drawers
         self.settle = settle          # seconds to wait after switching the pump
@@ -54,7 +60,7 @@ class DrawerStateMachine:
         self.state = 'IDLE'
         self.holding = False
         self.back_out = None          # pose to return to in a straight line (arm inside)
-        self.near_cabinet = False     # between the safe pose and a drawer
+        self.near_cabinet = False     # between home and a drawer
         self.cycles_done = 0
 
     def _set(self, state):
@@ -92,6 +98,8 @@ class DrawerStateMachine:
                     self._move(arg.format(d=drawer))
                 elif action == 'linear':
                     self._linear(arg.format(d=drawer))
+                elif action == 'forward':
+                    self.robot.forward(arg.format(d=drawer), self.reach)
                 else:
                     self._pump(arg)
                 if state in OUT_STATES:
@@ -113,16 +121,20 @@ class DrawerStateMachine:
                 self._set(f'RECOVER: back out to {self.back_out}')
                 self._linear(self.back_out)
                 self.back_out = None
+            at_home = False
             if self.near_cabinet:
-                self._set('RECOVER: safe')
-                self._move('safe')
+                self._set('RECOVER: home (away from the cabinet)')
+                self._move('home')
                 self.near_cabinet = False
+                at_home = True
             if self.holding:
                 self._set('RECOVER: release at the dropoff')
                 self._move('dropoff')
                 self._pump(False)
-            self._set('RECOVER: home')
-            self._move('home')
+                at_home = False
+            if not at_home:
+                self._set('RECOVER: home')
+                self._move('home')
         except Exception as err2:  # noqa: BLE001
             self._set(f'ERROR: recovery failed ({err2}). Pump off; check the arm.')
             self.robot.pump(False)

@@ -2,7 +2,7 @@
 
 Keys: 1-4 drawer, h home, q quit.
 
-Usage: ros2 run drawer_picking drawer_state_machine --mode sim|real [--speed 0.2] [--linear-speed 0.02]
+Usage: ros2 run drawer_picking drawer_state_machine --mode sim|real [--speed 0.2] [--linear-speed 0.02] [--reach 0.08]
 """
 import argparse
 import queue
@@ -25,6 +25,8 @@ def main():
     parser.add_argument('--speed', type=float, default=0.2, help='free moves: velocity scaling 0-1')
     parser.add_argument('--linear-speed', type=float, default=0.02,
                         help='straight-line moves (in/out of the drawer): cup speed, m/s')
+    parser.add_argument('--reach', type=float, default=poses.REACH,
+                        help='m straight forward from each drawer pose to the item, along the cup axis')
     parser.add_argument('--settle', type=float, default=1.0, help='seconds to wait after the pump')
     args, ros_args = parser.parse_known_args()
 
@@ -44,7 +46,7 @@ def main():
     robot = Robot(node, args.speed, args.linear_speed)
 
     sm = DrawerStateMachine(robot, pose_set, poses.DRAWERS, args.settle,
-                            on_state=lambda state: log.info(f'[STATE] {state}'))
+                            on_state=lambda state: log.info(f'[STATE] {state}'), reach=args.reach)
     stop = threading.Event()
 
     def read_keys():

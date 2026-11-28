@@ -9,9 +9,10 @@ from drawer_picking.state_machine import DrawerStateMachine
 
 
 class FakeRobot:
-    """Logs moves as 'name' (free) or '~name' (straight line). Fails once at `fail_on`.
+    """Logs moves as 'name' (free), '~name' (straight line to a pose) or '>label 8cm'
+    (straight line forward). Fails once at `fail_on`.
 
-    fail_on: a log entry ('dropoff', '~drawer_2_pick', 'pump_on'...);
+    fail_on: a log entry ('dropoff', '>drawer_2_item 8cm', 'pump_on'...);
     nth: fail at its nth occurrence (1 = first).
     """
 
@@ -33,6 +34,9 @@ class FakeRobot:
     def linear(self, name, joints):
         self._do('~' + name)
 
+    def forward(self, label, distance):
+        self._do(f'>{label} {distance * 100:.0f}cm')
+
     def pump(self, on):
         self._do('pump_on' if on else 'pump_off')
 
@@ -48,25 +52,33 @@ def test_cycle_order():
     sm, states = make()
     assert sm.run_cycle(2)
     assert sm.robot.log == [
-        'safe', 'drawer_2_approach', '~drawer_2_pick', 'pump_on', '~drawer_2_approach', 'safe',
+        'home', 'drawer_2_approach', '>drawer_2_item 8cm', 'pump_on', '~drawer_2_approach', 'home',
         'dropoff', 'pump_off', 'home']
-    assert states[0] == 'GO_SAFE (drawer 2)' and states[-1] == 'IDLE'
+    assert states[0] == 'GO_HOME (drawer 2)' and states[-1] == 'IDLE'
 
 
 def test_drawer_in_and_out_are_straight_lines():
     sm, _ = make()
     sm.run_cycle(1)
     log = sm.robot.log
-    i = log.index('~drawer_1_pick')
+    i = log.index('>drawer_1_item 8cm')
     assert log[i - 1] == 'drawer_1_approach' and log[i + 2] == '~drawer_1_approach'
-    assert log[i - 2] == 'safe' and log[i + 3] == 'safe', 'goes through safe both ways'
+    assert log[i - 2] == 'home' and log[i + 3] == 'home', 'goes through home both ways'
 
 
 @pytest.mark.parametrize('drawer', [1, 2, 3, 4])
 def test_each_drawer_uses_its_own_poses(drawer):
     sm, _ = make()
     assert sm.run_cycle(drawer)
-    assert f'~drawer_{drawer}_pick' in sm.robot.log
+    assert f'>drawer_{drawer}_item 8cm' in sm.robot.log
+    assert f'~drawer_{drawer}_approach' in sm.robot.log, 'back to the same single pose'
+
+
+def test_reach_distance_is_configurable():
+    sm, _ = make()
+    sm.reach = 0.05
+    assert sm.run_cycle(3)
+    assert '>drawer_3_item 5cm' in sm.robot.log
 
 
 def test_repeated_cycles():
@@ -79,24 +91,24 @@ def test_repeated_cycles():
 def test_refuses_invalid_drawer_or_busy():
     sm, _ = make()
     assert not sm.run_cycle(5)
-    sm.state = 'ENTER_DRAWER (drawer 1)'
+    sm.state = 'APPROACH (drawer 1)'
     assert not sm.run_cycle(1)
     assert sm.robot.log == []
 
 
-def test_failure_entering_drawer_backs_out_straight_then_safe():
-    sm, states = make(FakeRobot(fail_on='~drawer_3_pick'))
+def test_failure_entering_drawer_backs_out_straight_then_home():
+    sm, states = make(FakeRobot(fail_on='>drawer_3_item 8cm'))
     assert not sm.run_cycle(3)
     assert any(s.startswith('ERROR') for s in states)
     assert 'pump_on' not in sm.robot.log
-    assert sm.robot.log[-3:] == ['~drawer_3_approach', 'safe', 'home']
+    assert sm.robot.log[-2:] == ['~drawer_3_approach', 'home']
     assert sm.back_out is None and not sm.near_cabinet and sm.state == 'IDLE'
 
 
 def test_failure_leaving_drawer_with_item_backs_out_then_drops():
     sm, _ = make(FakeRobot(fail_on='~drawer_2_approach'))
     assert not sm.run_cycle(2)
-    assert sm.robot.log[-5:] == ['~drawer_2_approach', 'safe', 'dropoff', 'pump_off', 'home']
+    assert sm.robot.log[-5:] == ['~drawer_2_approach', 'home', 'dropoff', 'pump_off', 'home']
     assert not sm.holding
     assert sm.run_cycle(2), 'accepts a new cycle after recovering'
 
@@ -104,13 +116,13 @@ def test_failure_leaving_drawer_with_item_backs_out_then_drops():
 def test_failure_on_suction_backs_out_of_drawer():
     sm, _ = make(FakeRobot(fail_on='pump_on'))
     assert not sm.run_cycle(4)
-    assert sm.robot.log[-3:] == ['~drawer_4_approach', 'safe', 'home']
+    assert sm.robot.log[-2:] == ['~drawer_4_approach', 'home']
 
 
-def test_failure_near_cabinet_goes_through_safe():
+def test_failure_near_cabinet_goes_home():
     sm, _ = make(FakeRobot(fail_on='drawer_1_approach'))
     assert not sm.run_cycle(1)
-    assert sm.robot.log == ['safe', 'safe', 'home']
+    assert sm.robot.log == ['home', 'home']
 
 
 def test_dropoff_is_a_free_move():
@@ -124,7 +136,7 @@ def test_failure_on_release_retries_at_the_dropoff():
     assert not sm.run_cycle(1)
     tail = sm.robot.log[sm.robot.log.index('dropoff') + 1:]
     assert tail == ['dropoff', 'pump_off', 'home']
-    assert 'safe' not in tail, 'the dropoff is not near the cabinet'
+    assert tail.count('home') == 1, 'the dropoff is not near the cabinet'
 
 
 def test_failed_recovery_turns_pump_off():
